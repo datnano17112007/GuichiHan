@@ -1,0 +1,3461 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gửi Chị Hân</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&family=Playfair+Display:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <style>
+        :root {
+            --primary-gold: #ffdf85;
+            --muted-gold: #e6c200;
+            --secondary-cream: #fff5e6;
+            --lantern-glow: rgba(255, 140, 50, 0.6); 
+            --glass-bg: rgba(25, 20, 35, 0.4); 
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --modal-bg: rgba(20, 15, 35, 0.95);
+        }
+
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100vh; height: 100dvh;
+            background: radial-gradient(circle at bottom, #322538 0%, #1a1725 45%, #0d0c14 100%);
+            font-family: 'Nunito', sans-serif;
+            overflow: hidden; position: fixed; top: 0; left: 0;
+            user-select: none; -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 2s ease;
+        }
+
+        /* --- THEMES BẦU TRỜI SÁNG --- */
+        body.morning { 
+            background: linear-gradient(180deg, #3a9bdc 0%, #64b5f6 40%, #90caf9 70%, #e3f2fd 100%);
+            background-size: 100% 150%;
+            animation: morningSkyDepth 25s ease-in-out infinite alternate;
+        }
+        @keyframes morningSkyDepth {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 0% 100%; }
+        }
+        
+        body.morning .star, body.morning .meteor, body.morning .ambient-glow, body.morning .tiny-lantern-container { 
+            opacity: 0 !important; pointer-events: none; transition: opacity 1s ease;
+        }
+        body.morning .aquarius-container { opacity: 0; pointer-events: none; }
+
+        /* --- MẶT TRỜI CHÂN THỰC (LÕI TRẮNG, HÀO QUANG VÀNG) --- */
+        .moon.sun-mode {
+            /* Lõi trắng sáng rực, viền ngả chút vàng nắng pastel */
+            background: radial-gradient(circle at center, #ffffff 0%, #ffffff 65%, #fffce0 85%, #fff3b0 100%);
+            box-shadow: 
+                0 0 30px rgba(255, 255, 255, 1), 
+                0 0 80px rgba(255, 240, 150, 0.7),
+                0 0 150px rgba(255, 220, 100, 0.4);
+            animation: sunFloat 12s ease-in-out infinite; 
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            transition:
+                opacity .45s ease,
+                filter .45s ease,
+                background 1.5s ease,
+                box-shadow .7s ease;
+
+            opacity: var(--sun-cloud-opacity, 1);
+            filter: brightness(var(--sun-cloud-brightness, 1)) saturate(var(--sun-cloud-saturation, 1));
+
+        }
+        .moon.sun-mode::before { display: none; } 
+        
+        /* TIA ÁNH SÁNG MẶT TRỜI — CỐ ĐỊNH, MỀM, KHÔNG XOAY */
+        .moon.sun-mode::after {
+            content: '';
+            position: absolute;
+            top: -78%;
+            left: -78%;
+            width: 256%;
+            height: 256%;
+            border-radius: 50%;
+            pointer-events: none;
+
+            /* Các dải sáng cố định, giống ánh nắng lọt qua không khí
+               thay vì một vòng tia xoay liên tục. */
+            background:
+                linear-gradient(
+                    104deg,
+                    transparent 0 34%,
+                    rgba(255,255,255,.075) 39%,
+                    rgba(255,255,235,.115) 44%,
+                    transparent 50%
+                ),
+                linear-gradient(
+                    116deg,
+                    transparent 0 47%,
+                    rgba(255,255,255,.055) 51%,
+                    rgba(255,248,215,.085) 56%,
+                    transparent 62%
+                ),
+                linear-gradient(
+                    78deg,
+                    transparent 0 40%,
+                    rgba(255,255,255,.045) 46%,
+                    rgba(255,248,220,.075) 52%,
+                    transparent 59%
+                ),
+                radial-gradient(
+                    circle at 50% 50%,
+                    rgba(255,255,255,.34) 0%,
+                    rgba(255,248,210,.22) 24%,
+                    rgba(255,235,160,.10) 43%,
+                    transparent 68%
+                );
+
+            -webkit-mask-image: radial-gradient(
+                circle at center,
+                transparent 0 25%,
+                rgba(255,255,255,.95) 38%,
+                rgba(255,255,255,.72) 57%,
+                transparent 78%
+            );
+            mask-image: radial-gradient(
+                circle at center,
+                transparent 0 25%,
+                rgba(255,255,255,.95) 38%,
+                rgba(255,255,255,.72) 57%,
+                transparent 78%
+            );
+
+            filter: blur(4px);
+            opacity: .72;
+            z-index: -1;
+            animation: none !important;
+            transform: none !important;
+        }
+
+        .moon.sun-mode.sun-obscured::after {
+            opacity: .28;
+            transform: none !important;
+            animation: none !important;
+        }
+
+        /* Hiệu ứng mặt trời chỉ thở rất nhẹ, không làm các tia sáng xoay. */
+        @keyframes sunFloat {
+            0%, 100% {
+                transform: translateY(0);
+                box-shadow:
+                    0 0 30px rgba(255,255,255,1),
+                    0 0 80px rgba(255,240,150,.60),
+                    0 0 140px rgba(255,220,100,.30);
+            }
+            25% {
+                transform: translateY(-1.5px);
+                box-shadow:
+                    0 0 32px rgba(255,255,255,1),
+                    0 0 84px rgba(255,240,150,.62),
+                    0 0 145px rgba(255,220,100,.32);
+            }
+            50% {
+                transform: translateY(-3px);
+                box-shadow:
+                    0 0 34px rgba(255,255,255,1),
+                    0 0 88px rgba(255,240,150,.66),
+                    0 0 150px rgba(255,220,100,.34);
+            }
+            75% {
+                transform: translateY(-1.5px);
+                box-shadow:
+                    0 0 32px rgba(255,255,255,1),
+                    0 0 84px rgba(255,240,150,.62),
+                    0 0 145px rgba(255,220,100,.32);
+            }
+        }
+
+        .ambient-glow {
+            position: absolute; bottom: -20vh; left: 50%; transform: translateX(-50%);
+            width: 150vw; height: 50vh;
+            background: radial-gradient(ellipse at bottom, rgba(255, 130, 40, 0.18) 0%, transparent 70%);
+            pointer-events: none; z-index: 0; transition: opacity 1.5s ease;
+        }
+
+
+        /* --- INTRO / WELCOME UI --- */
+        #intro-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding:
+                max(24px, env(safe-area-inset-top))
+                max(24px, env(safe-area-inset-right))
+                max(24px, env(safe-area-inset-bottom))
+                max(24px, env(safe-area-inset-left));
+            background:
+                radial-gradient(circle at 50% 42%, rgba(48,42,77,.58) 0%, rgba(13,12,20,.96) 56%),
+                #0d0c14;
+            overflow: hidden;
+            transition: opacity 1.25s ease-out, transform 1.25s ease-out;
+        }
+
+        #intro-screen::before,
+        #intro-screen::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        #intro-screen::before {
+            width: min(62vw, 420px);
+            height: min(62vw, 420px);
+            top: 18%;
+            left: -16%;
+            background: radial-gradient(circle, rgba(255,223,133,.13), transparent 68%);
+            filter: blur(8px);
+        }
+
+        #intro-screen::after {
+            width: min(70vw, 460px);
+            height: min(70vw, 460px);
+            right: -24%;
+            bottom: -12%;
+            background: radial-gradient(circle, rgba(125,211,252,.12), transparent 68%);
+            filter: blur(10px);
+        }
+
+        .intro-content {
+            position: relative;
+            z-index: 1;
+            width: min(88vw, 520px);
+            padding: clamp(28px, 6vw, 46px);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 34px;
+            background: rgba(255,255,255,.055);
+            -webkit-backdrop-filter: blur(18px) saturate(120%);
+            backdrop-filter: blur(18px) saturate(120%);
+            box-shadow: 0 28px 80px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.10);
+        }
+
+        .intro-icon {
+            width: 78px;
+            height: 78px;
+            margin: 0 auto 18px;
+            display: grid;
+            place-items: center;
+            border-radius: 24px;
+            background: rgba(255,255,255,.075);
+            border: 1px solid rgba(255,255,255,.12);
+            font-size: 3rem;
+            animation: floatIcon 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255,223,133,.50));
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 12px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        .intro-title {
+            margin: 0;
+            font-family: 'Satisfy', cursive;
+            font-size: clamp(2.45rem, 8vw, 3.5rem);
+            line-height: 1.05;
+            color: var(--primary-gold);
+            text-shadow: 0 0 22px rgba(255,223,133,.28);
+            opacity: 0;
+            animation: fadeInUp .9s ease-out forwards .35s;
+        }
+
+        .intro-subtitle {
+            max-width: 390px;
+            margin: 14px auto 28px;
+            font-size: clamp(.95rem, 2.8vw, 1.08rem);
+            line-height: 1.55;
+            color: rgba(255,255,255,.82);
+            opacity: 0;
+            animation: fadeInUp .9s ease-out forwards .8s;
+        }
+
+        #start-btn {
+            min-width: 190px;
+            min-height: 48px;
+            padding: 12px 28px;
+            border: 1px solid rgba(255,223,133,.48);
+            border-radius: 999px;
+            background: rgba(255,255,255,.075);
+            color: var(--primary-gold);
+            font: 700 1rem 'Nunito', sans-serif;
+            letter-spacing: .02em;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.12);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            transition: transform .22s ease, background .22s ease, box-shadow .22s ease;
+            opacity: 0;
+            animation: fadeInUp .9s ease-out forwards 1.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #start-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            background: rgba(255,223,133,.11);
+            box-shadow: 0 16px 34px rgba(0,0,0,.22), 0 0 24px rgba(255,223,133,.16);
+        }
+
+        #start-btn:active { transform: scale(.98); }
+
+        /* INTRO — MORNING */
+        body.morning #intro-screen {
+            background:
+                radial-gradient(circle at 50% 42%, rgba(255,255,255,.42) 0%, rgba(219,239,255,.94) 54%),
+                linear-gradient(180deg, #dff3ff 0%, #bfe5fb 100%);
+        }
+
+        body.morning .intro-content {
+            background: rgba(255,255,255,.26);
+            border-color: rgba(255,255,255,.64);
+            box-shadow: 0 28px 80px rgba(57,87,110,.12), inset 0 1px 0 rgba(255,255,255,.82);
+        }
+
+        body.morning .intro-title {
+            color: #df6418;
+            text-shadow: 0 4px 20px rgba(255,255,255,.70);
+        }
+
+        body.morning .intro-subtitle { color: #334155; }
+        body.morning .intro-icon {
+            background: rgba(255,255,255,.38);
+            border-color: rgba(255,255,255,.62);
+            filter: drop-shadow(0 8px 18px rgba(234,88,12,.16));
+        }
+
+        body.morning #start-btn {
+            color: #d76118;
+            border-color: rgba(224,100,34,.32);
+            background: rgba(255,255,255,.56);
+        }
+
+        body.morning #start-btn:hover {
+            background: rgba(255,255,255,.82);
+            box-shadow: 0 14px 30px rgba(51,65,85,.10), 0 0 22px rgba(255,255,255,.48);
+        }
+
+        .sky-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; transition: transform 0.1s ease-out, opacity 1.5s ease; }
+        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0; animation: twinkleStar var(--twinkle-dur) ease-in-out infinite alternate; }
+        @keyframes twinkleStar { 0% { transform: scale(0.8); opacity: 0.1; box-shadow: none; } 100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 6px rgba(255,240,200,0.9); } }
+
+        /* --- SAO BĂNG (METEOR) --- */
+        .meteor { position: absolute; height: var(--meteor-width, 1px); background: linear-gradient( 90deg, rgba(255,255,255,0) 0%, rgba(255,223,133,0.05) 20%, rgba(255,238,180,0.6) 65%, rgba(255,255,255,0.9) 95%, rgba(255,255,255,1) 100% ); border-radius: 999px; filter: drop-shadow(0 0 2px rgba(255, 255, 255, 1)) drop-shadow(0 0 8px rgba(255, 223, 133, 0.8)); animation: meteor-flight var(--dur, 2s) cubic-bezier(.2,.65,.35,1) forwards; pointer-events: none; z-index: 1; opacity: 0; transform-origin: right center; will-change: transform, width, opacity; }
+        .meteor::before, .meteor::after { content: ''; position: absolute; top: 50%; right: 0; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,250,225,0.9) 50%, rgba(255,255,255,0) 100%); border-radius: 100%; transform-origin: center; animation: meteor-spark var(--dur, 2s) ease-in forwards; opacity: 0.8; box-shadow: 0 0 4px rgba(255, 238, 180, 0.8); }
+        .meteor::before { transform: translateY(-50%) translateX(50%) rotate(45deg); } .meteor::after { transform: translateY(-50%) translateX(50%) rotate(-45deg); }
+        @keyframes meteor-flight { 0% { width: 0; transform: rotate(var(--angle)) translateX(0) scaleX(0.35); opacity: 0; } 12% { opacity: 0.15; } 22% { opacity: var(--max-opacity, 0.9); transform: rotate(var(--angle)) translateX(0) scaleX(0.85); } 42% { width: var(--tail-len, 110px); opacity: calc(var(--max-opacity, 0.9) * 0.9); transform: rotate(var(--angle)) translateX(0) scaleX(1); } 72% { opacity: calc(var(--max-opacity, 0.9) * 0.6); } 100% { width: 0; transform: rotate(var(--angle)) translateX(var(--dx)) scaleX(0.45); opacity: 0; } }
+        @keyframes meteor-spark { 0% { width: 0; opacity: 0; } 18% { width: 4px; opacity: 0.4; } 40% { width: var(--spark-len, 18px); opacity: 0.8; } 72% { width: 8px; opacity: 0.3; } 100% { width: 0; opacity: 0; } }
+        
+        .moon { position: absolute; top: 12%; right: 12%; width: 85px; height: 85px; background: #fdfae1; border-radius: 50%; box-shadow: 0 0 40px rgba(253, 250, 225, 0.6), 0 0 80px rgba(255, 255, 255, 0.2); animation: moonFloatNight 8s ease-in-out infinite alternate; z-index: 1; cursor: pointer; transition: transform 0.2s ease, background 1.5s, box-shadow 1.5s; }
+        .moon::before { content: ''; position: absolute; top: 22%; left: 28%; width: 15px; height: 15px; background: rgba(0,0,0,0.04); border-radius: 50%; box-shadow: 25px 12px 0 -4px rgba(0,0,0,0.04), 10px 35px 0 -3px rgba(0,0,0,0.03); }
+        @keyframes moonFloatNight { 0% { transform: translateY(0); } 100% { transform: translateY(-12px); } }
+
+        /* --- AQUARIUS CONSTELLATION --- */
+        .aquarius-container { position: absolute; top: 24%; left: 50%; transform: translateX(-50%); width: 220px; height: 160px; z-index: 2; pointer-events: auto; cursor: pointer; opacity: 0.85; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        @media (min-width: 768px) { .aquarius-container { left: auto; right: 15%; top: 18%; transform: none; width: 250px; height: 180px; } }
+        .aquarius-container:hover, .aquarius-container.active-tap { opacity: 1; transform: translateX(-50%) scale(1.05); }
+        @media (min-width: 768px) { .aquarius-container:hover, .aquarius-container.active-tap { transform: scale(1.05); } }
+        .aquarius-container:hover .c-star, .aquarius-container.active-tap .c-star { box-shadow: 0 0 15px white; }
+        .aquarius-container:hover .constellation-msg, .aquarius-container.active-tap .constellation-msg { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .c-star { position: absolute; width: 3px; height: 3px; background: white; border-radius: 50%; box-shadow: 0 0 6px rgba(255,255,255,0.7); animation: starBreathe 3s ease-in-out infinite alternate; }
+        .c-star:nth-child(3n) { animation-duration: 4s; animation-delay: 0.5s; } .c-star:nth-child(3n+1) { animation-duration: 3.5s; animation-delay: 1.2s; }
+        @keyframes starBreathe { 0% { opacity: 0.3; transform: scale(0.8); box-shadow: 0 0 2px rgba(255,255,255,0.4); } 100% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 10px rgba(255,255,255,0.9); } }
+        .c-star.sadalmelik { background: #ffdf85; width: 6px; height: 6px; box-shadow: 0 0 15px #ffdf85; animation: pulseGold 2s infinite; }
+        @keyframes pulseGold { 0%,100% { opacity: 1; transform: scale(1); box-shadow: 0 0 15px #ffdf85; } 50% { opacity: 0.6; transform: scale(1.3); box-shadow: 0 0 25px #ffdf85; } }
+        .s1 { top: 30%; left: 15%; } .s2 { top: 60%; left: 35%; } .s3 { top: 40%; left: 55%; } .s4 { top: 75%; left: 75%; } .s5 { top: 25%; left: 85%; }
+        .c-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .c-lines polyline { fill: none; stroke: rgba(255,255,255,0.35); stroke-width: 1.2; stroke-dasharray: 600; stroke-dashoffset: 600; animation: drawConstellation 3.5s ease-in-out forwards 1.5s; }
+        .aquarius-container:hover .c-lines polyline, .aquarius-container.active-tap .c-lines polyline { stroke: rgba(255,255,255,0.7); stroke-width: 1.5; }
+        @keyframes drawConstellation { to { stroke-dashoffset: 0; } }
+        .constellation-msg { position: absolute; top: 100%; left: 50%; width: 240px; text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-weight: 500; color: #fff; font-size: 1.1rem; text-shadow: 0 1px 5px rgba(0,0,0,0.8); opacity: 0; pointer-events: none; transition: all 0.4s ease; background: rgba(25, 20, 35, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 25px rgba(0,0,0,0.4); line-height: 1.5; transform: translateX(-50%) translateY(-15px); margin-top: 15px; }
+        .aquarius-container.flash .c-star { background: #fff; box-shadow: 0 0 30px #ffdf85, 0 0 50px #fff; transform: scale(1.8); transition: all 0.15s ease; }
+        .aquarius-container.flash .c-lines polyline { stroke: #ffdf85; stroke-width: 2; transition: all 0.15s ease; }
+
+        /* --- ĐÈN LỒNG (TỐI) --- */
+        .lantern-container, .tiny-lantern-container { will-change: transform, opacity, filter; }
+        .lantern-container { position: absolute; display: flex; flex-direction: column; align-items: center; animation: riseUp var(--rise-duration) linear forwards, sway var(--sway-duration) ease-in-out infinite alternate; cursor: pointer; z-index: 10;}
+        .lantern-body { width: 52px; height: 62px; border-radius: 22px 22px 16px 16px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 50%), linear-gradient(to bottom, #ffba08, #ff7300, #d62828); position: relative; box-shadow: 0 0 25px var(--lantern-glow), inset 0 0 12px rgba(0,0,0,0.2); border: 1px solid rgba(255, 215, 0, 0.4); overflow: hidden; }
+        .lantern-body::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 20px; background: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 11px); pointer-events: none; }
+        .lantern-top, .lantern-bottom { width: 28px; height: 5px; background: #222; position: absolute; left: 50%; transform: translateX(-50%); border: 1px solid rgba(255,215,0,0.5); z-index: 2; }
+        .lantern-top { top: -3px; border-radius: 4px 4px 1px 1px; width: 22px;} .lantern-bottom { bottom: -3px; border-radius: 1px 1px 4px 4px; width: 22px;}
+        .tassel { width: 3px; height: 32px; background: #c62828; margin-top: 4px; border-radius: 2px; animation: tasselWave 2s ease-in-out infinite; position: relative; z-index: 1;}
+        .tassel::before { content:''; width: 7px; height: 7px; background: #f9d423; position: absolute; top: -3px; left: -2px; border-radius: 50%; }
+
+        .tiny-lantern-container { position: absolute; pointer-events: none; z-index: 5; animation: riseUpSlow var(--rise-duration) linear forwards; filter: blur(1.5px); opacity: 0.6; }
+        .tiny-lantern-body { width: 12px; height: 16px; background: linear-gradient(to bottom, #ffba08, #ff7300); border-radius: 4px; box-shadow: 0 0 10px rgba(255, 115, 0, 0.5); }
+
+        @keyframes riseUp { from { bottom: -150px; opacity: 0; } 10% { opacity: 1; } to { bottom: 130%; opacity: 0; } }
+        @keyframes riseUpSlow { from { bottom: -50px; opacity: 0; } 20% { opacity: 0.5; } to { bottom: 115%; opacity: 0; } }
+        @keyframes sway { from { transform: translateX(-15px) rotate(-6deg); } to { transform: translateX(15px) rotate(6deg); } }
+        @keyframes tasselWave { 0%, 100% { transform: skewX(-12deg); } 50% { transform: skewX(12deg); } }
+        
+        /* --- MÂY (SÁNG) --- */
+        .cloud-container { 
+            position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            cursor: pointer; will-change: transform, left; 
+            animation: cloudFlyRight var(--fly-duration) cubic-bezier(.25,.55,.25,1) forwards; 
+            left: -50vw; 
+        }
+        .cloud-container.active { z-index: 100 !important; }
+        
+        /* Mây thông điệp dùng cùng silhouette organic với mây tầng, nhưng rõ và đẹp hơn. */
+        .cloud-body {
+            position: relative;
+            width: 150px;
+            height: 78px;
+            transition: transform .35s ease, filter .35s ease;
+            overflow: visible;
+            transform-origin: 50% 70%;
+            filter: drop-shadow(0 14px 18px rgba(47, 102, 145, .16));
+        }
+        .cloud-container:hover .cloud-body { transform: scale(1.045); filter: drop-shadow(0 16px 22px rgba(47, 102, 145, .18)) brightness(1.025); }
+        .message-cloud-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+        .message-cloud-fill { fill: rgba(255,255,255,.97); }
+        .message-cloud-highlight { fill: none; }
+        .message-cloud-shade { fill: rgba(105,151,185,.10); }
+        .cloud-container.message-far .cloud-body { width: 112px; height: 60px; }
+        .cloud-container.message-mid .cloud-body { width: 145px; height: 76px; }
+        .cloud-container.message-near .cloud-body { width: 178px; height: 92px; }
+        .cloud-container.message-far .message-cloud-svg { opacity: .82; filter: blur(.55px); }
+        .cloud-container.message-mid .message-cloud-svg { opacity: .94; }
+        .cloud-container.message-near .message-cloud-svg { opacity: 1; }
+
+        @keyframes cloudFlyRight { 
+            0% { left: -50vw; } 
+            100% { left: 150vw; } 
+        }
+
+        
+        /* --- ÁNH SÁNG BUỔI SÁNG — CỐ ĐỊNH --- */
+        .morning-light {
+            position: absolute;
+            inset: -10%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+
+            /* Giữ các dải sáng đứng yên, chỉ thay đổi độ che khi mây
+               thực sự đi qua mặt trời. */
+            background:
+                radial-gradient(
+                    circle at 82% 15%,
+                    rgba(255,255,235,.50) 0,
+                    rgba(255,255,235,.20) 8%,
+                    transparent 24%
+                ),
+                linear-gradient(
+                    115deg,
+                    transparent 0 35%,
+                    rgba(255,255,255,.075) 43%,
+                    transparent 51%
+                ),
+                linear-gradient(
+                    72deg,
+                    transparent 0 55%,
+                    rgba(255,248,210,.055) 64%,
+                    transparent 73%
+                );
+
+            animation: none !important;
+            transform: none !important;
+        }
+
+        body.morning .morning-light {
+            opacity: var(--weather-light-opacity, 1);
+        }
+
+        /* --- CHIỀU SÂU BUỔI SÁNG: TIA NẮNG + CHÂN TRỜI + HẠT SÁNG TĨNH --- */
+        .morning-beams {
+            position:absolute;
+            inset:-8%;
+            z-index:.15;
+            pointer-events:none;
+            opacity:0;
+            transition:opacity 1.3s ease;
+            background:
+                linear-gradient(
+                    112deg,
+                    transparent 0 34%,
+                    rgba(255,255,255,.050) 39%,
+                    rgba(255,248,215,.075) 44%,
+                    transparent 50%
+                ),
+                linear-gradient(
+                    118deg,
+                    transparent 0 46%,
+                    rgba(255,255,255,.035) 51%,
+                    rgba(255,248,220,.055) 56%,
+                    transparent 62%
+                ),
+                linear-gradient(
+                    96deg,
+                    transparent 0 57%,
+                    rgba(255,255,255,.025) 62%,
+                    transparent 68%
+                );
+        }
+
+        body.morning .morning-beams { opacity:var(--weather-beam-opacity, 1); }
+
+        .morning-horizon {
+            position:absolute;
+            left:-10%;
+            right:-10%;
+            bottom:-8%;
+            height:45%;
+            z-index:.55;
+            pointer-events:none;
+            opacity:0;
+            transition:opacity 1.4s ease;
+            background:
+                radial-gradient(
+                    ellipse at 50% 100%,
+                    rgba(255,255,255,.13) 0,
+                    rgba(255,255,255,.060) 29%,
+                    transparent 69%
+                ),
+                linear-gradient(
+                    to top,
+                    rgba(239,249,255,.12) 0%,
+                    rgba(239,249,255,.045) 30%,
+                    transparent 78%
+                );
+        }
+
+        body.morning .morning-horizon { opacity:1; }
+
+        .morning-glints {
+            position:absolute;
+            inset:0;
+            z-index:3;
+            pointer-events:none;
+            opacity:0;
+            transition:opacity 1.1s ease;
+            background:
+                radial-gradient(circle at 68% 23%, rgba(255,255,255,.22) 0 1px, transparent 2px),
+                radial-gradient(circle at 76% 31%, rgba(255,255,255,.15) 0 1px, transparent 2px),
+                radial-gradient(circle at 59% 37%, rgba(255,255,255,.12) 0 1px, transparent 2px),
+                radial-gradient(circle at 87% 28%, rgba(255,255,255,.11) 0 1px, transparent 2px),
+                radial-gradient(circle at 48% 19%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+                radial-gradient(circle at 73% 46%, rgba(255,255,255,.09) 0 1px, transparent 2px),
+                radial-gradient(circle at 54% 52%, rgba(255,255,255,.08) 0 1px, transparent 2px);
+            filter:blur(.15px);
+        }
+
+        body.morning .morning-glints { opacity:var(--weather-glint-opacity, .72); }
+
+        /* --- MÂY NHIỀU TẦNG: DEPTH + PARALLAX NHẸ --- */
+        .far-cloud-layer {
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            overflow:hidden;
+            z-index:1;
+            opacity:0;
+            transition:opacity 1s ease;
+        }
+        body.morning .far-cloud-layer { opacity:1; }
+
+        .far-cloud {
+            position:absolute;
+            width:var(--far-width);
+            height:var(--far-height);
+            opacity:var(--far-opacity);
+            transform-origin:50% 70%;
+            animation:farCloudDrift var(--far-dur) ease-in-out infinite;
+            will-change:transform, opacity;
+        }
+
+        .far-cloud-svg {
+            display:block;
+            width:100%;
+            height:100%;
+            overflow:visible;
+            transform:
+                translateZ(0)
+                scaleX(var(--cloud-stretch,1))
+                rotate(var(--cloud-tilt,0deg));
+            filter: blur(var(--far-blur));
+            transform-origin:50% 70%;
+            will-change:transform;
+        }
+
+        .far-cloud-svg .cloud-fill { fill:rgba(255,255,255,.82); }
+        .far-cloud-svg .cloud-highlight { fill:rgba(255,255,255,.22); }
+        .far-cloud-svg .cloud-shade { fill:rgba(118,163,194,.075); }
+
+        .far-cloud.cloud-high .far-cloud-svg {
+            opacity:.64;
+        }
+        .far-cloud.cloud-middle .far-cloud-svg {
+            opacity:.80;
+        }
+        .far-cloud.cloud-low .far-cloud-svg {
+            opacity:.93;
+        }
+
+        /* Lớp xa di chuyển dài và chậm; lớp thấp ngắn và rõ hơn. */
+        @keyframes farCloudDrift {
+            0% {
+                transform:translate3d(-360px, var(--cloud-start-y,0), 0)
+                           scale(var(--far-scale,1));
+                opacity:.86;
+            }
+            20% {
+                transform:translate3d(calc(19vw + var(--cloud-offset-a,0px)),
+                                      var(--cloud-bob-a), 0)
+                           scale(var(--far-scale,1));
+            }
+            43% {
+                transform:translate3d(calc(47vw + var(--cloud-offset-b,0px)),
+                                      var(--cloud-bob-b), 0)
+                           scale(var(--far-scale,1));
+            }
+            67% {
+                transform:translate3d(calc(75vw + var(--cloud-offset-c,0px)),
+                                      var(--cloud-bob-c), 0)
+                           scale(var(--far-scale,1));
+            }
+            84% {
+                transform:translate3d(calc(92vw + var(--cloud-offset-d,0px)),
+                                      var(--cloud-bob-b), 0)
+                           scale(var(--far-scale,1));
+            }
+            100% {
+                transform:translate3d(calc(100vw + 420px), 0, 0)
+                           scale(var(--far-scale,1));
+                opacity:.96;
+            }
+        }
+
+        /* --- KHÔNG KHÍ / HAZE: TẠO CẢM GIÁC CHIỀU SÂU --- */
+        .atmospheric-haze {
+            position:absolute;
+            left:-8%;
+            right:-8%;
+            bottom:-10%;
+            height:48%;
+            pointer-events:none;
+            z-index:.8;
+            opacity:0;
+            transition:opacity 1.2s ease;
+            background:
+                radial-gradient(
+                    ellipse at 18% 86%,
+                    rgba(255,255,255,.075) 0,
+                    rgba(255,255,255,.035) 28%,
+                    transparent 62%
+                ),
+                radial-gradient(
+                    ellipse at 78% 70%,
+                    rgba(255,255,255,.065) 0,
+                    rgba(255,255,255,.028) 30%,
+                    transparent 65%
+                ),
+                linear-gradient(
+                    to top,
+                    rgba(238,248,255,.12) 0%,
+                    rgba(238,248,255,.045) 35%,
+                    transparent 78%
+                );
+            filter:blur(8px);
+        }
+        body.morning .atmospheric-haze { opacity:1; }
+
+        /* --- HẠT NẮNG: NHỎ, KHÔNG ĐỀU, TẬP TRUNG Ở VÙNG SÁNG --- */
+        .sun-dust-layer {
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            overflow:hidden;
+            z-index:6;
+            opacity:0;
+            transition:opacity 1s ease;
+        }
+        body.morning .sun-dust-layer { opacity:1; }
+
+        .sun-dust {
+            position:absolute;
+            width:var(--dust-size,3px);
+            height:var(--dust-size,3px);
+            border-radius:50%;
+            background:rgba(255,255,255,var(--dust-opacity,.42));
+            filter:blur(var(--dust-blur,.45px));
+            box-shadow:0 0 7px rgba(255,245,205,.24);
+            animation: dustFloat var(--dust-dur) ease-in-out infinite alternate;
+            will-change:transform,opacity,filter;
+        }
+
+        @keyframes dustFloat {
+            0% {
+                transform:translate3d(0,10px,0);
+                opacity:.10;
+            }
+            42% { opacity:.46; }
+            100% {
+                transform:translate3d(var(--dust-x),-22px,0);
+                opacity:.72;
+            }
+        }
+
+        /* --- ĐÀN CHIM: BAY NGANG ĐỘC LẬP, NHANH/CHẬM NGẪU NHIÊN --- */
+        .github-bird-flock {
+            position:absolute;
+            inset:0;
+            z-index:4;
+            pointer-events:none;
+            overflow:visible;
+        }
+
+        .github-bird-container {
+            position:absolute;
+            left:0;
+            top:var(--bird-top);
+            width:88px;
+            height:125px;
+            transform:translate3d(-120px,0,0) scale(var(--bird-scale,.34));
+            opacity:0;
+            will-change:transform,opacity;
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+            animation-name:github-bird-fly;
+            animation-duration:var(--bird-duration,21s);
+            animation-timing-function:linear;
+            animation-delay:var(--bird-delay,0s);
+            animation-iteration-count:1;
+            animation-fill-mode:forwards;
+        }
+
+        .github-bird {
+            width:88px;
+            height:125px;
+            background-image:url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/174479/bird-cells.svg");
+            background-size:auto 100%;
+            background-repeat:no-repeat;
+            background-position:0 0;
+            -webkit-animation:github-bird-flap .90s steps(10) infinite;
+            animation:github-bird-flap .90s steps(10) infinite;
+            transform:translateZ(0);
+            -webkit-transform:translateZ(0);
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+        }
+
+        @-webkit-keyframes github-bird-flap {
+            from { background-position:0 0; }
+            to   { background-position:-900px 0; }
+        }
+        @keyframes github-bird-flap {
+            from { background-position:0 0; }
+            to   { background-position:-900px 0; }
+        }
+
+        /*
+         * Mỗi con bắt đầu ở mép trái rồi đi thẳng sang mép phải.
+         * Chỉ duration khác nhau => con nhanh/chậm tự nhiên,
+         * không còn chuyện xuất hiện giữa màn hình rồi chờ nhau.
+         */
+        @-webkit-keyframes github-bird-fly {
+            0% {
+                -webkit-transform:translate3d(-120px,0,0) scale(var(--bird-scale,.34));
+                transform:translate3d(-120px,0,0) scale(var(--bird-scale,.34));
+                opacity:0;
+            }
+            6% { opacity:var(--bird-opacity,.72); }
+            94% { opacity:var(--bird-opacity,.72); }
+            100% {
+                -webkit-transform:translate3d(calc(var(--bird-screen-width, 100vw) + 120px),0,0) scale(var(--bird-scale,.34));
+                transform:translate3d(calc(var(--bird-screen-width, 100vw) + 120px),0,0) scale(var(--bird-scale,.34));
+                opacity:0;
+            }
+        }
+
+        @keyframes github-bird-fly {
+            0% {
+                transform:translate3d(-120px,0,0) scale(var(--bird-scale,.34));
+                opacity:0;
+            }
+            6% { opacity:var(--bird-opacity,.72); }
+            94% { opacity:var(--bird-opacity,.72); }
+            100% {
+                transform:translate3d(calc(var(--bird-screen-width, 100vw) + 120px),0,0) scale(var(--bird-scale,.34));
+                opacity:0;
+            }
+        }
+
+        .github-bird-container.far .github-bird {
+            opacity:.28;
+            filter:blur(.40px);
+        }
+        .github-bird-container.medium .github-bird {
+            opacity:.50;
+            filter:blur(.08px);
+        }
+        .github-bird-container.near .github-bird {
+            opacity:.72;
+        }
+
+        /* Đội hình lệch nhẹ theo chiều dọc, không lệch thời điểm bay. */
+        .github-bird-container:nth-child(2) { margin-top:4px; }
+        .github-bird-container:nth-child(3) { margin-top:-3px; }
+        .github-bird-container:nth-child(4) { margin-top:6px; }
+        .github-bird-container:nth-child(5) { margin-top:-4px; }
+        .github-bird-container:nth-child(6) { margin-top:3px; }
+
+        body:not(.morning) .github-bird-flock { display:none; }
+
+
+        /* --- MÁY BAY: XA / THƯỜNG / GẦN + VỆT GIÓ --- */
+        .airplane-wrapper {
+            position: absolute;
+            z-index: 5;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+            will-change: left, top;
+            overflow: visible;
+            transition: left var(--plane-dur) linear, top var(--plane-dur) linear;
+        }
+
+        .airplane-wrapper.airplane-far { opacity: .52; filter: blur(.12px); }
+        .airplane-wrapper.airplane-normal { opacity: .84; filter: blur(.02px); }
+        .airplane-wrapper.airplane-near { opacity: .97; }
+
+        .airplane-rotator {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 0;
+            height: 0;
+            transform: rotate(var(--plane-angle)) scale(var(--plane-scale));
+            transform-origin: center;
+            will-change: transform;
+        }
+
+        .airplane-turb {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: airplaneBump 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes airplaneBump {
+            0% { transform: translateY(-3px); }
+            100% { transform: translateY(3px); }
+        }
+
+        .plane-svg {
+            width: 30px;
+            height: 30px;
+            transform: rotate(90deg);
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,.25));
+            z-index: 2;
+            display: block;
+            overflow: visible;
+        }
+
+        .airplane-wrapper.airplane-far .plane-svg { width: 25px; height: 25px; }
+        .airplane-wrapper.airplane-normal .plane-svg { width: 32px; height: 32px; }
+        .airplane-wrapper.airplane-near .plane-svg { width: 42px; height: 42px; }
+
+        .contrail {
+            position: absolute;
+            right: 15px;
+            width: 150px;
+            height: 1.5px;
+            background: linear-gradient(
+                to right,
+                transparent 0%,
+                rgba(255,255,255,.14) 15%,
+                rgba(255,255,255,.54) 68%,
+                rgba(255,255,255,.84) 100%
+            );
+            border-radius: 999px;
+            z-index: 1;
+            filter: blur(1px);
+        }
+
+        .contrail.left-wing { transform: translateY(-10px); }
+        .contrail.right-wing { transform: translateY(10px); }
+
+        .airplane-wrapper.airplane-far .contrail {
+            width: 145px;
+            height: 1px;
+            opacity: .68;
+            filter: blur(.8px);
+        }
+        .airplane-wrapper.airplane-normal .contrail {
+            width: 185px;
+            height: 1.7px;
+            opacity: .82;
+            filter: blur(1px);
+        }
+        .airplane-wrapper.airplane-near .contrail {
+            width: 225px;
+            height: 2px;
+            opacity: .92;
+            filter: blur(1.25px);
+        }
+
+        .airplane-turb::before,
+        .airplane-turb::after {
+            content: '';
+            position: absolute;
+            right: 16px;
+            border-radius: 999px;
+            background: linear-gradient(
+                to right,
+                transparent 0%,
+                rgba(255,255,255,.10) 12%,
+                rgba(255,255,255,.42) 55%,
+                rgba(255,255,255,.72) 100%
+            );
+            filter: blur(.8px);
+            z-index: 0;
+        }
+
+        .airplane-turb::before {
+            width: 140px;
+            height: 1px;
+            transform: translateY(-4px);
+            opacity: .48;
+        }
+        .airplane-turb::after {
+            width: 118px;
+            height: 1px;
+            transform: translateY(4px);
+            opacity: .32;
+        }
+
+        .airplane-wrapper.airplane-normal .airplane-turb::before { width: 165px; opacity: .58; }
+        .airplane-wrapper.airplane-normal .airplane-turb::after { width: 140px; opacity: .38; }
+        .airplane-wrapper.airplane-near .airplane-turb::before { width: 205px; opacity: .68; }
+        .airplane-wrapper.airplane-near .airplane-turb::after { width: 175px; opacity: .45; }
+
+        /* --- POPUP CHUNG TỐI & SÁNG --- */
+
+        .lantern-popup { 
+            position: absolute; width: 240px; 
+            background: rgba(30, 28, 42, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); border-top: 1px solid rgba(255, 255, 255, 0.3); 
+            padding: 16px 20px; border-radius: 16px; text-align: center; 
+            bottom: 125%; left: 50%; transform: translateX(-50%) scale(0); transform-origin: bottom center; 
+            opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            pointer-events: none; box-shadow: 0 15px 35px rgba(0,0,0,0.7); z-index: 101; 
+        }
+        .lantern-popup p { margin: 0; min-height: 1.5em; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.15rem; line-height: 1.5; color: #fffaf0; text-shadow: 0 2px 4px rgba(0,0,0,0.6); letter-spacing: 0.3px; }
+        .weather-message-tag {
+            display: inline-block;
+            margin-bottom: 5px;
+            font-size: .65rem;
+            font-weight: 900;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            opacity: .52;
+        }
+
+        .lantern-container.active .lantern-popup, .cloud-container.active .lantern-popup { transform: translateX(-50%) scale(1); opacity: 1; z-index: 999 !important;}
+        
+        /* Popup Buổi Sáng (Kính mờ thanh lịch) */
+        body.morning .lantern-popup { 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), inset 0 0 15px rgba(255,255,255,0.6); 
+        }
+        body.morning .lantern-popup p { color: #1f2937; text-shadow: 0 1px 2px rgba(255,255,255,0.8); font-weight: 800; }
+
+        .cursor { display: inline-block; width: 2px; background-color: currentColor; margin-left: 2px; animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* =========================================================
+           PREMIUM UI SYSTEM
+           ========================================================= */
+
+        #gift-container {
+            position: fixed;
+            top: max(14px, env(safe-area-inset-top));
+            left: max(14px, env(safe-area-inset-left));
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 10px 7px 7px;
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 999px;
+            background: rgba(18,20,31,.28);
+            -webkit-backdrop-filter: blur(18px) saturate(135%);
+            backdrop-filter: blur(18px) saturate(135%);
+            box-shadow: 0 10px 28px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.12);
+        }
+
+        body.morning #gift-container {
+            background: rgba(255,255,255,.30);
+            border-color: rgba(255,255,255,.56);
+            box-shadow: 0 10px 28px rgba(31,41,55,.10), inset 0 1px 0 rgba(255,255,255,.72);
+        }
+
+        #gift-icon {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.10);
+            font-size: 1.35rem;
+            cursor: pointer;
+            filter: grayscale(100%) opacity(.58);
+            transition: transform .25s ease, filter .25s ease, background .25s ease, box-shadow .25s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.morning #gift-icon { background: rgba(255,255,255,.46); }
+
+        #gift-icon:hover {
+            transform: translateY(-1px) scale(1.05);
+            background: rgba(255,255,255,.13);
+        }
+
+        #gift-icon:active { transform: scale(.96); }
+
+        /* --- VỊ TRÍ / THỜI TIẾT: NÚT MÂY NHỎ --- */
+        #location-cloud.show {
+            display: grid;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        #location-cloud:hover {
+            background: rgba(255,255,255,.34);
+            box-shadow: 0 10px 22px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.76);
+            transform: translateY(-1px) scale(1.05);
+        }
+        #location-cloud:active {
+            transform: scale(.94);
+        }
+        #location-cloud.loading {
+            animation: locationCloudPulse 1.1s ease-in-out infinite;
+        }
+        body.morning #location-cloud {
+            background: rgba(255,255,255,.44);
+            border-color: rgba(255,255,255,.72);
+            color: #334155;
+        }
+        @keyframes locationCloudPulse {
+            0%,100% { opacity: .66; }
+            50% { opacity: 1; }
+        }
+
+        #gift-icon.unlocked {
+            filter: none;
+            animation: giftShake 2s ease-in-out infinite alternate;
+            box-shadow: 0 0 22px rgba(255,215,0,.24);
+        }
+
+        @keyframes giftShake {
+            0%,100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-5deg) scale(1.04); }
+            75% { transform: rotate(5deg) scale(1.04); }
+        }
+
+        #gift-counter {
+            min-width: 34px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(0,0,0,.22);
+            border: 1px solid rgba(255,255,255,.10);
+            color: rgba(255,255,255,.88);
+            font-size: .70rem;
+            font-weight: 800;
+            line-height: 1.2;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        body.morning #gift-counter {
+            background: rgba(255,255,255,.58);
+            color: #243042;
+            border-color: rgba(255,255,255,.76);
+        }
+
+        /* Top status — static UI shell. The mode buttons remain TEST ONLY. */
+
+        #location-cloud {
+            position: fixed;
+            left: 50%;
+            top: calc(50% + 112px);
+            transform: translateX(-50%);
+            z-index: 140;
+            width: 38px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 1px solid rgba(255,255,255,.65);
+            border-radius: 15px;
+            background: rgba(255,255,255,.42);
+            color: rgba(48,62,78,.78);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 6px 18px rgba(20,35,50,.10), inset 0 1px 0 rgba(255,255,255,.75);
+            font: 700 17px/1 system-ui, sans-serif;
+            cursor: pointer;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition: opacity .28s ease, transform .28s ease, visibility .28s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #location-cloud.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(-4px) scale(.92);
+        }
+
+        body.evening #location-cloud {
+            background: rgba(20,24,35,.32);
+            border-color: rgba(255,255,255,.18);
+            color: rgba(255,255,255,.78);
+        }
+
+        @media (max-width: 680px) {
+            #location-cloud {
+                top: calc(50% + 108px);
+            }
+        }
+
+        /* PREMIUM PLAYER */
+        .ui-container {
+            position: fixed;
+            left: 50%;
+            bottom: max(16px, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: min(92vw, 560px);
+            min-height: 78px;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 46px minmax(0,1fr) auto;
+            align-items: center;
+            gap: 10px;
+            box-sizing: border-box;
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            background: rgba(18,21,32,.36);
+            -webkit-backdrop-filter: blur(22px) saturate(135%);
+            backdrop-filter: blur(22px) saturate(135%);
+            color: #fff;
+            box-shadow: 0 18px 42px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.10);
+            transition: background .45s ease, border-color .45s ease, box-shadow .45s ease, color .45s ease;
+        }
+
+        body.morning .ui-container {
+            background: rgba(255,255,255,.43);
+            border-color: rgba(255,255,255,.68);
+            color: #243042;
+            box-shadow: 0 18px 42px rgba(31,41,55,.10), inset 0 1px 0 rgba(255,255,255,.78);
+        }
+
+        .disk-wrapper {
+            width: 46px;
+            height: 46px;
+            flex: 0 0 auto;
+            position: relative;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: conic-gradient(from 45deg, #a1c4fd, #c2e9fb, #fbc2eb, #a18cd1, #a1c4fd);
+            box-shadow: 0 5px 15px rgba(161,196,253,.28);
+            animation: spin 5s linear infinite;
+            border: 2px solid rgba(255,255,255,.54);
+        }
+
+        .disk-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,.16), 0 2px 5px rgba(0,0,0,.16);
+        }
+
+        .ui-container.paused .disk-wrapper { animation-play-state: paused; }
+
+        .track-info {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .song-title {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: .86rem;
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: .01em;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,.35);
+        }
+
+        body.morning .song-title {
+            color: #243042;
+            text-shadow: none;
+        }
+
+        .heart-beat {
+            flex: 0 0 auto;
+            font-size: .75rem;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .time-text {
+            min-width: 27px;
+            font-size: .58rem;
+            font-variant-numeric: tabular-nums;
+            color: rgba(255,255,255,.58);
+        }
+
+        body.morning .time-text {
+            color: rgba(36,48,66,.62);
+            font-weight: 700;
+        }
+
+        #seekSlider {
+            min-width: 0;
+            flex: 1 1 auto;
+            width: 100%;
+            height: 4px;
+            margin: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            border-radius: 999px;
+            outline: none;
+            cursor: pointer;
+            background: rgba(255,255,255,.16);
+        }
+
+        body.morning #seekSlider { background: rgba(36,48,66,.15); }
+
+        #seekSlider::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border: 0;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(255,255,255,.64);
+        }
+
+        #seekSlider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border: 0;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(255,255,255,.64);
+        }
+
+        .bottom-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 10px;
+        }
+
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 10px;
+            opacity: .78;
+        }
+
+        .bar {
+            width: 3px;
+            height: 3px;
+            border-radius: 2px;
+            background: var(--muted-gold);
+            transition: height .05s ease;
+        }
+
+        .bar:nth-child(even) { background: #fff; }
+        .ui-container.paused .bar { height: 3px !important; opacity: .34; }
+        body.morning .bar { background: #334155; }
+        body.morning .bar:nth-child(even) { background: var(--muted-gold); }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-left: 2px;
+        }
+
+        .btn {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: grid;
+            place-items: center;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: rgba(255,255,255,.78);
+            font: 700 .93rem 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: transform .20s ease, background .20s ease, color .20s ease, box-shadow .20s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.morning .btn { color: #334155; }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,.10);
+            color: #fff;
+        }
+
+        body.morning .btn:hover {
+            background: rgba(255,255,255,.42);
+            color: #d96818;
+        }
+
+        .btn:active { transform: scale(.94); }
+
+        .btn-play {
+            width: 38px;
+            height: 38px;
+            background: #fff;
+            color: #111827;
+            box-shadow: 0 8px 18px rgba(255,255,255,.14);
+        }
+
+        .btn-play:hover {
+            background: var(--muted-gold);
+            color: #172033;
+            box-shadow: 0 10px 22px rgba(230,194,0,.24);
+        }
+
+        body.morning .btn-play {
+            background: #243042;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(36,48,66,.15);
+        }
+
+        body.morning .btn-play:hover {
+            background: #f2a34a;
+            color: #fff;
+        }
+
+        /* YOUTUBE INPUT PANEL */
+        #yt-panel {
+            position: fixed;
+            left: 50%;
+            bottom: calc(max(102px, 16vh) + env(safe-area-inset-bottom));
+            transform: translate(-50%, 18px);
+            z-index: 2500;
+            width: min(88vw, 360px);
+            box-sizing: border-box;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 20px;
+            background: rgba(18,21,32,.72);
+            -webkit-backdrop-filter: blur(22px) saturate(135%);
+            backdrop-filter: blur(22px) saturate(135%);
+            box-shadow: 0 18px 42px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.10);
+        }
+
+        #yt-panel.show {
+            display: flex;
+            animation: slideUp .28s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 18px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .yt-label {
+            color: rgba(255,255,255,.90);
+            font-size: .78rem;
+            font-weight: 800;
+        }
+
+        body.morning .yt-label { color: #334155; }
+
+        #yt-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 12px;
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 12px;
+            background: rgba(0,0,0,.22);
+            color: #fff;
+            outline: none;
+            font: 600 .85rem 'Nunito', sans-serif;
+        }
+
+        body.morning #yt-input {
+            background: rgba(255,255,255,.62);
+            border-color: rgba(255,255,255,.72);
+            color: #243042;
+        }
+
+        #yt-input::placeholder { color: rgba(255,255,255,.42); }
+        body.morning #yt-input::placeholder { color: rgba(36,48,66,.48); }
+
+        .yt-actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+        }
+
+        #yt-submit-btn,
+        #yt-close-btn {
+            min-height: 42px;
+            border-radius: 12px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font: 800 .82rem 'Nunito', sans-serif;
+            transition: transform .2s ease, background .2s ease;
+        }
+
+        #yt-submit-btn {
+            border: 0;
+            background: #fff;
+            color: #172033;
+        }
+
+        #yt-close-btn {
+            border: 1px solid rgba(255,255,255,.18);
+            background: transparent;
+            color: rgba(255,255,255,.76);
+        }
+
+        #yt-submit-btn:hover,
+        #yt-close-btn:hover { transform: translateY(-1px); }
+
+        body.morning #yt-panel {
+            background: rgba(255,255,255,.60);
+            border-color: rgba(255,255,255,.72);
+            box-shadow: 0 18px 42px rgba(31,41,55,.10), inset 0 1px 0 rgba(255,255,255,.82);
+        }
+
+        body.morning #yt-submit-btn { background: #243042; color: #fff; }
+        body.morning #yt-close-btn { color: #334155; border-color: rgba(36,48,66,.16); }
+
+        /* MODALS */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding:
+                max(20px, env(safe-area-inset-top))
+                max(20px, env(safe-area-inset-right))
+                max(20px, env(safe-area-inset-bottom))
+                max(20px, env(safe-area-inset-left));
+            box-sizing: border-box;
+            background: rgba(6,8,14,.68);
+            -webkit-backdrop-filter: blur(10px) saturate(120%);
+            backdrop-filter: blur(10px) saturate(120%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .28s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            position: relative;
+            width: min(88vw, 360px);
+            max-height: min(86vh, 720px);
+            overflow: auto;
+            box-sizing: border-box;
+            padding: 26px 22px 22px;
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 28px;
+            background: rgba(20,17,32,.88);
+            -webkit-backdrop-filter: blur(22px) saturate(125%);
+            backdrop-filter: blur(22px) saturate(125%);
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 26px 70px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.10);
+            transform: scale(.96) translateY(8px);
+            transition: transform .32s cubic-bezier(.175,.885,.32,1.275);
+        }
+
+        .modal.show .modal-content { transform: scale(1) translateY(0); }
+
+        .modal h3 {
+            margin: 0 0 10px;
+            font: normal clamp(1.9rem, 7vw, 2.35rem) 'Satisfy', cursive;
+            color: var(--primary-gold);
+            text-shadow: 0 2px 14px rgba(255,215,0,.16);
+        }
+
+        .modal-copy {
+            margin: 0;
+            color: rgba(255,255,255,.72);
+            font-size: .88rem;
+            line-height: 1.55;
+        }
+
+        #pass-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 13px;
+            margin: 15px 0 6px;
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 13px;
+            background: rgba(0,0,0,.24);
+            color: #fff;
+            text-align: center;
+            font: 700 .98rem 'Nunito', sans-serif;
+            outline: none;
+            transition: border-color .22s ease, background .22s ease, box-shadow .22s ease;
+        }
+
+        #pass-input:focus {
+            border-color: rgba(255,223,133,.62);
+            background: rgba(0,0,0,.32);
+            box-shadow: 0 0 0 4px rgba(255,223,133,.08);
+        }
+
+        #check-pass-btn {
+            width: auto;
+            min-width: 150px;
+            height: 42px;
+            padding: 0 24px;
+            margin-top: 8px;
+            border-radius: 999px;
+            font-size: .9rem;
+        }
+
+        #pass-error {
+            margin: 10px 0 0;
+            color: #ff8496;
+            font-size: .82rem;
+        }
+
+        #qr-image {
+            display: block;
+            width: min(68vw, 210px);
+            height: min(68vw, 210px);
+            object-fit: contain;
+            margin: 16px auto 10px;
+            padding: 9px;
+            box-sizing: border-box;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,.14);
+            background: #fff;
+            box-shadow: 0 12px 30px rgba(0,0,0,.16);
+        }
+
+        .modal-note {
+            margin: 8px 0 0;
+            color: rgba(255,255,255,.56);
+            font-size: .75rem;
+            line-height: 1.45;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: rgba(255,255,255,.56);
+            background: rgba(255,255,255,.06);
+            font: 400 1.7rem/1 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: transform .20s ease, color .20s ease, background .20s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: #fff;
+            background: rgba(255,255,255,.12);
+            transform: scale(1.04);
+        }
+
+
+        body.evening .morning-light,
+        body.evening .morning-beams,
+        body.evening .morning-horizon,
+        body.evening .morning-glints,
+        body.evening .sun-dust-layer,
+        body.evening #farCloudLayer {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        body.morning .morning-light,
+        body.morning .morning-beams,
+        body.morning .morning-horizon,
+        body.morning .morning-glints,
+        body.morning .sun-dust-layer {
+            visibility: visible;
+        }
+
+        /* --- RESPONSIVE UI --- */
+        @media (max-width: 680px) {
+            body.morning .morning-beams { opacity:.82; }
+            body.morning .morning-horizon { opacity:.88; }
+            body.morning .morning-glints { opacity:.58; }
+
+            #location-cloud {
+                top: calc(max(14px, env(safe-area-inset-top)) + 56px);
+                left: calc(max(14px, env(safe-area-inset-left)) + 8px);
+                width: 32px;
+                height: 32px;
+                font-size: .90rem;
+            }
+
+            #gift-container {
+                padding: 6px 8px 6px 6px;
+            }
+
+            #gift-icon { width: 38px; height: 38px; }
+            #gift-counter { font-size: .66rem; }
+
+            .ui-container {
+                width: calc(100vw - 24px);
+                min-height: 76px;
+                grid-template-columns: 42px minmax(0,1fr) auto;
+                gap: 8px;
+                padding: 9px 10px;
+                border-radius: 21px;
+            }
+
+            .disk-wrapper { width: 42px; height: 42px; }
+            .controls { gap: 2px; }
+            .btn { width: 32px; height: 32px; }
+            .btn-play { width: 37px; height: 37px; }
+
+            .song-title { font-size: .80rem; }
+            .time-text { min-width: 24px; font-size: .54rem; }
+
+            #yt-panel {
+                bottom: calc(101px + env(safe-area-inset-bottom));
+                width: calc(100vw - 28px);
+            }
+
+            .intro-content {
+                width: calc(100vw - 34px);
+                padding: 30px 22px;
+                border-radius: 28px;
+            }
+
+            .intro-icon {
+                width: 68px;
+                height: 68px;
+                border-radius: 20px;
+                font-size: 2.6rem;
+            }
+
+            .modal-content {
+                width: calc(100vw - 30px);
+                padding: 24px 18px 19px;
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-height: 650px) and (orientation: landscape) {
+            .ui-container { bottom: 10px; }
+            .intro-content { padding: 20px 26px; }
+            .intro-icon { display: none; }
+            .intro-subtitle { margin-bottom: 18px; }
+        }
+
+        @media (hover: none) {
+            #gift-icon:hover,
+            .btn:hover,
+            #start-btn:hover,
+            #yt-submit-btn:hover,
+            #yt-close-btn:hover { transform: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
+
+            html, body { transition: none !important; }
+        }
+    </style>
+</head>
+<body class="evening">
+    </div>
+
+    <div id="intro-screen">
+        <div class="intro-content">
+            <div class="intro-icon">💌</div>
+            <div class="intro-title" id="introGreeting">Chào chị Hân...</div>
+            <div class="intro-subtitle">Em có một món quà nhỏ gửi tặng chị 🌙✨</div>
+            <button id="start-btn">Mở Quà Ngay</button>
+        </div>
+    </div>
+
+    <div class="ambient-glow"></div>
+
+    <div class="sky-container" id="sky">
+        <div class="morning-light" aria-hidden="true"></div>
+        <div class="morning-beams" aria-hidden="true"></div>
+        <div class="morning-horizon" aria-hidden="true"></div>
+        <div class="atmospheric-haze" aria-hidden="true"></div>
+        <div class="far-cloud-layer" id="farCloudLayer" aria-hidden="true"></div>
+        <div class="morning-glints" aria-hidden="true"></div>
+        <div class="sun-dust-layer" id="sunDustLayer" aria-hidden="true"></div>
+        <div class="moon" title="Bầu trời hôm nay"></div>
+        
+        <div class="aquarius-container" title="Bảo Bình độc lập và sáng tạo">
+            <div class="constellation-msg">
+                Trời đêm lấp lánh<br>
+                Ôm trọn sao sa<br>
+                Mệt thì cứ khóc<br>
+                Có em ở nhà ✨
+            </div>
+            <svg class="c-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <polyline points="15,30 35,60 55,40 75,75 85,25" />
+            </svg>
+            <div class="c-star s1"></div>
+            <div class="c-star s2"></div>
+            <div class="c-star s3 sadalmelik" title="Sadalmelik - Ngôi sao của Bảo Bình"></div>
+            <div class="c-star s4"></div>
+            <div class="c-star s5"></div>
+        </div>
+    </div>
+
+    <div id="gift-container">
+        <div id="gift-icon" class="locked">🎁</div>
+        <div id="gift-counter">0/50</div>
+    </div>
+
+    <button id="location-cloud" type="button" aria-label="Cho phép vị trí để nhận lời nhắn thời tiết" title="Cho phép vị trí để nhận lời nhắn thời tiết">☁️</button>
+
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-btn" onclick="closeModal('password-modal')">×</span>
+            <h3>Món quà bí mật 🤫</h3>
+            <p class="modal-copy">Chị đã tìm thấy mật khẩu chưa?</p>
+            <input type="password" id="pass-input" placeholder="Nhập mật khẩu vào đây..." autocomplete="off">
+            <button id="check-pass-btn" class="btn btn-play" type="button">Mở Quà</button>
+            <p id="pass-error" style="display:none;">Chưa đúng rùi, tìm kỹ lại đi á! 🥺</p>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="modal">
+        <div class="modal-content" style="max-width: 350px;">
+            <span class="modal-close-btn" onclick="closeModal('qr-modal')">×</span>
+            <h3>Chúc Mừng Chị Hân! 🎉</h3>
+            <p class="modal-copy">Một chút "ting ting" nhỏ để chị mua trà sữa nè! 🧋✨</p>
+            <img src="maqr.jpg" alt="QR Lì Xì" id="qr-image">
+            <p class="modal-note">Quét mã ZaloPay nha chị ui</p>
+        </div>
+    </div>
+
+    <div id="yt-panel">
+        <span class="yt-label">Dán link YouTube vào đây:</span>
+        <input type="text" id="yt-input" placeholder="https://www.youtube.com/watch?v=..." autocomplete="url" />
+        <div class="yt-actions">
+            <button id="yt-submit-btn" type="button" onclick="loadYoutubeVideo()">Phát Nhạc ▶</button>
+            <button id="yt-close-btn" type="button" onclick="document.getElementById('yt-panel').classList.remove('show')">Đóng</button>
+        </div>
+    </div>
+
+    <div id="yt-player-container" style="display:none;"></div>
+
+    <div class="ui-container paused" id="uiPlayer">
+        <div class="disk-wrapper"></div>
+        
+        <div class="track-info">
+            <div class="title-row">
+                <div class="song-title" id="songTitle">🎵 Đang tải...</div>
+                <div class="heart-beat">💖</div>
+            </div>
+            <div class="progress-container">
+                <span class="time-text" id="currTime">0:00</span>
+                <input type="range" id="seekSlider" min="0" max="100" value="0">
+                <span class="time-text" id="durTime">0:00</span>
+            </div>
+            <div class="bottom-row">
+                <div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+            </div>
+        </div>
+
+        <audio id="audioPlayer" crossorigin="anonymous"><source id="audioSource" src="" type="audio/mpeg"></audio>
+        
+        <div class="controls">
+            <button class="btn" onclick="document.getElementById('yt-panel').classList.toggle('show')" title="Phát từ YouTube">🌐</button>
+            <button class="btn" onclick="prevSong()">⏮</button>
+            <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶</button>
+            <button class="btn" onclick="nextSong()">⏭</button>
+        </div>
+    </div>
+
+
+        <!-- Bird animation adapted from Steven Roberts (@matchboxhero), Animated - SVG Birds. Original source supplied by user. -->
+    <script>
+        const passwordParts = [
+            "🔍 Mảnh ghép 1: Mật mã là....",
+            "🔍 Mảnh ghép 2: tên của chị (không dấu)",
+            "🔑 MẬT KHẨU: chihandethuong"
+        ];
+        const FINAL_PASSWORD = "chihandethuong";
+        const REQUIRED_LANTERNS_TO_UNLOCK = 50;
+
+        const eveningMessages = [
+            "Chị Hân ơi, đêm nay trăng đẹp quá nhỉ? 🌕",
+            "Nếu chị thấy lạnh, em gửi chị vạn cái ôm! ❄️🫂",
+            "Cô gái Bảo Bình độc lập và ấm áp của em ♒❤️",
+            "Mệt mỏi quá thì về đây, em cho mượn cái ôm nè 🤗",
+            "Đang gửi một cái ôm online đến chị Hân... Loading 100% 📶",
+            "Bảo Bình luôn độc lập, sáng tạo nhưng lại vô cùng dịu dàng với em 💫",
+            "Trời lạnh rồi, chị nhớ mặc ấm và nhận cái ôm của em nha 🧣",
+            "Em không có quà to, chỉ có cái ôm siêu to tặng chị thôi 🎁🙆‍♂️",
+            "Thế giới này xô bồ quá, để em ôm chị một cái cho bình yên 🍃",
+            "Chúc chị ngủ ngon kèm một cái ôm thật chặt! 🌙💤",
+            "Ôm chị Hân một cái để sạc đầy năng lượng nè! 🔋⚡",
+            "Dù cả thế giới quay lưng, em vẫn dang tay ôm chị 🤗",
+            "Chị Hân cười lên là xinh nhất! 😊",
+            "Mỗi ngọn đèn là một cái ôm ấm áp gửi tới chị ✨",
+            "Chị nhớ giữ gìn sức khỏe nha ❤️",
+            "Chị là điều tuyệt vời nhất! 💖",
+            "Phí dịch vụ tư vấn hôm nay là một cái ôm nha chị :> ✨",
+            "Chị Hân cười lên là rạng rỡ như mặt trời! ☀️",
+            "Người ta bảo Bảo Bình hay lạnh lùng, nhưng em chỉ thấy chị ấm áp và đáng yêu thôi 💫",
+            "Mong chị luôn an yên và hạnh phúc 🌸",
+            "Chị nhớ giữ gìn sức khỏe nha, đừng thức khuya nữa 🌙",
+            "Gửi chị một chút may mắn của ngọn đèn này ✨",
+            "Sự thông minh và độc lập của Bảo Bình sẽ giúp chị vượt qua mọi thứ 🧠✨",
+            "Em luôn ở đây ủng hộ chị Hân! 🌟",
+            "Chúc chị một đời an nhiên, vô lo vô nghĩ 🍀",
+            "Chị là người sâu sắc và tinh tế nhất em từng gặp 💖",
+            "Mãi tự do, rạng rỡ và tràn đầy năng lượng nha cô nàng Bảo Bình ♒🌻",
+            "Tâm hồn tự do của Bảo Bình trong chị luôn truyền cảm hứng cho em ✨",
+            "Dù Bảo Bình có đôi lúc bướng bỉnh và khó đoán, nhưng đó là điều em thích nhất ở chị 😊",
+            "Chị Hân là điều tuyệt vời nhất! ✨"
+        ];
+
+        const morningMessages = [
+            "Chị Hân ơi, bên ngoài nắng đẹp lắm! ☀️",
+            "Buổi sáng rạng rỡ như nụ cười của chị nha ✨",
+            "Bên chị buổi sáng có lạnh không? Nhớ mặc áo ấm nhé! 🧥",
+            "Hãy mang theo ô phòng cơn mưa bất chợt nha chị ☔",
+            "Cô gái Bảo Bình của em ngày mới tràn đầy năng lượng 🔋",
+            "Uống một ly nước ấm cho buổi sáng an lành 🍵",
+            "Một nụ cười bằng mười thang thuốc bổ, cười lên nha chị 😊",
+            "Chúc chị một ngày làm việc thật hiệu quả 💼",
+            "Hôm nay có mệt mỏi thì tối về em bù cho cái ôm nhé 🤗",
+            "Ngày mới ngập tràn niềm vui nha chị Hân 🌻",
+            "Dù bận rộn cũng nhớ ăn sáng đầy đủ nha 🍳",
+            "Trời trong xanh như tâm hồn tự do của Bảo Bình vậy 🍃",
+            "Mây trắng bay ngang mang theo lời chúc tốt lành đến chị ☁️",
+            "Chị Hân là điều tuyệt vời nhất! 💖",
+            "Gửi chị chút ấm áp của ánh mặt trời sớm mai 🌅",
+            "Hãy để những muộn phiền trôi đi như đám mây kia nhé ☁️",
+            "Sự thông minh của Bảo Bình sẽ giúp chị giải quyết mọi việc hôm nay 🧠✨",
+            "Chị ra đường nhớ thoa kem chống nắng nha ☀️",
+            "Tít tít! Có một thông điệp siêu dễ thương gửi đến chị Hân 💌",
+            "Chúc chị một ngày suôn sẻ, không quạu cọ nha 😊",
+            "Dù ngày hôm nay thế nào, hãy nhớ có em luôn ủng hộ chị 🌟",
+            "Sáng nay đường đông, chị đi lại cẩn thận nhé 🛵",
+            "Bầu trời hôm nay đẹp như chính chị vậy 🌸",
+            "Nhớ giữ gìn sức khỏe, đừng làm việc quá sức nha chị 💪",
+            "Chị Hân cười lên một cái là bừng sáng cả góc trời ✨",
+            "Một ngày bình yên, vô lo vô nghĩ nha chị 🍀",
+            "Cứ tự do, bay bổng và rạng rỡ như đám mây này nhé Bảo Bình ☁️",
+            "Mỗi đám mây là một lời chúc em gửi đến chị trong hôm nay 🌬️",
+            "Hãy bắt đầu ngày mới bằng sự tích cực nhé 🌻",
+            "Chào buổi sáng cô gái tuyệt vời nhất thế giới! 🌍❤️"
+        ];
+
+        let mainContentQueue = [];
+        let queueIndex = 0;
+        let openedLanternCount = 0;
+        let isGiftUnlocked = false;
+        let currentModeTime = 'evening';
+        let spawnInterval;
+        let tinyLanternInterval;
+        let airplaneInterval;
+        let airplaneStartTimeout;
+        let birdInterval;
+        let birdStartTimeout;
+        let sunInteractionInterval;
+        let nightLanternInterval;
+
+        /* =========================================================
+           LOCATION + WEATHER ENGINE
+           - Tọa độ được lưu trong LocalStorage của chính website.
+           - Không hiển thị khung thời tiết riêng.
+           - Dữ liệu thời tiết được dùng để tạo câu nhắn tự nhiên trong mây/đèn.
+           - Không có vị trí => không thêm bất kỳ câu nhắn nào dựa trên thời tiết.
+           ========================================================= */
+        const LOCATION_STORAGE_KEY = 'gch_location_v1';
+        const WEATHER_CACHE_KEY = 'gch_weather_cache_v1';
+        const WEATHER_CACHE_MAX_AGE = 10 * 60 * 1000; // 10 phút
+
+        const locationCloud = document.getElementById('location-cloud');
+        let weatherRefreshTimer;
+        let weatherData = null;
+        let weatherMessages = [];
+
+        const WMO_WEATHER = {
+            0:  { icon:'☀️', text:'Trời quang' },
+            1:  { icon:'🌤️', text:'Gần như quang' },
+            2:  { icon:'⛅', text:'Có mây' },
+            3:  { icon:'☁️', text:'Nhiều mây' },
+            45: { icon:'🌫️', text:'Sương mù' },
+            48: { icon:'🌫️', text:'Sương mù' },
+            51: { icon:'🌦️', text:'Mưa phùn nhẹ' },
+            53: { icon:'🌦️', text:'Mưa phùn' },
+            55: { icon:'🌧️', text:'Mưa phùn dày' },
+            56: { icon:'🌧️', text:'Mưa phùn lạnh nhẹ' },
+            57: { icon:'🌧️', text:'Mưa phùn lạnh' },
+            61: { icon:'🌦️', text:'Mưa nhẹ' },
+            63: { icon:'🌧️', text:'Mưa vừa' },
+            65: { icon:'🌧️', text:'Mưa to' },
+            66: { icon:'🌧️', text:'Mưa lạnh nhẹ' },
+            67: { icon:'🌧️', text:'Mưa lạnh' },
+            71: { icon:'🌨️', text:'Tuyết nhẹ' },
+            73: { icon:'🌨️', text:'Tuyết vừa' },
+            75: { icon:'❄️', text:'Tuyết dày' },
+            77: { icon:'🌨️', text:'Hạt tuyết' },
+            80: { icon:'🌦️', text:'Mưa rào nhẹ' },
+            81: { icon:'🌧️', text:'Mưa rào' },
+            82: { icon:'⛈️', text:'Mưa rào mạnh' },
+            85: { icon:'🌨️', text:'Tuyết rào nhẹ' },
+            86: { icon:'🌨️', text:'Tuyết rào' },
+            95: { icon:'⛈️', text:'Dông' },
+            96: { icon:'⛈️', text:'Dông có mưa đá' },
+            99: { icon:'⛈️', text:'Dông mạnh' }
+        };
+
+        const RAIN_CODES = new Set([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99]);
+        const STORM_CODES = new Set([95,96,99]);
+
+
+
+
+        function syncLocationCloud() {
+            if (!locationCloud) return;
+            const saved = getSavedLocation();
+            locationCloud.classList.toggle('hidden', !!saved);
+        }
+
+        locationCloud?.addEventListener('click', async () => {
+            syncLocationCloud();
+            await initLocationAndWeather(true);
+    
+        });
+
+        function getSavedLocation() {
+            try {
+                const raw = localStorage.getItem(LOCATION_STORAGE_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (!Number.isFinite(data.lat) || !Number.isFinite(data.lon)) return null;
+                return data;
+            } catch (error) {
+                console.warn('Không đọc được location đã lưu:', error);
+                return null;
+            }
+        }
+
+        function saveLocation(position) {
+            const coords = position.coords;
+            const data = {
+                lat: Number(coords.latitude.toFixed(6)),
+                lon: Number(coords.longitude.toFixed(6)),
+                accuracy: Number.isFinite(coords.accuracy) ? Math.round(coords.accuracy) : null,
+                savedAt: Date.now()
+            };
+
+            try {
+                localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(data));
+            } catch (error) {
+                console.warn('Không lưu được location:', error);
+            }
+            return data;
+        }
+
+        function syncLocationCloud(visible, label) {
+            if (!locationCloud) return;
+            locationCloud.classList.toggle('show', !!visible);
+            locationCloud.classList.remove('loading');
+            if (label) {
+                locationCloud.title = label;
+                locationCloud.setAttribute('aria-label', label);
+            }
+        }
+
+        function setLocationCloudLoading(isLoading) {
+            if (!locationCloud) return;
+            locationCloud.classList.toggle('loading', isLoading);
+            if (isLoading) {
+                locationCloud.textContent = '⌖';
+                locationCloud.title = 'Đang lấy vị trí và thời tiết…';
+                locationCloud.setAttribute('aria-label', 'Đang lấy vị trí và thời tiết');
+            } else {
+                locationCloud.textContent = '☁️';
+            }
+        }
+
+        function getWeatherDescription(code) {
+            return WMO_WEATHER[Number(code)] || { icon:'🌤️', text:'Thời tiết hiện tại' };
+        }
+
+        function applyWeatherToSky(current) {
+            if (!current) return;
+
+            const cloudCover = Number(current.cloud_cover);
+            const code = Number(current.weather_code);
+            const hasRain = Number(current.rain || 0) > 0 ||
+                            Number(current.showers || 0) > 0 ||
+                            RAIN_CODES.has(code);
+
+            /* Chỉ điều chỉnh nhẹ visual hiện có; không thêm animation mới. */
+            if (Number.isFinite(cloudCover)) {
+                const farLayer = document.getElementById('farCloudLayer');
+                const morningLight = document.querySelector('.morning-light');
+                const beams = document.querySelector('.morning-beams');
+                const glints = document.querySelector('.morning-glints');
+
+                if (farLayer) {
+                    const cloudOpacity = Math.min(.98, .72 + (cloudCover / 100) * .28);
+                    farLayer.style.opacity = currentModeTime === 'morning'
+                        ? cloudOpacity.toFixed(3)
+                        : '0';
+                }
+
+                if (morningLight) {
+                    const lightOpacity = Math.max(.48, .98 - (cloudCover / 100) * .42);
+                    morningLight.style.setProperty('--weather-light-opacity',
+                        currentModeTime === 'morning' ? lightOpacity.toFixed(3) : '0');
+                }
+
+                if (beams) {
+                    const beamOpacity = Math.max(.28, .98 - (cloudCover / 100) * .55);
+                    beams.style.opacity = currentModeTime === 'morning'
+                        ? beamOpacity.toFixed(3)
+                        : '0';
+                }
+
+                if (glints) {
+                    const glintOpacity = Math.max(.25, .72 - (cloudCover / 100) * .46);
+                    glints.style.opacity = currentModeTime === 'morning'
+                        ? glintOpacity.toFixed(3)
+                        : '0';
+                }
+            }
+
+            document.documentElement.style.setProperty('--weather-cloud-cover', Number.isFinite(cloudCover) ? cloudCover : 0);
+            document.documentElement.classList.toggle('weather-rainy', hasRain);
+        }
+
+        function buildWeatherMessages(data) {
+            if (!data || !data.current) return [];
+
+            const c = data.current;
+            const code = Number(c.weather_code);
+            const temp = Number(c.temperature_2m);
+            const feels = Number(c.apparent_temperature);
+            const humidity = Number(c.relative_humidity_2m);
+            const cloud = Number(c.cloud_cover);
+            const wind = Number(c.wind_speed_10m);
+            const rain = Number(c.rain || 0) + Number(c.showers || 0);
+            const isDay = Number(c.is_day) === 1;
+            const messages = [];
+
+            if (STORM_CODES.has(code)) {
+                messages.push('Chỗ chị hôm nay có dông, chị nhớ đi lại cẩn thận và tránh đứng ngoài trời lúc mưa nhé ⛈️');
+            } else if (RAIN_CODES.has(code) || rain > 0.1) {
+                if (code === 65 || code === 82 || rain >= 4) {
+                    messages.push('Chỗ chị hôm nay có mưa khá to, nhớ mang ô và đi chậm một chút nhé ☔');
+                } else {
+                    messages.push('Chỗ chị hôm nay có mưa, nhớ mang theo ô nhé ☔');
+                }
+            } else if (Number.isFinite(temp) && temp >= 33 && Number.isFinite(cloud) && cloud < 60) {
+                messages.push('Chỗ chị hôm nay nắng nhiều, nhớ uống đủ nước và mang áo khoác nhé ☀️🧥');
+            } else if (Number.isFinite(temp) && temp >= 30 && Number.isFinite(cloud) && cloud < 65) {
+                messages.push('Hôm nay chỗ chị có nắng, ra ngoài nhớ mang áo khoác mỏng nhé ☀️');
+            } else if (Number.isFinite(cloud) && cloud >= 75) {
+                messages.push('Hôm nay chỗ chị nhiều mây, trời dịu hơn rồi nhưng vẫn nhớ giữ gìn sức khỏe nha ☁️');
+            } else if (Number.isFinite(cloud) && cloud >= 45) {
+                messages.push('Chỗ chị hôm nay có khá nhiều mây, thời tiết trông dịu nhẹ đó ☁️');
+            } else if (isDay && (code === 0 || code === 1)) {
+                messages.push('Bầu trời chỗ chị hôm nay khá trong, nhớ tranh thủ tận hưởng một chút nắng nhé 🌤️');
+            }
+
+            if (Number.isFinite(feels) && feels >= 35) {
+                messages.push('Nhiệt độ cảm nhận hôm nay khá cao, chị tránh nắng lâu và nhớ uống nhiều nước nhé 💧');
+            } else if (Number.isFinite(temp) && temp <= 21) {
+                messages.push('Hôm nay chỗ chị hơi lạnh, nhớ mặc ấm một chút nha chị 🧣');
+            }
+
+            if (Number.isFinite(humidity) && humidity >= 85 && !RAIN_CODES.has(code)) {
+                messages.push('Độ ẩm hôm nay khá cao, trời dễ oi và bí, chị nhớ uống nước đều nhé 💧');
+            }
+
+            if (Number.isFinite(wind) && wind >= 30) {
+                messages.push('Hôm nay gió khá mạnh, chị đi đường nhớ cẩn thận và giữ tóc cho đàng hoàng nhé 🍃');
+            }
+
+            if (!messages.length) {
+                messages.push('Thời tiết chỗ chị hôm nay khá ổn, mong chị có một ngày thật dễ chịu nha 🌿');
+            }
+
+            return [...new Set(messages)].slice(0, 4);
+        }
+
+        function rebuildMessageQueue({ resetIndex = false } = {}) {
+            const sourceArr = currentModeTime === 'morning' ? morningMessages : eveningMessages;
+
+            /*
+             * Mật khẩu là thông điệp HIẾM:
+             * - 3 mảnh vẫn xuất hiện đầy đủ trong mỗi vòng queue.
+             * - Ít nhất 8 thông điệp khác nằm giữa hai mảnh.
+             * - Vị trí được xáo ngẫu nhiên mỗi lần rebuild.
+             */
+            const PASSWORD_MIN_GAP = 8;
+
+            const normalItems = sourceArr.map(msg => ({ type: 'text', val: msg }));
+
+            weatherMessages.forEach(msg => {
+                normalItems.push({ type: 'weather', val: msg });
+            });
+
+            const uniqueNormalItems = [];
+            const seen = new Set();
+
+            normalItems.forEach(item => {
+                const key = `${item.type}:${item.val}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueNormalItems.push(item);
+                }
+            });
+
+            const passwordItems = passwordParts.map(val => ({
+                type: 'pass',
+                val
+            }));
+
+            const totalLength = uniqueNormalItems.length + passwordItems.length;
+            const positions = [];
+            const maxStart = totalLength - 1;
+
+            for (let attempt = 0; attempt < 500 && positions.length < passwordItems.length; attempt++) {
+                const candidate = Math.floor(Math.random() * (maxStart + 1));
+
+                if (positions.every(pos => Math.abs(pos - candidate) > PASSWORD_MIN_GAP)) {
+                    positions.push(candidate);
+                }
+            }
+
+            /* Fallback an toàn nếu queue quá ngắn để random đủ khoảng cách. */
+            if (positions.length < passwordItems.length) {
+                positions.length = 0;
+
+                const span = Math.max(
+                    PASSWORD_MIN_GAP + 1,
+                    Math.floor(totalLength / passwordItems.length)
+                );
+
+                for (let i = 0; i < passwordItems.length; i++) {
+                    positions.push(Math.min(
+                        maxStart,
+                        i * span + Math.floor(span / 2)
+                    ));
+                }
+            }
+
+            positions.sort((a, b) => a - b);
+
+            const queue = [];
+            let normalIndex = 0;
+            let passwordIndex = 0;
+
+            for (let i = 0; i < totalLength; i++) {
+                if (passwordIndex < passwordItems.length &&
+                    i === positions[passwordIndex]) {
+                    queue.push(passwordItems[passwordIndex]);
+                    passwordIndex++;
+                } else if (normalIndex < uniqueNormalItems.length) {
+                    queue.push(uniqueNormalItems[normalIndex]);
+                    normalIndex++;
+                }
+            }
+
+            mainContentQueue = queue;
+
+            if (resetIndex) {
+                queueIndex = 0;
+            }
+        }
+
+        function renderWeather(data) {
+            if (!data || !data.current) {
+                throw new Error('Dữ liệu thời tiết không hợp lệ.');
+            }
+
+            weatherData = data;
+            weatherMessages = buildWeatherMessages(data);
+            rebuildMessageQueue({ resetIndex: true });
+            applyWeatherToSky(data.current);
+            syncLocationCloud(false);
+
+            try {
+                const location = getSavedLocation();
+                if (location) {
+                    localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({
+                        savedAt: Date.now(),
+                        lat: Number(location.lat),
+                        lon: Number(location.lon),
+                        data
+                    }));
+                }
+            } catch (error) {
+                console.warn('Không lưu được weather cache:', error);
+            }
+        }
+
+        function getCachedWeather(location) {
+            try {
+                const raw = localStorage.getItem(WEATHER_CACHE_KEY);
+                if (!raw) return null;
+                const cache = JSON.parse(raw);
+                if (!cache || !cache.data || !cache.savedAt || !Number.isFinite(Number(cache.lat)) || !Number.isFinite(Number(cache.lon))) return null;
+                if (Date.now() - cache.savedAt > WEATHER_CACHE_MAX_AGE) return null;
+
+                const latDiff = Math.abs(Number(cache.lat) - Number(location.lat));
+                const lonDiff = Math.abs(Number(cache.lon) - Number(location.lon));
+                if (latDiff > 0.001 || lonDiff > 0.001) return null;
+                return cache.data;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function fetchWeatherForLocation(location) {
+            if (!location) return;
+
+            const cached = getCachedWeather(location);
+            if (cached) {
+                renderWeather(cached);
+                return;
+            }
+
+            const url =
+                `https://api.open-meteo.com/v1/forecast` +
+                `?latitude=${encodeURIComponent(location.lat)}` +
+                `&longitude=${encodeURIComponent(location.lon)}` +
+                `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,weather_code,cloud_cover,wind_speed_10m,is_day` +
+                `&daily=sunrise,sunset` +
+                `&forecast_days=1` +
+                `&timezone=auto`;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+
+                if (!response.ok) throw new Error(`Weather HTTP ${response.status}`);
+                const data = await response.json();
+                renderWeather(data);
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        function requestUserLocation() {
+            return new Promise((resolve, reject) => {
+                if (!window.isSecureContext) {
+                    reject(new Error('Trang cần HTTPS để dùng vị trí.'));
+                    return;
+                }
+
+                if (!navigator.geolocation) {
+                    reject(new Error('Trình duyệt không hỗ trợ định vị.'));
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    position => resolve(saveLocation(position)),
+                    error => {
+                        const message =
+                            error.code === 1 ? 'Em chưa cho phép vị trí.' :
+                            error.code === 2 ? 'Không xác định được vị trí.' :
+                            'Lấy vị trí quá thời gian.';
+                        reject(new Error(message));
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 10000,
+                        maximumAge: 15 * 60 * 1000
+                    }
+                );
+            });
+        }
+
+        async function initLocationAndWeather(forceLocation = false) {
+            setLocationCloudLoading(true);
+
+            try {
+                let location = forceLocation ? null : getSavedLocation();
+                if (!location) location = await requestUserLocation();
+                await fetchWeatherForLocation(location);
+                syncLocationCloud(false);
+            } catch (error) {
+                console.warn('Location/weather error:', error);
+                weatherData = null;
+                weatherMessages = [];
+                rebuildMessageQueue({ resetIndex: true });
+                syncLocationCloud(true, 'Bấm để cho phép vị trí và nhận lời nhắn thời tiết');
+                if (locationCloud) locationCloud.textContent = '☁️';
+            } finally {
+                clearTimeout(weatherRefreshTimer);
+            }
+        }
+
+        function scheduleWeatherRefresh() {
+            clearTimeout(weatherRefreshTimer);
+            weatherRefreshTimer = setTimeout(async () => {
+                const saved = getSavedLocation();
+                if (saved) {
+                    try { await fetchWeatherForLocation(saved); }
+                    catch (error) { console.warn('Định kỳ cập nhật weather lỗi:', error); }
+                }
+                scheduleWeatherRefresh();
+            }, WEATHER_CACHE_MAX_AGE);
+        }
+
+        locationCloud?.addEventListener('click', (event) => {
+            event.stopPropagation();
+            initLocationAndWeather(true);
+        });
+
+        /* Chỉ hiện mây nhỏ khi chưa có vị trí đã lưu. */
+        syncLocationCloud(!getSavedLocation(), 'Bấm để cho phép vị trí và nhận lời nhắn thời tiết');
+        scheduleWeatherRefresh();
+
+        const giftIcon = document.getElementById('gift-icon');
+        const giftCounter = document.getElementById('gift-counter');
+        const passInput = document.getElementById('pass-input');
+        const passError = document.getElementById('pass-error');
+        giftCounter.textContent = `0/${REQUIRED_LANTERNS_TO_UNLOCK}`;
+
+        function startMorningEffects() {
+            if (currentModeTime !== 'morning') return;
+
+            clearInterval(spawnInterval);
+            clearInterval(airplaneInterval);
+            clearTimeout(airplaneStartTimeout);
+            clearInterval(birdInterval);
+            clearTimeout(birdStartTimeout);
+            clearInterval(sunInteractionInterval);
+
+            createMorningAtmosphere();
+            if (currentModeTime !== 'morning') return;
+            for (let i = 0; i < 5 && currentModeTime === 'morning'; i++) createCloud(true);
+            spawnInterval = setInterval(() => {
+                if (currentModeTime === 'morning') createCloud(false);
+            }, 5000);
+
+            // Chiếc đầu tiên có thời điểm xuất hiện chắc chắn. Sau đó chỉ
+            // spawn khi không còn máy bay trên màn hình, tránh bị mất lượt vì random.
+            airplaneStartTimeout = setTimeout(() => {
+                if (currentModeTime === 'morning') createAirplane();
+            }, 3500);
+
+            airplaneInterval = setInterval(() => {
+                if (currentModeTime === 'morning' &&
+                    document.querySelectorAll('.airplane-wrapper').length === 0) {
+                    createAirplane();
+                }
+            }, 8000);
+
+            birdStartTimeout = setTimeout(() => createBirdFlock(), 7000);
+            birdInterval = setInterval(() => {
+                // Chim xuất hiện thưa hơn: trung bình khoảng 1 đàn mỗi ~56 giây.
+                if (Math.random() < 0.32) createBirdFlock();
+            }, 18000);
+
+            updateSunCloudOcclusion();
+            sunInteractionInterval = setInterval(updateSunCloudOcclusion, 450);
+        }
+
+        function updateModeTestUI(mode) {
+            /* Giữ hàm để không phá vỡ cấu trúc chuyển mode hiện có.
+               UI TEST đã được gỡ khỏi giao diện. */
+        }
+
+        function setMode(mode) {
+            const nextMode = mode === 'morning' ? 'morning' : 'evening';
+            currentModeTime = nextMode;
+
+            updateModeTestUI(nextMode);
+
+            /* Dọn sạch toàn bộ hiệu ứng của mode cũ trước khi đổi mode. */
+            clearInterval(spawnInterval);
+            clearInterval(tinyLanternInterval);
+            clearInterval(airplaneInterval);
+            clearTimeout(airplaneStartTimeout);
+            clearInterval(birdInterval);
+            clearTimeout(birdStartTimeout);
+            clearInterval(sunInteractionInterval);
+            clearInterval(nightLanternInterval);
+
+            document.querySelectorAll(
+                '.lantern-container, .cloud-container, .tiny-lantern-container, ' +
+                '.airplane-wrapper, .github-bird-flock'
+            ).forEach(e => e.remove());
+
+            /* Xóa mọi mây động còn sót trước khi chuyển mode. */
+            document.querySelectorAll('.cloud-container').forEach(e => e.remove());
+
+            const morningOnlySelectors = [
+                '.morning-light',
+                '.morning-beams',
+                '.morning-horizon',
+                '.morning-glints',
+                '.sun-dust-layer'
+            ];
+
+            morningOnlySelectors.forEach(selector => {
+                document.querySelectorAll(selector).forEach(el => {
+                    el.style.removeProperty('opacity');
+                    el.style.removeProperty('--weather-light-opacity');
+                    el.style.removeProperty('--weather-beam-opacity');
+                    el.style.removeProperty('--weather-glint-opacity');
+                    el.classList.remove('active', 'visible', 'show');
+                });
+            });
+
+            document.body.classList.remove('morning', 'evening');
+            document.body.classList.add(nextMode);
+
+            const celestial = document.querySelector('.moon');
+            if (celestial) celestial.classList.toggle('sun-mode', nextMode === 'morning');
+
+            /* Weather messages vẫn được giữ, nhưng cảnh phải theo mode. */
+            weatherMessages = weatherData ? buildWeatherMessages(weatherData) : [];
+            rebuildMessageQueue({ resetIndex: true });
+
+            const greetingTitle = document.getElementById('introGreeting');
+            const subtitle = document.querySelector('.intro-subtitle');
+            if (greetingTitle) {
+                greetingTitle.textContent =
+                    nextMode === 'morning'
+                        ? "Chào buổi sáng, chị Hân! ☀️"
+                        : "Đêm muộn rồi, chị Hân... 🌙";
+            }
+            if (subtitle) {
+                subtitle.textContent =
+                    nextMode === 'morning'
+                        ? "Em có một món quà nhỏ gửi tặng chị ✨"
+                        : "Em có một món quà nhỏ gửi tặng chị 🌙✨";
+            }
+
+            /* Nếu intro còn mở thì chưa spawn cảnh; mở quà xong mới chạy. */
+            if (!document.getElementById('intro-screen')) {
+                if (nextMode === 'morning') {
+                    startMorningEffects();
+                    /* Áp lại weather sau khi morning DOM được khởi tạo. */
+                    if (weatherData?.current) applyWeatherToSky(weatherData.current);
+                } else {
+                    /* Ban đêm: chỉ có hệ thống đèn trời đêm, tuyệt đối không tạo mây. */
+                    spawnInterval = null;
+                    airplaneInterval = null;
+                    birdInterval = null;
+                    tinyLanternInterval = setInterval(createTinyLantern, 1500);
+                    nightLanternInterval = setInterval(() => createLantern(0, 0, true), 1800);
+                }
+            }
+        }
+
+        let autoModeTimer = null;
+
+        function getModeByLocalClock() {
+            const hour = new Date().getHours();
+            return (hour >= 6 && hour < 18) ? 'morning' : 'evening';
+        }
+
+        function scheduleAutoDayNight() {
+            clearTimeout(autoModeTimer);
+
+            const now = new Date();
+            const next = new Date(now);
+
+            if (now.getHours() < 6) {
+                next.setHours(6, 0, 0, 0);
+            } else if (now.getHours() < 18) {
+                next.setHours(18, 0, 0, 0);
+            } else {
+                next.setDate(next.getDate() + 1);
+                next.setHours(6, 0, 0, 0);
+            }
+
+            autoModeTimer = setTimeout(() => {
+                setMode(getModeByLocalClock());
+                scheduleAutoDayNight();
+            }, Math.max(1000, next.getTime() - now.getTime()));
+        }
+
+        setMode(getModeByLocalClock());
+        scheduleAutoDayNight();
+
+        const introScreen = document.getElementById("intro-screen");
+        const startBtn = document.getElementById("start-btn");
+
+        startBtn.addEventListener('click', () => {
+            /* Xin quyền vị trí sau thao tác của người dùng. Chế độ sáng/tối tự theo giờ. */
+            initLocationAndWeather(false);
+            introScreen.style.opacity = "0";
+            introScreen.style.transform = "scale(1.1)"; 
+            
+            if (currentMode === 'mp3' && audioPlayer.paused) {
+                audioPlayer.play().then(() => {
+                    playBtn.innerHTML = "⏸"; 
+                    uiPlayer.classList.remove("paused");
+                }).catch(e => console.log(e));
+            }
+
+            setTimeout(() => {
+                introScreen.remove();
+                if (currentModeTime === 'morning') {
+                    startMorningEffects();
+                } else {
+                    spawnInterval = setInterval(() => createLantern(0, 0, true), 1800);
+                    tinyLanternInterval = setInterval(createTinyLantern, 1500);
+                }
+                const meteorLoop = () => {
+                    createShootingStar();
+                    setTimeout(meteorLoop, Math.random() * 1400 + 2400);
+                };
+                meteorLoop();
+            }, 1000);
+        });
+
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                document.getElementById('sky').style.transform = `translate(${x}px, ${y}px)`;
+            });
+        }
+
+        let currentMode = 'mp3'; 
+        let currentSongIndex = 0; 
+        const audioPlayer = document.getElementById("audioPlayer");
+        const playBtn = document.getElementById("playBtn");
+        const uiPlayer = document.getElementById("uiPlayer");
+        const seekSlider = document.getElementById('seekSlider');
+        const currTime = document.getElementById('currTime');
+        const durTime = document.getElementById('durTime');
+        const songTitle = document.getElementById("songTitle");
+
+        let audioCtx, analyser, dataArray;
+        const bars = document.querySelectorAll('.bar');
+
+        audioPlayer.addEventListener('play', () => {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                const source = audioCtx.createMediaElementSource(audioPlayer);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                analyser.fftSize = 64; 
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            requestAnimationFrame(updateVisualizer);
+        });
+
+        function updateVisualizer() {
+            if (audioPlayer.paused || currentMode !== 'mp3') return;
+            requestAnimationFrame(updateVisualizer);
+            analyser.getByteFrequencyData(dataArray);
+            const freqs = [dataArray[2], dataArray[4], dataArray[8], dataArray[12]]; 
+            bars.forEach((bar, index) => {
+                const height = 3 + (freqs[index] / 255) * 11; 
+                bar.style.height = `${height}px`;
+            });
+        }
+        
+        let ytPlayer;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-player-container', {
+                height: '0', width: '0',
+                playerVars: { 'playsinline': 1, 'controls': 0 },
+                events: { 'onStateChange': onPlayerStateChange, 'onReady': onPlayerReady }
+            });
+        }
+        function onPlayerReady(event) { if(ytPlayer) ytPlayer.setVolume(60); }
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                playBtn.innerHTML = "⏸"; uiPlayer.classList.remove("paused"); startYTTimer();
+            } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
+                playBtn.innerHTML = "▶"; uiPlayer.classList.add("paused"); stopYTTimer();
+            }
+        }
+
+        function loadYoutubeVideo() {
+            const inputVal = document.getElementById('yt-input').value.trim();
+            let videoId = "";
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = inputVal.match(regExp);
+            if (match && match[2].length == 11) videoId = match[2];
+            else if(inputVal.length === 11) videoId = inputVal;
+            else { alert("Link YouTube không hợp lệ!"); return; }
+            
+            currentMode = 'youtube'; audioPlayer.pause(); 
+            songTitle.textContent = "YouTube Audio 🎵";
+            document.getElementById('yt-panel').classList.remove('show');
+            if (ytPlayer) ytPlayer.loadVideoById(videoId);
+        }
+
+        audioPlayer.volume = 0.6; 
+        function formatTime(s) {
+            if(isNaN(s)) return "0:00";
+            let min = Math.floor(s / 60); let sec = Math.floor(s % 60);
+            return `${min}:${sec < 10 ? '0'+sec : sec}`;
+        }
+
+        audioPlayer.ontimeupdate = () => {
+            if (currentMode === 'mp3' && audioPlayer.duration) {
+                seekSlider.value = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                currTime.innerText = formatTime(audioPlayer.currentTime);
+                if(durTime.innerText === "0:00" || durTime.innerText === "NaN:NaN") durTime.innerText = formatTime(audioPlayer.duration);
+            }
+        };
+
+        let ytInterval;
+        function startYTTimer() {
+            clearInterval(ytInterval);
+            ytInterval = setInterval(() => {
+                if(ytPlayer && ytPlayer.getDuration) {
+                    const cur = ytPlayer.getCurrentTime(); const dur = ytPlayer.getDuration();
+                    seekSlider.value = (cur / dur) * 100;
+                    currTime.innerText = formatTime(cur); durTime.innerText = formatTime(dur);
+                }
+            }, 1000);
+        }
+        function stopYTTimer() { clearInterval(ytInterval); }
+
+        seekSlider.addEventListener('input', () => {
+            if (currentMode === 'mp3') { audioPlayer.currentTime = (seekSlider.value / 100) * audioPlayer.duration; } 
+            else if (currentMode === 'youtube' && ytPlayer) { ytPlayer.seekTo((seekSlider.value / 100) * ytPlayer.getDuration(), true); }
+        });
+
+        function togglePlay() {
+            if (currentMode === 'mp3') {
+                if (audioPlayer.paused) { audioPlayer.play().then(() => { playBtn.innerHTML = "⏸"; uiPlayer.classList.remove("paused"); }); } 
+                else { audioPlayer.pause(); playBtn.innerHTML = "▶"; uiPlayer.classList.add("paused"); }
+            } else {
+                if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
+            }
+        }
+
+        const playlist = [ 
+            { title: "i just wish you know", src: "song1.mp3" }, 
+            { title: "i miss your warm hands", src: "song2.mp3" }, 
+            { title: "Bâng Khuâng 😪", src: "song3.mp3" } 
+        ];
+
+        function loadSong(index) { 
+            currentMode = 'mp3'; if(ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+            document.getElementById("songTitle").textContent = playlist[index].title; 
+            document.getElementById("audioSource").src = playlist[index].src; audioPlayer.load(); 
+        }
+        function playSongAtIndex(index) {
+            currentSongIndex = index; loadSong(currentSongIndex);
+            audioPlayer.play().then(() => { playBtn.innerHTML = "⏸"; uiPlayer.classList.remove("paused"); }).catch(e => console.error(e));
+        }
+        function nextSong() { playSongAtIndex((currentSongIndex + 1) % playlist.length); }
+        function prevSong() { playSongAtIndex((currentSongIndex - 1 + playlist.length) % playlist.length); }
+
+        audioPlayer.addEventListener("ended", nextSong); loadSong(0);
+
+        function trackLanternOpen(container) {
+            if (!container.dataset.counted && container.classList.contains('active')) {
+                openedLanternCount++; container.dataset.counted = "true";
+                if(openedLanternCount <= REQUIRED_LANTERNS_TO_UNLOCK) giftCounter.textContent = `${openedLanternCount}/${REQUIRED_LANTERNS_TO_UNLOCK}`;
+                if (openedLanternCount >= REQUIRED_LANTERNS_TO_UNLOCK && !isGiftUnlocked) {
+                    isGiftUnlocked = true; giftIcon.classList.remove('locked'); giftIcon.classList.add('unlocked');
+                    giftCounter.textContent = "Sẵn sàng!"; giftCounter.style.background = "rgba(249, 212, 35, 0.2)"; giftCounter.style.color = "var(--primary-gold)";
+                }
+            }
+        }
+        
+        giftIcon.addEventListener('click', () => {
+            if (!isGiftUnlocked) alert(`Chị cần đọc đủ ${REQUIRED_LANTERNS_TO_UNLOCK} thông điệp và tìm mật khẩu bên trong nhé!`);
+            else { showModal('password-modal'); passInput.focus(); }
+        });
+        
+        document.getElementById('check-pass-btn').addEventListener('click', checkPassword);
+        passInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') checkPassword(); });
+
+        function checkPassword() {
+            if (passInput.value.trim().toLowerCase() === FINAL_PASSWORD) {
+                closeModal('password-modal');
+                var duration = 3000; var animationEnd = Date.now() + duration; var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 99999 };
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+                var interval = setInterval(function() {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+                setTimeout(() => { showModal('qr-modal'); document.getElementById('gift-container').style.display = 'none'; }, 2000);
+            } else { passError.style.display = 'block'; passInput.style.borderColor = '#ff6b81'; }
+        }
+        function showModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); if(id === 'password-modal') { passError.style.display = 'none'; passInput.value = ''; passInput.style.borderColor = 'rgba(255,255,255,0.2)'; } }
+
+        function createStars() {
+            const sky = document.getElementById('sky');
+            for(let i=0; i<100; i++) {
+                const star = document.createElement('div'); star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`; star.style.top = `${Math.random() * 100}%`;
+                const depth = Math.random(); let size, opacity, twinkleDur;
+                if (depth < 0.6) { size = Math.random() * 1 + 0.5; opacity = Math.random() * 0.3 + 0.1; twinkleDur = Math.random() * 5 + 4; } 
+                else if (depth < 0.9) { size = Math.random() * 1.5 + 1; opacity = Math.random() * 0.5 + 0.3; twinkleDur = Math.random() * 4 + 2; } 
+                else { size = Math.random() * 2 + 1.5; opacity = Math.random() * 0.5 + 0.5; twinkleDur = Math.random() * 2 + 1; }
+                star.style.width = `${size}px`; star.style.height = `${size}px`; star.style.opacity = opacity;
+                star.style.setProperty('--twinkle-dur', `${twinkleDur}s`); sky.appendChild(star);
+            }
+        }
+        
+        function createSingleShootingStar(groupOffsetX = 0, groupOffsetY = 0, groupDelay = 0) {
+            const sky = document.getElementById('sky'); const star = document.createElement('div'); star.classList.add('meteor');
+            const depth = Math.random(); let distance, duration, thickness, maxOpacity; const baseDuration = Math.random() * 2.3 + 0.5;
+            if (depth < 0.35) { distance = Math.random() * 200 + 300; duration = baseDuration + 0.4; thickness = Math.random() * 0.5 + 0.4; maxOpacity = Math.random() * 0.3 + 0.4; star.style.filter = "blur(1px) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))"; } 
+            else if (depth < 0.75) { distance = Math.random() * 400 + 400; duration = baseDuration; thickness = Math.random() * 0.7 + 0.8; maxOpacity = Math.random() * 0.3 + 0.6; } 
+            else { distance = Math.random() * 500 + 700; duration = baseDuration - 0.2; if(duration < 0.35) duration = 0.35; thickness = Math.random() * 0.9 + 1.5; maxOpacity = 1; }
+            let startX, startY;
+            if (Math.random() > 0.5) { startX = Math.random() * 100 + 10 + groupOffsetX; startY = Math.random() * 15 - 15 + groupOffsetY; } 
+            else { startX = Math.random() * 15 + 100 + groupOffsetX; startY = Math.random() * 80 - 10 + groupOffsetY; }
+            star.style.left = `${startX}%`; star.style.top = `${startY}%`;
+            const angle = Math.random() * 15 + 140; star.style.setProperty('--angle', `${angle}deg`); star.style.setProperty('--dx', `${distance}px`); star.style.setProperty('--dur', `${duration}s`);
+            star.style.setProperty('--tail-len', `${Math.random() * 50 + 70 + (distance * 0.1)}px`); star.style.setProperty('--spark-len', `${Math.random() * 8 + 10}px`);
+            star.style.setProperty('--meteor-width', `${thickness}px`); star.style.setProperty('--max-opacity', maxOpacity);
+            sky.appendChild(star); 
+            star.addEventListener('animationend', () => star.remove());
+        }
+
+        function createGiantShootingStar() {
+            const sky = document.getElementById('sky'); const star = document.createElement('div'); star.classList.add('meteor');
+            star.style.left = `110%`; star.style.top = `${Math.random() * 30}%`;
+            star.style.setProperty('--angle', `145deg`); star.style.setProperty('--dx', `1500px`); star.style.setProperty('--dur', `1.2s`); star.style.setProperty('--tail-len', `200px`); star.style.setProperty('--spark-len', `20px`); star.style.setProperty('--meteor-width', `3.5px`); star.style.setProperty('--max-opacity', `1`);
+            star.style.filter = "drop-shadow(0 0 4px #fff) drop-shadow(0 0 20px #ffdf85) drop-shadow(0 0 40px #ffdf85)";
+            sky.appendChild(star); 
+            star.addEventListener('animationend', () => star.remove());
+        }
+
+        function createShootingStar() {
+            if (Math.random() > 0.72) return;
+            const roll = Math.random();
+            if (roll < 0.15) { createSingleShootingStar(-1.2, 0, 0); createSingleShootingStar(1.5, 2.0, 120); createSingleShootingStar(3.0, 3.5, 260); } 
+            else if (roll < 0.45) { createSingleShootingStar(-1.0, 0, 0); createSingleShootingStar(2.0, 2.2, 150); } 
+            else { createSingleShootingStar(); }
+        }
+
+        function createLantern(x, y, isAuto = false) {
+            if (document.querySelectorAll('.lantern-container').length > 15) return;
+            const container = document.createElement('div'); container.classList.add('lantern-container');
+            const layer = Math.random(); let scale, duration, zIndex, filter, opacity;
+            if (layer < 0.35) { scale = Math.random() * 0.3 + 0.3; duration = Math.random() * 25 + 45; zIndex = 5; filter = `blur(${Math.random() * 1.5 + 1}px) brightness(0.8)`; opacity = Math.random() * 0.3 + 0.5; } 
+            else if (layer < 0.75) { scale = Math.random() * 0.4 + 0.6; duration = Math.random() * 15 + 25; zIndex = 15; filter = `blur(${Math.random() * 0.5}px)`; opacity = Math.random() * 0.2 + 0.8; } 
+            else { scale = Math.random() * 0.5 + 1.0; duration = Math.random() * 10 + 12; zIndex = 30; filter = "none"; opacity = 1; }
+
+            const startX = isAuto ? Math.random() * (window.innerWidth - 60) : x - 30;
+            const startBottom = isAuto ? -150 : (window.innerHeight - y);
+            container.style.left = `${startX}px`; container.style.bottom = `${startBottom}px`; container.style.transform = `scale(${scale})`;
+            container.style.setProperty('--rise-duration', `${duration}s`); container.style.setProperty('--sway-duration', `${Math.random()*2+3}s`);
+            container.dataset.origFilter = filter; container.dataset.origOpacity = opacity; container.dataset.origZ = zIndex;
+            container.style.filter = filter; container.style.opacity = opacity; container.style.zIndex = zIndex;
+
+            let item = mainContentQueue[queueIndex]; queueIndex = (queueIndex + 1) % mainContentQueue.length;
+            let pStyle = item.type === 'pass' ? 'color: #ffdf85; font-size: 1.25rem;' : '';
+            const weatherTag = item.type === 'weather' ? '<span class="weather-message-tag">THỜI TIẾT CHỖ CHỊ</span>' : '';
+
+            container.innerHTML = `<div class="lantern-popup">${weatherTag}<p style="${pStyle}"></p></div><div class="lantern-body"><div class="lantern-top"></div><div class="lantern-bottom"></div></div><div class="tassel"></div>`;
+            let textArr = [...item.val]; 
+            
+            container.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                
+                if (container.classList.contains('active')) {
+                    container.classList.remove('active');
+                    container.style.filter = container.dataset.origFilter; container.style.opacity = container.dataset.origOpacity; container.style.zIndex = container.dataset.origZ;
+                } else {
+                    container.style.filter = "none"; container.style.zIndex = "100"; container.style.opacity = "1";
+                    document.querySelectorAll('.lantern-container.active, .cloud-container.active').forEach(l => { 
+                        l.classList.remove('active');
+                        if(l.classList.contains('lantern-container')) { l.style.filter = l.dataset.origFilter; l.style.opacity = l.dataset.origOpacity; l.style.zIndex = l.dataset.origZ; }
+                    });
+                    container.classList.add('active'); 
+                    trackLanternOpen(container);
+                    let pElem = container.querySelector('.lantern-popup p');
+                    if (!container.dataset.typed) {
+                        container.dataset.typed = "true"; pElem.innerHTML = ''; let i = 0; clearInterval(container.typewriterInterval);
+                        container.typewriterInterval = setInterval(() => {
+                            pElem.innerHTML = textArr.slice(0, i + 1).join('') + (i < textArr.length - 1 ? '<span class="cursor"></span>' : '');
+                            i++; if (i >= textArr.length) clearInterval(container.typewriterInterval);
+                        }, 50); 
+                    }
+                }
+            });
+            document.body.appendChild(container); 
+            container.addEventListener('animationend', (e) => {
+                if (e.animationName === 'riseUp') container.remove();
+            });
+        }
+
+        const MESSAGE_CLOUD_SHAPES = [
+            'M18 70 C18 58 29 50 43 50 C46 36 59 27 73 30 C80 16 99 11 113 24 C128 18 145 24 151 38 C171 35 187 45 186 61 C186 73 177 81 163 82 L41 82 C27 82 18 77 18 70 Z',
+            'M12 68 C12 56 24 49 37 50 C41 40 50 34 62 34 C70 20 87 17 99 28 C111 20 127 24 132 36 C149 32 164 41 166 54 C181 54 194 62 193 73 C192 82 183 87 169 87 L35 87 C21 87 12 80 12 68 Z',
+            'M20 72 C20 59 33 52 47 54 C52 42 63 38 75 40 C82 27 96 21 108 27 C120 14 140 17 149 31 C162 26 177 34 181 47 C195 46 207 56 206 67 C205 78 196 84 182 85 L43 85 C29 85 20 80 20 72 Z',
+            'M13 73 C13 62 23 55 35 55 C40 43 49 37 61 39 C66 26 81 19 94 25 C103 15 120 15 129 28 C143 23 158 31 161 43 C177 41 190 50 190 63 C190 76 181 83 166 84 L34 84 C21 84 13 79 13 73 Z',
+            'M18 69 C18 57 31 51 44 53 C47 44 57 37 68 38 C75 24 90 22 101 29 C112 20 128 24 135 36 C148 34 163 40 167 51 C182 50 194 59 194 70 C194 80 185 86 172 86 L40 86 C26 86 18 79 18 69 Z',
+            'M11 71 C11 59 22 52 35 53 C39 41 49 36 61 37 C68 23 83 20 97 28 C108 17 126 21 133 33 C148 27 164 36 169 49 C183 47 197 57 197 69 C197 80 188 87 174 87 L34 87 C20 87 11 81 11 71 Z'
+        ];
+
+        function createMessageCloudSVG(shape, variant) {
+            /*
+             * Mây thông điệp: không dùng ellipse highlight/shade nữa.
+             * Các ellipse tạo ra hình bầu dục "dính" trên thân mây khi
+             * render trên Chrome. Silhouette + lớp shadow của chính silhouette
+             * đã đủ để tạo độ mềm và chiều sâu.
+             */
+            return `
+                <svg class="message-cloud-svg" viewBox="0 0 220 100" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="message-cloud-shade" d="${shape}" transform="translate(0 3)"/>
+                    <path class="message-cloud-fill" d="${shape}"/>
+                </svg>`;
+        }
+
+        function createCloud(isInitial = false) {
+            if (document.querySelectorAll('.cloud-container').length > 15) return;
+            const container = document.createElement('div'); container.classList.add('cloud-container');
+            
+            const layer = Math.random(); 
+            let scale, duration, zIndex, filter, opacity;
+            
+            if (layer < 0.35) { 
+                scale = Math.random() * 0.3 + 0.3; duration = Math.random() * 40 + 40; zIndex = 2; filter = `blur(${Math.random() * 1.5 + 1.5}px)`; opacity = Math.random() * 0.3 + 0.4; 
+            } else if (layer < 0.75) { 
+                scale = Math.random() * 0.4 + 0.6; duration = Math.random() * 20 + 20; zIndex = 8; filter = `blur(${Math.random() * 0.8}px)`; opacity = Math.random() * 0.2 + 0.7; 
+            } else { 
+                scale = Math.random() * 0.5 + 1.0; duration = Math.random() * 15 + 10; zIndex = 20; filter = "none"; opacity = Math.random() * 0.1 + 0.9; 
+            }
+            
+            container.style.top = `${Math.random() * 60 + 10}vh`; 
+            container.style.left = `-50vw`; 
+            
+            const animation = container.animate([
+                { left: '-50vw' },
+                { left: '150vw' }
+            ], {
+                duration: duration * 1000,
+                easing: 'linear',
+                fill: 'forwards'
+            });
+            
+            if (isInitial) {
+                animation.currentTime = Math.random() * (duration * 1000);
+            }
+            
+            animation.onfinish = () => container.remove();
+
+            container.style.transform = `scale(${scale})`;
+            container.style.zIndex = zIndex;
+
+            let item = mainContentQueue[queueIndex]; queueIndex = (queueIndex + 1) % mainContentQueue.length;
+            let pStyle = item.type === 'pass' ? 'color: #ff8c32; font-size: 1.25rem;' : '';
+            const weatherTag = item.type === 'weather' ? '<span class="weather-message-tag">THỜI TIẾT CHỖ CHỊ</span>' : '';
+
+            // Mây thông điệp dùng silhouette organic, nhưng vẫn giữ vài mây tầng phía sau để có chiều sâu.
+            const shape = MESSAGE_CLOUD_SHAPES[Math.floor(Math.random() * MESSAGE_CLOUD_SHAPES.length)];
+            const messageLayer = layer < 0.35 ? 'message-far' : (layer < 0.75 ? 'message-mid' : 'message-near');
+            container.classList.add(messageLayer);
+
+            container.innerHTML = `<div class="lantern-popup">${weatherTag}<p style="${pStyle}"></p></div><div class="cloud-body">${createMessageCloudSVG(shape, messageLayer)}</div>`;
+            const body = container.querySelector('.cloud-body');
+            body.style.opacity = opacity;
+            body.style.setProperty('--message-filter', filter);
+            let textArr = [...item.val]; 
+            
+            container.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                if (container.classList.contains('active')) {
+                    container.classList.remove('active');
+                } else {
+                    document.querySelectorAll('.cloud-container.active, .lantern-container.active').forEach(l => l.classList.remove('active'));
+                    container.classList.add('active'); 
+                    trackLanternOpen(container);
+                    let pElem = container.querySelector('.lantern-popup p');
+                    if (!container.dataset.typed) {
+                        container.dataset.typed = "true"; pElem.innerHTML = ''; let i = 0; clearInterval(container.typewriterInterval);
+                        container.typewriterInterval = setInterval(() => {
+                            pElem.innerHTML = textArr.slice(0, i + 1).join('') + (i < textArr.length - 1 ? '<span class="cursor"></span>' : '');
+                            i++; if (i >= textArr.length) clearInterval(container.typewriterInterval);
+                        }, 50); 
+                    }
+                }
+            });
+            document.body.appendChild(container); 
+        }
+
+        
+        function createMorningAtmosphere() {
+            const farLayer = document.getElementById('farCloudLayer');
+            const dustLayer = document.getElementById('sunDustLayer');
+            if (!farLayer || !dustLayer) return;
+
+            farLayer.innerHTML = '';
+            dustLayer.innerHTML = '';
+
+            // Nhiều silhouette khác nhau để mây không bị lặp hình.
+            const cloudShapes = [
+                'M18 70 C18 58 29 50 43 50 C46 36 59 27 73 30 C80 16 99 11 113 24 C128 18 145 24 151 38 C171 35 187 45 186 61 C186 73 177 81 163 82 L41 82 C27 82 18 77 18 70 Z',
+                'M12 68 C12 56 24 49 37 50 C41 40 50 34 62 34 C70 20 87 17 99 28 C111 20 127 24 132 36 C149 32 164 41 166 54 C181 54 194 62 193 73 C192 82 183 87 169 87 L35 87 C21 87 12 80 12 68 Z',
+                'M20 72 C20 59 33 52 47 54 C52 42 63 38 75 40 C82 27 96 21 108 27 C120 14 140 17 149 31 C162 26 177 34 181 47 C195 46 207 56 206 67 C205 78 196 84 182 85 L43 85 C29 85 20 80 20 72 Z',
+                'M13 73 C13 62 23 55 35 55 C40 43 49 37 61 39 C66 26 81 19 94 25 C103 15 120 15 129 28 C143 23 158 31 161 43 C177 41 190 50 190 63 C190 76 181 83 166 84 L34 84 C21 84 13 79 13 73 Z',
+                'M18 69 C18 57 31 51 44 53 C47 44 57 37 68 38 C75 24 90 22 101 29 C112 20 128 24 135 36 C148 34 163 40 167 51 C182 50 194 59 194 70 C194 80 185 86 172 86 L40 86 C26 86 18 79 18 69 Z',
+                'M11 71 C11 59 22 52 35 53 C39 41 49 36 61 37 C68 23 83 20 97 28 C108 17 126 21 133 33 C148 27 164 36 169 49 C183 47 197 57 197 69 C197 80 188 87 174 87 L34 87 C20 87 11 81 11 71 Z'
+            ];
+
+            const cloudLayers = [
+                {
+                    cls: 'cloud-high', count: 8,
+                    top: [7, 22], width: [58, 112], height: [26, 40],
+                    speed: [130, 185], opacity: [.08, .14], blur: [.20, .55],
+                    scale: [.70, .90]
+                },
+                {
+                    cls: 'cloud-middle', count: 6,
+                    top: [20, 43], width: [78, 145], height: [34, 52],
+                    speed: [95, 145], opacity: [.11, .19], blur: [.12, .40],
+                    scale: [.80, 1.00]
+                },
+                {
+                    cls: 'cloud-low', count: 4,
+                    top: [39, 59], width: [108, 185], height: [44, 65],
+                    speed: [72, 112], opacity: [.16, .25], blur: [.04, .24],
+                    scale: [.90, 1.07]
+                }
+            ];
+
+            cloudLayers.forEach(layer => {
+                for (let i = 0; i < layer.count; i++) {
+                    const cloud = document.createElement('div');
+                    cloud.className = `far-cloud ${layer.cls}`;
+
+                    const width = Math.random() * (layer.width[1] - layer.width[0]) + layer.width[0];
+                    const height = Math.random() * (layer.height[1] - layer.height[0]) + layer.height[0];
+                    const opacity = Math.random() * (layer.opacity[1] - layer.opacity[0]) + layer.opacity[0];
+                    const blur = Math.random() * (layer.blur[1] - layer.blur[0]) + layer.blur[0];
+                    const duration = Math.random() * (layer.speed[1] - layer.speed[0]) + layer.speed[0];
+                    const scale = Math.random() * (layer.scale[1] - layer.scale[0]) + layer.scale[0];
+                    const shape = cloudShapes[Math.floor(Math.random() * cloudShapes.length)];
+
+                    cloud.style.top = `${Math.random() * (layer.top[1] - layer.top[0]) + layer.top[0]}%`;
+                    cloud.style.left = `${Math.random() * 100}%`;
+                    cloud.style.setProperty('--far-width', `${width.toFixed(0)}px`);
+                    cloud.style.setProperty('--far-height', `${height.toFixed(0)}px`);
+                    cloud.style.setProperty('--far-opacity', opacity.toFixed(3));
+                    cloud.style.setProperty('--far-blur', `${blur.toFixed(2)}px`);
+                    cloud.style.setProperty('--far-dur', `${duration.toFixed(1)}s`);
+                    cloud.style.setProperty('--far-scale', scale.toFixed(2));
+                    cloud.style.setProperty('--cloud-stretch', (Math.random() * .22 + .89).toFixed(2));
+                    cloud.style.setProperty('--cloud-tilt', `${(Math.random() * 3 - 1.5).toFixed(2)}deg`);
+                    cloud.style.setProperty('--cloud-bob-a', `${(Math.random() * 7 - 3.5).toFixed(1)}px`);
+                    cloud.style.setProperty('--cloud-bob-b', `${(Math.random() * 11 - 5.5).toFixed(1)}px`);
+                    cloud.style.setProperty('--cloud-bob-c', `${(Math.random() * 8 - 4).toFixed(1)}px`);
+                    cloud.style.setProperty('--cloud-offset-a', `${(Math.random() * 45 - 22).toFixed(1)}px`);
+                    cloud.style.setProperty('--cloud-offset-b', `${(Math.random() * 58 - 29).toFixed(1)}px`);
+                    cloud.style.setProperty('--cloud-offset-c', `${(Math.random() * 50 - 25).toFixed(1)}px`);
+                    cloud.style.setProperty('--cloud-offset-d', `${(Math.random() * 38 - 19).toFixed(1)}px`);
+                    cloud.style.setProperty('--cloud-start-y', `${(Math.random() * 8 - 4).toFixed(1)}px`);
+                    cloud.style.animationDelay = `-${(Math.random() * duration).toFixed(2)}s`;
+
+                    cloud.innerHTML = `
+                        <svg class="far-cloud-svg" viewBox="0 0 220 100" preserveAspectRatio="none" aria-hidden="true">
+                            <path class="cloud-shade" d="${shape}" transform="translate(0 3)"/>
+                            <path class="cloud-fill" d="${shape}"/>
+                        </svg>
+                    `;
+                    farLayer.appendChild(cloud);
+                }
+            });
+
+            // Hạt nắng thưa hơn để nhẹ máy trên mobile.
+            for (let i = 0; i < 18; i++) {
+                const dust = document.createElement('div');
+                dust.className = 'sun-dust';
+                const aroundSun = Math.random() < .70;
+                dust.style.left = `${aroundSun ? Math.random() * 52 + 45 : Math.random() * 100}%`;
+                dust.style.top = `${aroundSun ? Math.random() * 48 + 8 : Math.random() * 72 + 12}%`;
+                dust.style.setProperty('--dust-size', `${Math.random() * 2.5 + 1.5}px`);
+                dust.style.setProperty('--dust-opacity', `${Math.random() * .30 + .20}`);
+                dust.style.setProperty('--dust-blur', `${Math.random() * .65 + .25}px`);
+                dust.style.setProperty('--dust-dur', `${Math.random() * 6 + 6}s`);
+                dust.style.setProperty('--dust-x', `${Math.random() * 42 - 21}px`);
+                dust.style.animationDelay = `-${Math.random() * 8}s, -${Math.random() * 5}s`;
+                dustLayer.appendChild(dust);
+            }
+        }
+
+
+        function createBirdFlock() {
+            if (currentModeTime !== 'morning') return;
+
+            const existingBirds =
+                document.querySelectorAll('.github-bird-container').length;
+
+            // Giữ giới hạn nhẹ trên mobile để tránh quá nhiều sprite cùng lúc.
+            if (existingBirds >= 7) return;
+
+            const flock = document.createElement('div');
+            flock.className = 'github-bird-flock';
+
+            // User-provided weights:
+            // 1:20, 2:40, 3:50, 4:50, 5:15, 6:10.
+            // These add to 185, so use them as relative weights.
+            const countWeights = [
+                { count:1, weight:20 },
+                { count:2, weight:40 },
+                { count:3, weight:50 },
+                { count:4, weight:50 },
+                { count:5, weight:15 },
+                { count:6, weight:10 }
+            ];
+
+            const totalWeight = countWeights.reduce(
+                (sum, item) => sum + item.weight, 0
+            );
+
+            let roll = Math.random() * totalWeight;
+            let birdCount = 3;
+
+            for (const item of countWeights) {
+                roll -= item.weight;
+                if (roll <= 0) {
+                    birdCount = item.count;
+                    break;
+                }
+            }
+
+            // Không vượt quá giới hạn sprite đang hiện diện.
+            birdCount = Math.min(
+                birdCount,
+                Math.max(1, 7 - existingBirds)
+            );
+
+            /*
+             * Tất cả đều bắt đầu ở mép trái.
+             * Duration riêng từng con: nhanh hơn / chậm hơn một chút,
+             * nhưng không có delay âm nên không con nào spawn giữa màn hình.
+             */
+            const usedLanes = [];
+
+            for (let i = 0; i < birdCount; i++) {
+                const container = document.createElement('div');
+
+                const depthRoll = Math.random();
+                const depth =
+                    depthRoll < 0.30 ? 'far' :
+                    depthRoll < 0.82 ? 'medium' :
+                    'near';
+
+                // Chọn làn bay khác nhau để đàn không chồng lên nhau.
+                let top;
+                let attempts = 0;
+                do {
+                    top = Math.random() * 26 + 16; // 16%–42% màn hình
+                    attempts++;
+                } while (
+                    usedLanes.some(v => Math.abs(v - top) < 3.3) &&
+                    attempts < 12
+                );
+                usedLanes.push(top);
+
+                const duration = Math.random() * 7 + 17; // 17–24s
+                const scale =
+                    depth === 'far'
+                        ? Math.random() * 0.07 + 0.22
+                        : depth === 'near'
+                            ? Math.random() * 0.13 + 0.45
+                            : Math.random() * 0.10 + 0.32;
+
+                const opacity =
+                    depth === 'far'
+                        ? Math.random() * 0.12 + 0.30
+                        : depth === 'near'
+                            ? Math.random() * 0.12 + 0.62
+                            : Math.random() * 0.12 + 0.50;
+
+                // Chênh nhẹ 0–450ms chỉ để đội hình không khóa cứng,
+                // nhưng vẫn bắt đầu ở ngoài màn hình.
+                const delay = Math.random() * 0.45;
+
+                container.className =
+                    `github-bird-container ${depth}`;
+
+                container.style.setProperty(
+                    '--bird-top',
+                    `${top.toFixed(2)}%`
+                );
+                container.style.setProperty(
+                    '--bird-scale',
+                    scale.toFixed(2)
+                );
+                container.style.setProperty(
+                    '--bird-opacity',
+                    opacity.toFixed(2)
+                );
+                container.style.setProperty(
+                    '--bird-duration',
+                    `${duration.toFixed(2)}s`
+                );
+                container.style.setProperty(
+                    '--bird-delay',
+                    `${delay.toFixed(2)}s`
+                );
+
+                const bird = document.createElement('div');
+                bird.className = 'github-bird';
+
+                container.appendChild(bird);
+                flock.appendChild(container);
+            }
+
+            document.getElementById('sky').appendChild(flock);
+
+            // Dọn riêng batch sau khi con chậm nhất đã bay khỏi màn hình.
+            const maxDuration = 24.8;
+            setTimeout(() => flock.remove(), maxDuration * 1000);
+        }
+
+        /* Weather tự làm mới dữ liệu theo location đã lưu; không gọi GPS lại. */
+        weatherRefreshTimer = setInterval(() => {
+            const saved = getSavedLocation();
+            if (saved) fetchWeatherForLocation(saved);
+        }, WEATHER_CACHE_MAX_AGE);
+
+        function refreshBirdViewportWidth() {
+            document.documentElement.style.setProperty(
+                '--bird-screen-width',
+                `${Math.ceil(window.innerWidth)}px`
+            );
+        }
+
+        refreshBirdViewportWidth();
+        window.addEventListener('resize', refreshBirdViewportWidth, { passive:true });
+        window.addEventListener('orientationchange', () => {
+            setTimeout(refreshBirdViewportWidth, 150);
+        }, { passive:true });
+
+        function createAirplane() {
+            if (currentModeTime !== 'morning') return;
+            if (document.querySelectorAll('.airplane-wrapper').length > 0) return;
+
+            const isLeftToRight = Math.random() > 0.3;
+            const startX = isLeftToRight ? -20 : 120;
+            const endX = isLeftToRight ? 120 : -20;
+
+            const startY = Math.random() * 30 + 10;
+            const yDrift = (Math.random() - 0.5) * 10;
+            const endY = startY + yDrift;
+
+            const deltaX_px = (endX - startX) * window.innerWidth / 100;
+            const deltaY_px = (endY - startY) * window.innerHeight / 100;
+            const angleDeg = Math.atan2(deltaY_px, deltaX_px) * (180 / Math.PI);
+
+            // Cân bằng theo chiều sâu: 20% xa / 55% thường / 25% gần.
+            const depthRoll = Math.random();
+            let depthClass, duration, scale;
+
+            if (depthRoll < 0.20) {
+                depthClass = 'airplane-far';
+                duration = isLeftToRight
+                    ? Math.random() * 6 + 20
+                    : Math.random() * 8 + 24;
+                scale = Math.random() * 0.08 + 0.22;
+            } else if (depthRoll < 0.75) {
+                depthClass = 'airplane-normal';
+                duration = isLeftToRight
+                    ? Math.random() * 5 + 16
+                    : Math.random() * 7 + 19;
+                scale = Math.random() * 0.12 + 0.34;
+            } else {
+                depthClass = 'airplane-near';
+                duration = isLeftToRight
+                    ? Math.random() * 4 + 10
+                    : Math.random() * 5 + 12;
+                scale = Math.random() * 0.18 + 0.50;
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('airplane-wrapper', depthClass);
+
+            wrapper.style.setProperty('--plane-dur', `${duration}s`);
+            wrapper.style.left = `${startX}vw`;
+            wrapper.style.top = `${startY}vh`;
+
+            wrapper.innerHTML = `
+                <div class="airplane-rotator"
+                     style="--plane-angle:${angleDeg}deg; --plane-scale:${scale};">
+                    <div class="airplane-turb">
+                        <div class="contrail left-wing"></div>
+                        <div class="contrail right-wing"></div>
+                        <svg class="plane-svg"
+                             width="30"
+                             height="30"
+                             viewBox="0 0 24 24"
+                             fill="#fff"
+                             aria-hidden="true">
+                            <path d="M21,16V14L13,9V3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z"/>
+                        </svg>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(wrapper);
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (wrapper.isConnected) {
+                        wrapper.style.left = `${endX}vw`;
+                        wrapper.style.top = `${endY}vh`;
+                    }
+                });
+            });
+
+            setTimeout(() => wrapper.remove(), duration * 1000 + 180);
+        }
+
+        function createTinyLantern() { 
+            if (document.querySelectorAll('.tiny-lantern-container').length > 18) return; 
+            const container = document.createElement('div'); container.classList.add('tiny-lantern-container');
+            const duration = Math.random() * 20 + 30; container.style.left = `${Math.random() * 100}%`; container.style.setProperty('--rise-duration', `${duration}s`);
+            const scale = Math.random() * 0.4 + 0.2; container.style.transform = `scale(${scale})`; 
+            container.innerHTML = `<div class="tiny-lantern-body"></div>`;
+            document.getElementById('sky').appendChild(container); 
+            container.addEventListener('animationend', () => container.remove());
+        }
+
+
+        function updateSunCloudOcclusion() {
+            if (currentModeTime !== 'morning') return;
+
+            const sun = document.querySelector('.moon.sun-mode');
+            if (!sun) return;
+
+            const sunRect = sun.getBoundingClientRect();
+            const sunCX = sunRect.left + sunRect.width / 2;
+            const sunCY = sunRect.top + sunRect.height / 2;
+            const sunRadius = Math.min(sunRect.width, sunRect.height) * 0.46;
+
+            const clouds = document.querySelectorAll(
+                '.cloud-container .cloud-body, .far-cloud'
+            );
+
+            let strongestCover = 0;
+
+            clouds.forEach(cloud => {
+                const rect = cloud.getBoundingClientRect();
+                if (rect.width <= 0 || rect.height <= 0) return;
+
+                const closestX = Math.max(rect.left, Math.min(sunCX, rect.right));
+                const closestY = Math.max(rect.top, Math.min(sunCY, rect.bottom));
+                const dx = sunCX - closestX;
+                const dy = sunCY - closestY;
+                const distance = Math.hypot(dx, dy);
+
+                if (distance <= sunRadius + 12) {
+                    const horizontalOverlap = Math.max(
+                        0,
+                        Math.min(rect.right, sunRect.right) -
+                        Math.max(rect.left, sunRect.left)
+                    );
+                    const verticalOverlap = Math.max(
+                        0,
+                        Math.min(rect.bottom, sunRect.bottom) -
+                        Math.max(rect.top, sunRect.top)
+                    );
+
+                    const areaRatio =
+                        (horizontalOverlap * verticalOverlap) /
+                        (sunRect.width * sunRect.height);
+
+                    const proximity = 1 - Math.min(
+                        1,
+                        distance / (sunRadius + 12)
+                    );
+
+                    // Chỉ che tối nhẹ; mây càng phủ nhiều thì giảm sáng thêm.
+                    const cover = Math.min(
+                        1,
+                        areaRatio * 1.35 + proximity * 0.18
+                    );
+
+                    strongestCover = Math.max(strongestCover, cover);
+                }
+            });
+
+            if (strongestCover > 0.025) {
+                const opacity = Math.max(
+                    0.82,
+                    0.97 - strongestCover * 0.12
+                );
+                const brightness = Math.max(
+                    0.87,
+                    1 - strongestCover * 0.18
+                );
+                const saturation = Math.max(
+                    0.91,
+                    1 - strongestCover * 0.05
+                );
+
+                sun.style.setProperty(
+                    '--sun-cloud-opacity',
+                    opacity.toFixed(3)
+                );
+                sun.style.setProperty(
+                    '--sun-cloud-brightness',
+                    brightness.toFixed(3)
+                );
+                sun.style.setProperty(
+                    '--sun-cloud-saturation',
+                    saturation.toFixed(3)
+                );
+
+                sun.classList.add('sun-obscured');
+            } else {
+                sun.style.setProperty('--sun-cloud-opacity', '1');
+                sun.style.setProperty('--sun-cloud-brightness', '1');
+                sun.style.setProperty('--sun-cloud-saturation', '1');
+                sun.classList.remove('sun-obscured');
+            }
+        }
+
+        // --- SỰ KIỆN CLICK CHÒM SAO & MẶT TRĂNG ---
+        const aquariusContainer = document.querySelector('.aquarius-container');
+        aquariusContainer.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            aquariusContainer.classList.toggle('active-tap');
+            aquariusContainer.classList.add('flash');
+            setTimeout(() => aquariusContainer.classList.remove('flash'), 300);
+            createGiantShootingStar();
+        });
+
+        let moonClickCount = 0;
+        const moonElement = document.querySelector('.moon');
+        moonElement.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            moonClickCount++;
+            moonElement.style.transform = 'scale(1.1) rotate(5deg)';
+            setTimeout(() => moonElement.style.transform = 'none', 150);
+
+            if (moonClickCount === 3 && currentModeTime === 'evening') {
+                document.body.style.background = 'radial-gradient(circle at bottom, #ff9a9e 0%, #fecfef 45%, #a1c4fd 100%)';
+                document.getElementById('sky').style.opacity = '0.15'; 
+                const dawnModal = document.createElement('div'); dawnModal.className = 'modal show';
+                dawnModal.innerHTML = `
+                    <div class="modal-content" style="background: rgba(255,255,255,0.9); color: #333; text-shadow: none;">
+                        <h3 style="color: #ff7300; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.5rem;">Bình Minh Tới Rồi! 🌅</h3>
+                        <p style="font-weight: bold; margin-bottom: 5px;">Sau mỗi đêm dài luôn là một ngày rực rỡ.</p>
+                        <p style="font-size: 0.95rem; line-height: 1.4;">Dù hôm nay có mệt mỏi, ngày mai cô gái Bảo Bình lại rạng rỡ nhé!</p>
+                        <button onclick="this.closest('.modal').remove()" class="btn btn-play" style="margin-top:15px; width:auto; padding: 5px 25px; border-radius: 20px;">Đóng</button>
+                    </div>
+                `;
+                document.body.appendChild(dawnModal);
+                moonClickCount = 0; 
+            }
+        });
+
+        // Click bên ngoài
+        document.body.addEventListener('click', (e) => {
+            if (!e.target.closest('.lantern-container') && !e.target.closest('.aquarius-container') && !e.target.closest('.cloud-container')) {
+                document.querySelectorAll('.lantern-container.active, .cloud-container.active').forEach(l => {
+                    l.classList.remove('active');
+                    if(l.classList.contains('lantern-container')) { l.style.filter = l.dataset.origFilter; l.style.opacity = l.dataset.origOpacity; l.style.zIndex = l.dataset.origZ; }
+                });
+            }
+            if (e.target.closest('.aquarius-container') === null && aquariusContainer.classList.contains('active-tap')) {
+                aquariusContainer.classList.remove('active-tap');
+            }
+            if (currentModeTime === 'evening' && !e.target.closest('.ui-container') && !e.target.closest('.btn') && !e.target.closest('.modal') && !e.target.closest('#gift-container') && !e.target.closest('.aquarius-container') && !e.target.closest('#yt-panel') && !e.target.closest('.moon') && !e.target.closest('#dev-tools') && !e.target.closest('#location-cloud')) {
+                createLantern(e.clientX, e.clientY, false);
+            }
+        });
+        
+        createStars();
+    </script>
+</body>
+</html>
