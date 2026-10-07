@@ -990,21 +990,26 @@
                 0 0 22px rgba(255,196,116,.34),
                 0 7px 14px rgba(67,87,105,.07);
         }
-        .hot-air-balloon-wrapper.private-reply-balloon::after {
-            content:"♥";
+        .private-reply-heart {
             position:absolute;
             left:50%;
-            top:50%;
-            transform:translate(-50%, -118px);
-            font-size:18px;
-            color:rgba(255,255,255,.88);
+            top:8px;
+            transform:translateX(-50%);
+            display:block;
+            width:42px;
+            height:42px;
+            line-height:42px;
+            text-align:center;
+            font-size:34px;
+            color:rgba(255,255,255,.92);
             text-shadow:0 0 10px rgba(255,210,132,.45);
             pointer-events:none;
-            animation: privateReplyHeart 2.4s ease-in-out infinite;
+            z-index:4;
+            animation:privateReplyHeart 2.4s ease-in-out infinite;
         }
         @keyframes privateReplyHeart {
-            0%,100% { opacity:.55; transform:translate(-50%, -118px) scale(.96); }
-            50% { opacity:.95; transform:translate(-50%, -123px) scale(1.05); }
+            0%,100% { opacity:.58; transform:translateX(-50%) translateY(0) scale(.96); }
+            50% { opacity:.98; transform:translateX(-50%) translateY(-4px) scale(1.05); }
         }
 
         /* ---------- TIN NHẮN RIÊNG ---------- */
@@ -1131,16 +1136,21 @@
         .private-reply-cloud .message-cloud-shade { fill:rgba(96,137,171,.14); }
         .private-reply-cloud .lantern-popup {
             position:absolute;
-            width:min(250px, 76vw);
-            bottom:45%;
+            width:min(86%, 290px);
+            max-width:calc(100% - 24px);
+            max-height:calc(100% - 20px);
+            top:50%;
+            bottom:auto;
             left:50%;
-            transform:translateX(-50%) scale(1);
+            transform:translate(-50%, -50%) scale(1);
             opacity:1;
             z-index:2;
             pointer-events:none;
-            background:rgba(255,255,255,.86);
-            border-color:rgba(255,255,255,.82);
+            background:rgba(255,255,255,.88);
+            border-color:rgba(255,255,255,.84);
             box-shadow:0 14px 35px rgba(43,63,79,.16), inset 0 0 15px rgba(255,255,255,.64);
+            padding:12px 14px;
+            border-radius:17px;
         }
         .private-reply-cloud .private-reply-tag {
             display:inline-block;
@@ -1152,11 +1162,13 @@
         .private-reply-cloud .lantern-popup p {
             color:#273848;
             text-shadow:none;
-            font-size:1rem;
-            max-height:150px;
+            font-size:clamp(.82rem, 3.7vw, 1rem);
+            line-height:1.42;
+            max-height:calc(100% - 46px);
             overflow:auto;
             white-space:pre-wrap;
             word-break:break-word;
+            margin:0;
         }
         .private-reply-cloud .private-reply-cloud-icon {
             width:42px;
@@ -2559,12 +2571,21 @@
             const p = container.querySelector('.lantern-popup p');
             if (p) p.textContent = reply.content || '';
 
-            const width = Math.min(window.innerWidth * .78, 335);
-            const left = Math.max(18, Math.min(window.innerWidth - width - 18, rect.left + rect.width / 2 - width / 2));
-            const top = Math.max(86, rect.top - Math.min(170, rect.height + 120));
+            /* Định vị theo chính phần thân balloon, không lấy wrapper 25rem làm mốc.
+               Cloud được đặt ngay phía trên balloon và nội dung nằm giữa cloud. */
+            const anchor = anchorWrapper.querySelector('.hot-air-balloon') || anchorWrapper;
+            const anchorRect = anchor.getBoundingClientRect();
+            document.body.appendChild(container);
+
+            const cloudRect = container.getBoundingClientRect();
+            const gap = Math.min(18, Math.max(10, window.innerHeight * .018));
+            const left = Math.max(10, Math.min(
+                window.innerWidth - cloudRect.width - 10,
+                anchorRect.left + anchorRect.width / 2 - cloudRect.width / 2
+            ));
+            const top = Math.max(78, anchorRect.top - cloudRect.height - gap);
             container.style.left = `${left}px`;
             container.style.top = `${top}px`;
-            document.body.appendChild(container);
 
             setTimeout(() => {
                 if (!container.isConnected) return;
@@ -4446,6 +4467,7 @@
             const balloon = document.createElement('div');
             balloon.className = 'hot-air-balloon';
             balloon.innerHTML = `
+                <span class="private-reply-heart" aria-hidden="true">♥</span>
                 <div class="balloon"></div>
                 <div class="basket"></div>
             `;
