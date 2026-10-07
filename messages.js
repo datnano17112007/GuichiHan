@@ -1,236 +1,385 @@
-/* =========================================================
-   GCH MESSAGES
-   ---------------------------------------------------------
-   Đây là file CHỈ CHỨA THÔNG ĐIỆP.
-   Không chứa logic của app.
+const GCH_MESSAGES = {
+    "morning": [
+        "Chị Hân ơi, bên ngoài nắng đẹp lắm! ☀️",
+        "Buổi sáng rạng rỡ như nụ cười của chị nha ✨",
+        "Bên chị buổi sáng có lạnh không? Nhớ mặc áo ấm nhé! 🧥",
+        "Hãy mang theo ô phòng cơn mưa bất chợt nha chị ☔",
+        "Cô gái Bảo Bình của em ngày mới tràn đầy năng lượng 🔋",
+        "Uống một ly nước ấm cho buổi sáng an lành 🍵",
+        "Một nụ cười bằng mười thang thuốc bổ, cười lên nha chị 😊",
+        "Chúc chị một ngày làm việc thật hiệu quả 💼",
+        "Hôm nay có mệt mỏi thì tối về em bù cho cái ôm nhé 🤗",
+        "Ngày mới ngập tràn niềm vui nha chị Hân 🌻",
+        "Dù bận rộn cũng nhớ ăn sáng đầy đủ nha 🍳",
+        "Trời trong xanh như tâm hồn tự do của Bảo Bình vậy 🍃",
+        "Mây trắng bay ngang mang theo lời chúc tốt lành đến chị ☁️",
+        "Chị Hân là điều tuyệt vời nhất! 💖",
+        "Gửi chị chút ấm áp của ánh mặt trời sớm mai 🌅",
+        "Hãy để những muộn phiền trôi đi như đám mây kia nhé ☁️",
+        "Sự thông minh của Bảo Bình sẽ giúp chị giải quyết mọi việc hôm nay 🧠✨",
+        "Chị ra đường nhớ thoa kem chống nắng nha ☀️",
+        "Tít tít! Có một thông điệp siêu dễ thương gửi đến chị Hân 💌",
+        "Chúc chị một ngày suôn sẻ, không quạu cọ nha 😊",
+        "Dù ngày hôm nay thế nào, hãy nhớ có em luôn ủng hộ chị 🌟",
+        "Sáng nay đường đông, chị đi lại cẩn thận nhé 🛵",
+        "Bầu trời hôm nay đẹp như chính chị vậy 🌸",
+        "Nhớ giữ gìn sức khỏe, đừng làm việc quá sức nha chị 💪",
+        "Chị Hân cười lên một cái là bừng sáng cả góc trời ✨",
+        "Một ngày bình yên, vô lo vô nghĩ nha chị 🍀",
+        "Cứ tự do, bay bổng và rạng rỡ như đám mây này nhé Bảo Bình ☁️",
+        "Mỗi đám mây là một lời chúc em gửi đến chị trong hôm nay 🌬️",
+        "Hãy bắt đầu ngày mới bằng sự tích cực nhé 🌻",
+        "Chào buổi sáng cô gái tuyệt vời nhất thế giới! 🌍❤️",
+        "Mở mắt ra là một ngày mới, chị cứ thong thả tận hưởng nha 🌤️",
+        "Nắng sớm dịu dàng, mong lòng chị hôm nay cũng thật nhẹ nhàng 🌼",
+        "Chúc chị hôm nay gặp toàn những điều nhỏ xinh và dễ thương 💛",
+        "Đừng quên dành cho bản thân một chút thời gian nghỉ ngơi nha chị ☕",
+        "Một ngày mới, một chút bình yên, một chút may mắn gửi chị 🍀",
+        "Nếu hôm nay nhiều việc quá thì mình làm từng chút một thôi nha 🌿",
+        "Gửi chị một tia nắng nhỏ để mở đầu ngày thật ấm áp ☀️",
+        "Mong mọi chuyện hôm nay đến với chị thật vừa vặn và dịu dàng 🌷",
+        "Chị cứ bước chậm một chút cũng được, miễn là hôm nay chị vui 💕",
+        "Bầu trời sáng rồi, em cũng gửi chị một lời chúc thật trong trẻo 🌈",
+        "Chúc chị có một buổi sáng nhẹ tênh, không vội vàng và thật vui 🌤️",
+        "Chị Hân ơi, ngày mới đến rồi, chúc chị mở mắt ra là thấy thật nhiều niềm vui nhé 🌤️",
+        "Nắng sớm hôm nay gửi chị một chút năng lượng thật dịu dàng ☀️",
+        "Chúc cô gái Bảo Bình của em hôm nay làm gì cũng thuận lợi nha ♒✨",
+        "Sáng rồi đó chị, nhớ hít một hơi thật sâu và bắt đầu ngày mới thật nhẹ nhàng nhé 🌿",
+        "Một buổi sáng trong veo gửi đến chị Hân, mong hôm nay lòng chị cũng trong veo như vậy 💙",
+        "Chúc chị thức dậy với một tâm trạng thật tốt và một nụ cười thật xinh 😊",
+        "Hôm nay dù có bao nhiêu việc, chị cứ bình tĩnh làm từng việc một nha 🌱",
+        "Em gửi chị một chút nắng sớm để ngày hôm nay thêm ấm áp ☀️💛",
+        "Chị Hân nhớ uống nước sau khi thức dậy nha, cơ thể cũng cần được yêu thương đó 💧",
+        "Chúc chị một buổi sáng thật nhẹ nhàng, không có chuyện gì làm chị phải cau mày nhé 🌼",
+        "Bảo Bình hôm nay nhớ mang theo sự tự tin và một chút tinh nghịch nha ♒😌",
+        "Mong buổi sáng của chị bắt đầu bằng những điều thật nhỏ nhưng thật vui 💕",
+        "Chị Hân ơi, hôm nay hãy để ánh nắng đánh thức những điều tích cực trong lòng chị nhé 🌅",
+        "Nếu sáng nay hơi mệt thì cứ chậm lại một chút, không cần phải vội đâu nha 🌿",
+        "Chúc chị bước ra khỏi nhà với thật nhiều năng lượng tốt lành 🔋✨",
+        "Một ngày mới đang chờ chị khám phá, cứ vui vẻ bước đi nha Hân 🌈",
+        "Chị nhớ kiểm tra đồ đạc trước khi ra ngoài nha, đừng để quên gì đó 😆🎒",
+        "Nắng đẹp thế này mà thiếu nụ cười của chị thì hơi phí đó nha ☀️😊",
+        "Chúc chị hôm nay gặp thật nhiều người dễ thương và những chuyện thật vui 🌷",
+        "Buổi sáng này em gửi chị một lời chúc bình yên, mong mọi thứ đều thật vừa đủ 🍀",
+        "Chị Hân đừng quên ăn sáng nha, bụng đói thì làm gì cũng khó vui đó 🍞🥛",
+        "Hôm nay hãy dành cho bản thân một chút dịu dàng trước khi bắt đầu công việc nhé 💛",
+        "Nếu ngoài trời nóng, chị nhớ uống đủ nước và nghỉ ngơi một chút nha ☀️💧",
+        "Một ngày mới lại bắt đầu, mong chị có thật nhiều lý do để mỉm cười 🌻",
+        "Chúc cô gái Bảo Bình hôm nay thật sáng tạo và nghĩ ra thật nhiều điều hay ho 🧠✨",
+        "Chị cứ là chính mình thôi, vì phiên bản Hân tự nhiên nhất luôn đáng yêu mà 💕",
+        "Em gửi chị một chiếc ôm tinh thần thật nhẹ cho buổi sáng hôm nay 🤗",
+        "Chúc chị hôm nay không gặp deadline dí sát bên người nha 😂💼",
+        "Buổi sáng đẹp trời, chúc chị làm việc hiệu quả nhưng vẫn nhớ nghỉ ngơi nhé 🌤️",
+        "Mong những chuyện khiến chị lo lắng hôm qua hôm nay đều nhẹ đi một chút 🌿",
+        "Chị Hân ơi, đừng quên chăm sóc bản thân giữa những việc phải làm nha 💗",
+        "Một tia nắng nhỏ đang thay em nói rằng: hôm nay chị sẽ ổn thôi ☀️",
+        "Chúc chị hôm nay đi đâu cũng gặp đường thuận, người vui và chuyện lành 🛵🍀",
+        "Nếu hôm nay có chuyện không như ý, chị đừng tự trách mình nha 🌷",
+        "Bảo Bình cứ tự do bay theo cách của mình, miễn là chị thấy vui là được ☁️♒",
+        "Chúc chị một ngày không quá vội, không quá áp lực và thật nhiều niềm vui 🌼",
+        "Sáng nay em gửi chị một chút may mắn, giữ lấy để dùng cả ngày nha 🍀✨",
+        "Chị Hân nhớ nhìn lên bầu trời một chút khi có thời gian nhé, đẹp lắm đó ☁️",
+        "Mây hôm nay trôi thật chậm, mong ngày của chị cũng nhẹ nhàng như vậy 🌤️",
+        "Chúc chị có một buổi sáng đủ nắng, đủ vui và đủ bình yên 💛",
+        "Hôm nay nếu thấy mệt, chị cho mình nghỉ vài phút cũng chẳng sao đâu nha ☕",
+        "Chị Hân ơi, đừng để một chuyện nhỏ làm hỏng cả một ngày đẹp nhé 🌻",
+        "Chúc chị hôm nay luôn giữ được tâm trạng thật tốt dù có bận rộn 💪✨",
+        "Một ngày mới là một cơ hội mới, chị cứ từ từ tận hưởng nha 🌅",
+        "Em mong hôm nay mọi điều tốt đẹp sẽ tìm đúng đường đến với chị Hân 💌",
+        "Chị nhớ mang theo tinh thần vui vẻ trước khi bước ra ngoài nha 😄",
+        "Bảo Bình sáng nay nhận được một lời chúc đặc biệt: hôm nay nhất định phải vui ♒💙",
+        "Chúc chị làm việc chăm chỉ nhưng đừng quên thương lấy bản thân mình nha 🌿",
+        "Nếu hôm nay trời có mưa, cứ xem đó là một chút mát lành gửi đến chị ☔💙",
+        "Nắng lên rồi, chị cũng nhớ bật chế độ rạng rỡ của mình lên nha ☀️✨",
+        "Chúc chị Hân hôm nay có một ngày thật đáng nhớ theo cách nhẹ nhàng nhất 🌷",
+        "Sáng nay không cần hoàn hảo đâu chị, chỉ cần bình yên và vui vẻ là được 💕",
+        "Mong một ngày mới mang đến cho chị thật nhiều bất ngờ dễ thương 🎁",
+        "Chị Hân ơi, nhớ ăn uống đúng giờ nha, đừng mải làm rồi quên mất đó 🍱",
+        "Một chút năng lượng từ bầu trời xanh gửi đến cô gái Bảo Bình hôm nay 💙☁️",
+        "Chúc chị ra ngoài gặp toàn những tín hiệu xanh và chẳng phải chờ đợi lâu nha 🚦😆",
+        "Hôm nay hãy tin vào bản thân mình thêm một chút nhé chị 🫶",
+        "Chị có thể làm được nhiều hơn chị nghĩ đó, cứ tự tin lên nha ✨",
+        "Buổi sáng này em chúc chị có một tâm trí thật nhẹ và một trái tim thật vui 🌼",
+        "Nếu có việc khó, chị cứ chia nhỏ ra rồi giải quyết từng chút một nha 🧩",
+        "Chúc chị hôm nay có người hỗ trợ và mọi chuyện đều suôn sẻ 🤝🍀",
+        "Hân ơi, một ngày đẹp trời đang gọi tên chị rồi đó 🌤️",
+        "Mong hôm nay chị không phải suy nghĩ quá nhiều về những chuyện chưa xảy ra 🌿",
+        "Chị hãy để những điều tích cực có thêm một chút không gian trong ngày hôm nay nhé 💛",
+        "Chúc chị sáng nay gặp một món ăn ngon và một ly nước thật vừa ý 😋🥤",
+        "Bảo Bình hôm nay nhớ giữ lại một chút thời gian cho những điều mình thích nha ♒💫",
+        "Em gửi chị một chiếc vé vô hình đến một ngày thật bình yên 🎫🌷",
+        "Chị Hân ơi, nếu có ai làm chị buồn thì đừng để chuyện đó ở trong lòng lâu nha 💕",
+        "Chúc chị bước qua hôm nay với thật nhiều tự tin và thật ít muộn phiền 🌈",
+        "Sáng nay trời có thể thay đổi, nhưng lời chúc dành cho chị thì vẫn ở đây nha ☀️",
+        "Mong chị hôm nay có những khoảnh khắc khiến chị bất giác mỉm cười 😊",
+        "Chị nhớ thở chậm lại khi thấy áp lực nha, mọi chuyện rồi sẽ từng bước ổn thôi 🌿",
+        "Một buổi sáng bình yên dành riêng cho cô gái Bảo Bình đáng yêu ♒🌼",
+        "Chúc chị hôm nay gặp đúng người, đúng việc và đúng lúc 🍀",
+        "Hân ơi, đừng quên sạc đầy năng lượng cho bản thân giống như sạc điện thoại nha 🔋😆",
+        "Chúc chị hôm nay không bị những chuyện linh tinh làm mất mood nhé 😌✨",
+        "Em gửi chị một đám mây nhỏ, trên đó viết hai chữ: “Vui nha!” ☁️💛",
+        "Nếu hôm nay có nắng, nhớ để nắng hong khô những muộn phiền của chị nhé ☀️",
+        "Chị Hân hãy bắt đầu buổi sáng bằng một suy nghĩ thật tích cực nha 🌻",
+        "Chúc chị có đủ kiên nhẫn cho những việc khó và đủ vui vẻ cho những việc nhỏ 🌿",
+        "Hôm nay chị không cần chạy thật nhanh, chỉ cần đi đúng hướng là được 🚶‍♀️✨",
+        "Mong từng giờ trong ngày hôm nay đều đối xử thật dịu dàng với chị Hân 🌷",
+        "Bảo Bình ơi, hãy để trí tưởng tượng của mình bay cao một chút hôm nay nhé ☁️♒",
+        "Chúc chị hôm nay có một bầu trời thật rộng để thở và một ngày thật nhẹ để sống 💙",
+        "Sáng nay em nhắc nhỏ một câu thôi: chị nhớ thương bản thân mình nha 💕",
+        "Chúc chị có một ngày làm việc năng suất nhưng vẫn còn thật nhiều năng lượng cuối ngày 💼🔋",
+        "Hân ơi, nếu chưa có ai chúc thì để em chúc chị một ngày thật may mắn nha 🍀",
+        "Mong những điều tốt đẹp hôm nay đến với chị một cách thật tự nhiên 🌼",
+        "Chị Hân nhớ nhìn đường cẩn thận khi đi ngoài đường nha, an toàn là quan trọng nhất 🛵💛",
+        "Chúc chị hôm nay tâm trạng ổn định, công việc thuận lợi và nụ cười luôn ở đó 😊",
+        "Một ngày mới lại mở ra, chị cứ bước vào thật nhẹ nhàng thôi nha 🌤️",
+        "Em gửi chị chút gió mát của buổi sáng để những lo lắng bay đi nhé 🍃",
+        "Chúc cô gái Bảo Bình hôm nay có thật nhiều ý tưởng hay và những cuộc trò chuyện vui vẻ ♒💡",
+        "Chị Hân ơi, hôm nay cũng hãy tự hào về những điều nhỏ bé mình làm được nhé 🌷",
+        "Mong chị có một buổi sáng không vội vàng, không áp lực, chỉ toàn những điều dễ chịu 💛",
+        "Nếu hôm nay chưa vui ngay được thì cũng không sao, mình vui từ từ nha chị 🌿",
+        "Chúc chị cả ngày được bao quanh bởi sự tử tế và những điều ấm áp 🤍",
+        "Hân ơi, nắng sáng đang lên rồi, chúc chị cũng từ từ rực rỡ theo nha 🌅✨",
+        "Một ngày mới, một cơ hội mới, và một lời chúc mới dành riêng cho chị 💌",
+        "Chúc chị hôm nay bình an từ lúc ra khỏi nhà cho đến khi trở về 🏡🍀",
+        "Bầu trời rộng lắm, nên chị đừng để một chuyện nhỏ làm lòng mình chật lại nha ☁️",
+        "Chị Hân cứ vui vẻ lên nhé, hôm nay vẫn còn rất nhiều điều tốt đẹp đang chờ chị 🌻"
+    ],
 
-   Muốn đổi / thêm thông điệp:
-   → chỉ cần sửa file này.
-   → Không cần sửa index.html.
+    "evening": [
+        "Chị Hân ơi, đêm nay trăng đẹp quá nhỉ? 🌕",
+        "Nếu chị thấy lạnh, em gửi chị vạn cái ôm! ❄️🫂",
+        "Cô gái Bảo Bình độc lập và ấm áp của em ♒❤️",
+        "Mệt mỏi quá thì về đây, em cho mượn cái ôm nè 🤗",
+        "Đang gửi một cái ôm online đến chị Hân... Loading 100% 📶",
+        "Bảo Bình luôn độc lập, sáng tạo nhưng lại vô cùng dịu dàng với em 💫",
+        "Trời lạnh rồi, chị nhớ mặc ấm và nhận cái ôm của em nha 🧣",
+        "Em không có quà to, chỉ có cái ôm siêu to tặng chị thôi 🎁🙆‍♂️",
+        "Thế giới này xô bồ quá, để em ôm chị một cái cho bình yên 🍃",
+        "Chúc chị ngủ ngon kèm một cái ôm thật chặt! 🌙💤",
+        "Ôm chị Hân một cái để sạc đầy năng lượng nè! 🔋⚡",
+        "Dù cả thế giới quay lưng, em vẫn dang tay ôm chị 🤗",
+        "Chị Hân cười lên là xinh nhất! 😊",
+        "Mỗi ngọn đèn là một cái ôm ấm áp gửi tới chị ✨",
+        "Chị nhớ giữ gìn sức khỏe nha ❤️",
+        "Chị là điều tuyệt vời nhất! 💖",
+        "Phí dịch vụ tư vấn hôm nay là một cái ôm nha chị :> ✨",
+        "Chị Hân cười lên là rạng rỡ như mặt trời! ☀️",
+        "Người ta bảo Bảo Bình hay lạnh lùng, nhưng em chỉ thấy chị ấm áp và đáng yêu thôi 💫",
+        "Mong chị luôn an yên và hạnh phúc 🌸",
+        "Chị nhớ giữ gìn sức khỏe nha, đừng thức khuya nữa 🌙",
+        "Gửi chị một chút may mắn của ngọn đèn này ✨",
+        "Sự thông minh và độc lập của Bảo Bình sẽ giúp chị vượt qua mọi thứ 🧠✨",
+        "Em luôn ở đây ủng hộ chị Hân! 🌟",
+        "Chúc chị một đời an nhiên, vô lo vô nghĩ 🍀",
+        "Chị là người sâu sắc và tinh tế nhất em từng gặp 💖",
+        "Mãi tự do, rạng rỡ và tràn đầy năng lượng nha cô nàng Bảo Bình ♒🌻",
+        "Tâm hồn tự do của Bảo Bình trong chị luôn truyền cảm hứng cho em ✨",
+        "Dù Bảo Bình có đôi lúc bướng bỉnh và khó đoán, nhưng đó là điều em thích nhất ở chị 😊",
+        "Chị Hân là điều tuyệt vời nhất! ✨",
+        "Chị Hân ơi, tối rồi đó, hôm nay chị đã vất vả nhiều rồi nha 🌙",
+        "Đêm xuống rồi, chị cho bản thân được nghỉ ngơi một chút nhé 🍃",
+        "Bầu trời đêm nay đang giữ hộ chị một chút bình yên đó 🌌",
+        "Chị Hân ơi, gác lại những chuyện chưa vui của hôm nay nha, mai mình tính tiếp 💕",
+        "Một ngày dài kết thúc rồi, giờ đến lúc cô gái Bảo Bình được thư giãn thôi ♒🌙",
+        "Em gửi chị một chiếc chăn ấm vô hình để đêm nay ngủ thật ngon 🛌💛",
+        "Ngoài kia có bao nhiêu ánh đèn, em vẫn muốn dành riêng một ánh sáng nhỏ cho chị ✨",
+        "Chị Hân hôm nay đã cố gắng rất nhiều rồi, hãy tự thưởng cho mình một buổi tối thật nhẹ nhàng nha 🌷",
+        "Trăng lên rồi, chị nhớ để những muộn phiền xuống cùng hôm nay nhé 🌕",
+        "Đêm nay không cần suy nghĩ quá nhiều đâu chị, nghỉ ngơi trước đã nha 🌙",
+        "Em gửi một chút bình yên theo gió đêm đến bên chị Hân 🍃💌",
+        "Nếu hôm nay chưa được vui thì cũng không sao, ngày mai vẫn còn cơ hội mà 🌅",
+        "Chị Hân ơi, nhắm mắt lại một chút và hít thở thật chậm nhé 🌿",
+        "Bảo Bình của em tối nay nhớ chăm sóc bản thân thật tốt nha ♒💙",
+        "Một đêm thật yên, một căn phòng thật ấm và một giấc ngủ thật ngon dành cho chị 🌙🛏️",
+        "Chị đừng mang công việc lên giường ngủ nha, giờ là thời gian của chị rồi 💕",
+        "Hôm nay chị đã làm đủ tốt rồi, đừng tự gây áp lực thêm nữa nhé 🌷",
+        "Gửi chị một chút ánh sao để đêm nay lòng nhẹ hơn ✨",
+        "Nếu có điều gì khiến chị buồn, cứ để gió đêm mang nó đi xa nha 🍃",
+        "Chị Hân ơi, tối nay hãy cho trái tim mình được nghỉ phép một chút nhé 💗",
+        "Đèn lồng sáng rồi, em gửi theo đó một lời chúc ngủ thật ngon 🏮🌙",
+        "Bầu trời càng tối thì những vì sao càng trở nên rõ ràng, chị cũng vậy đó ✨",
+        "Chị cứ dịu dàng với bản thân như cách chị dịu dàng với mọi người nha 💛",
+        "Tối nay em chỉ muốn nhắc chị một điều: chị cũng xứng đáng được quan tâm 🌸",
+        "Cô gái Bảo Bình hôm nay có thể cất chiếc áo mạnh mẽ xuống rồi đó ♒🫂",
+        "Chị Hân ơi, nếu mệt thì nghỉ, nếu buồn thì cứ buồn một chút, không cần phải cố đâu nha 🌙",
+        "Một ngày nữa sắp khép lại, mong những điều chưa trọn vẹn cũng được nhẹ nhàng bỏ qua 🍀",
+        "Đêm nay chị hãy ngủ với một tâm trạng thật nhẹ nhé 💙",
+        "Em gửi chị một cái ôm xuyên qua màn hình, nhận được chưa nè? 🤗📱",
+        "Nếu hôm nay chị đã cười được một lần, vậy là hôm nay cũng có một điều đẹp rồi đó 😊",
+        "Chị Hân nhớ uống chút nước trước khi ngủ nha 💧🌙",
+        "Đêm lạnh thì kéo chăn lên một chút nhé chị, đừng để bị lạnh 🧣",
+        "Tối nay không cần mạnh mẽ đâu, làm cô gái nhỏ được nghỉ ngơi một chút cũng được mà 💕",
+        "Trăng đêm nay thay em canh cho chị một chút bình yên nhé 🌕✨",
+        "Chúc chị bỏ lại những mệt mỏi của hôm nay trước cửa phòng ngủ nha 🚪🌙",
+        "Bảo Bình có thể tự do bay nhảy cả ngày, nhưng tối rồi thì nhớ về nhà nghỉ ngơi nha ♒🏡",
+        "Chị Hân ơi, em mong giấc ngủ tối nay sẽ ôm lấy chị thật dịu dàng 💤💛",
+        "Không có chuyện gì đáng để chị phải thức cả đêm suy nghĩ đâu nha 🌙",
+        "Ngày mai chưa đến, nên tối nay chị chỉ cần sống cho khoảnh khắc này thôi 🍃",
+        "Một chút ánh trăng, một chút gió, một chút bình yên gửi chị Hân 🌕🍃",
+        "Chị nhớ đặt điện thoại xuống một lúc để mắt được nghỉ nha 📱😴",
+        "Nếu cả ngày đã chạy thật nhanh, tối nay mình đi chậm lại một chút nhé 🌿",
+        "Chúc chị tối nay không gặp giấc mơ xấu nào, chỉ toàn những điều thật đẹp 🌙✨",
+        "Em gửi chị một ngôi sao nhỏ, coi như một lời nhắc rằng chị không hề vô hình ⭐",
+        "Hân ơi, hôm nay có thể chưa hoàn hảo nhưng chị đã cố gắng rồi, thế là đủ 💗",
+        "Đêm nay hãy để tiếng gió thay tiếng những suy nghĩ trong đầu chị nhé 🍃",
+        "Chị Hân à, đừng thức khuya quá nha, ngày mai còn cần năng lượng của chị đó 🔋🌙",
+        "Một buổi tối bình yên đôi khi chỉ cần một ly nước, một chiếc chăn và một giấc ngủ ngon 🥤🛌",
+        "Chúc chị khép lại hôm nay bằng một nụ cười thật nhỏ 😊🌙",
+        "Em mong căn phòng của chị tối nay thật ấm áp và dễ chịu 🏡💛",
+        "Bầu trời đêm rộng lắm, đủ chỗ cho mọi ước mơ của cô gái Bảo Bình đó ♒🌌",
+        "Nếu chị đang nhìn lên trời, nhớ chọn một ngôi sao để gửi điều ước nha ⭐",
+        "Tối nay chị hãy tự nói với mình rằng: “Mình đã làm tốt rồi.” 💕",
+        "Chị Hân ơi, đừng để một ngày không vui khiến chị quên mất những ngày đẹp đã từng có 🌷",
+        "Gửi chị một chút ánh sáng giữa màn đêm, mong lòng chị cũng sáng lên ✨",
+        "Đèn lồng có thể nhỏ, nhưng ánh sáng của nó vẫn đủ làm đêm dịu hơn 🏮💛",
+        "Chị cứ nghỉ ngơi đi, những chuyện còn lại để ngày mai giải quyết nha 🌙",
+        "Bảo Bình tối nay nhớ sạc cả điện thoại lẫn năng lượng cho mình nhé 🔋♒",
+        "Em chúc chị có một buổi tối không deadline, không áp lực, chỉ có sự bình yên 😌",
+        "Nếu mệt quá thì đừng cố nữa nha chị, cơ thể cũng biết mệt mà 💗",
+        "Chị Hân xứng đáng có một đêm thật yên sau một ngày dài 🌙",
+        "Mong mọi suy nghĩ rối ren trong lòng chị tối nay từ từ được tháo gỡ 🍃",
+        "Một chiếc ôm trước khi ngủ, chị nhận giúp em nha 🤗💛",
+        "Đêm nay sao nhiều quá, chắc bầu trời cũng đang chúc chị ngủ ngon đó ⭐",
+        "Chị nhớ tắt bớt ánh sáng và cho đôi mắt được nghỉ ngơi nhé 🌙",
+        "Hân ơi, nếu ngày hôm nay có chuyện làm chị buồn, đừng mang nó vào giấc ngủ nha 💕",
+        "Chúc chị tối nay ngủ một giấc thật sâu và sáng mai thức dậy thật nhẹ nhàng 🌙🌤️",
+        "Một ngày khép lại không phải là kết thúc, mà là cơ hội để mình bắt đầu lại ngày mai 🌅",
+        "Chị Hân ơi, tối nay hãy để trái tim được nghỉ thay vì tiếp tục suy nghĩ nhé 💗",
+        "Em gửi chị một chút dịu dàng của đêm nay 🌌",
+        "Bầu trời đang yên, chị cũng cho lòng mình yên một chút nha 🍃",
+        "Chúc chị tối nay gặp toàn những giấc mơ đẹp và những điều dễ thương 💤🌸",
+        "Nếu có thể, trước khi ngủ chị hãy nhớ đến một điều khiến mình biết ơn hôm nay nhé 💛",
+        "Bảo Bình của em, tối nay đừng quên dành một chút thời gian cho chính mình ♒🌙",
+        "Chị Hân ơi, không cần phải giải quyết cả thế giới trong một buổi tối đâu nha 😌",
+        "Một đêm bình thường cũng có thể trở thành một đêm thật đẹp nếu lòng mình bình yên 🌙",
+        "Em mong chị tối nay được ngủ trong cảm giác an toàn và nhẹ nhõm 🫂",
+        "Nếu ngoài trời có gió, coi như em gửi một lời chúc thật khẽ đến chị 🍃💌",
+        "Chị nhớ đóng cửa cẩn thận rồi nằm nghỉ nha, cô gái Bảo Bình 🌙🏡",
+        "Tối nay hãy cho bản thân quyền được lười một chút nhé 😆💕",
+        "Chị Hân ơi, ngày mai còn dài, nên đêm nay mình ngủ sớm nha 💤",
+        "Một chút trăng sáng, một chút sao xa, một chút thương gửi đến chị 🌕⭐",
+        "Mong chị không còn phải nghĩ về những điều đã xảy ra quá nhiều nữa 🍀",
+        "Chị đã đi qua thêm một ngày rồi, đáng được nghỉ ngơi lắm đó 🌷",
+        "Tối nay em không chúc gì lớn lao, chỉ mong chị thật bình an thôi 💛",
+        "Nếu chị đang mỉm cười khi đọc câu này thì em xin nhận một phần công nha 😆✨",
+        "Đêm nay hãy để những vì sao giữ hộ chị những ước mơ chưa kịp nói ra ⭐",
+        "Chúc cô gái Bảo Bình có một đêm thật nhẹ, thật ấm và thật nhiều yêu thương ♒❤️",
+        "Hân ơi, mọi chuyện rồi sẽ có cách của nó, chị đừng lo quá nha 🌙",
+        "Em gửi chị một chiếc gối mềm tưởng tượng, nằm xuống là ngủ liền 😴🛏️",
+        "Chị nhớ chăm sóc sức khỏe nha, đừng đổi giấc ngủ lấy vài giờ lướt điện thoại 📱🌙",
+        "Một ngày nhiều chuyện đến đâu cũng nên có một khoảng thời gian thật yên cho chị 🍃",
+        "Nếu hôm nay chị chưa kịp yêu thương mình, tối nay bù lại một chút nha 💕",
+        "Chị Hân ơi, hãy ngủ với suy nghĩ rằng ngày mai mình vẫn còn rất nhiều điều tốt đẹp để gặp 🌅",
+        "Bầu trời đêm nay không cần hoàn hảo, chị cũng không cần phải hoàn hảo đâu 🌌💛",
+        "Mong giấc ngủ ôm lấy chị thật nhẹ, giống như một cái ôm không cần nói thành lời 🫂",
+        "Tối nay chị cứ thả lỏng đi, những chuyện chưa xong để mai mình tiếp tục nhé 🌙",
+        "Chúc chị Hân một đêm bình an, một giấc ngủ ngon và một ngày mai thật rực rỡ ✨🌙"
+    ],
 
-   CẤU TRÚC:
-   morning        = thông điệp buổi sáng
-   evening        = thông điệp buổi tối
-   location       = thông điệp xin quyền thời tiết
-   shootingStar   = thông điệp khi sao băng
-   lanternMemory  = thông điệp của đèn lồng
-   quietNight     = thông điệp đêm yên tĩnh
-   nightAtmosphere= thông điệp không khí ban đêm
-   aquariusPoems  = các khổ thơ của chòm Bảo Bình
+    "location": [
+        "☁️ Chị Hân ơi, nhấn vào đám mây nhỏ rồi chọn Cho phép nhé, em xem thời tiết giúp chị nha 🌤️",
+        "🌤️ Chị bấm vào đám mây nhỏ một chút nha, nếu trình duyệt hỏi thì chọn Cho phép nhé 💛",
+        "☔ Chị cho phép một chút nha, để em xem hôm nay trời có mưa không rồi nhắc chị mang ô 🌧️",
+        "☀️ Nhấn vào đám mây nhỏ và chọn Cho phép nhé chị, em sẽ xem hôm nay trời nắng hay nhiều mây nha.",
+        "💧 Chị Hân ơi, cho em xem thời tiết một chút nhé, để em báo nhiệt độ cho chị 🌡️",
+        "🍃 Chị chỉ cần bấm Cho phép khi trình duyệt hỏi thôi nha, còn lại để em lo phần thời tiết cho chị 💕",
+        "🌈 Chị nhấn vào đám mây nhỏ nhé, em sẽ gửi chị một bản thời tiết nhỏ xinh cho hôm nay.",
+        "☁️ Nếu trình duyệt hỏi, chị chọn Cho phép nha, em muốn xem hôm nay bầu trời bên chị thế nào 🌤️",
+        "🌦️ Chị cho em một chút thông tin thời tiết nhé, để em biết lúc nào nên nhắc chị mang ô ☔",
+        "💛 Chị Hân cứ yên tâm nha, em chỉ dùng thông tin này để xem thời tiết và chăm sóc lời nhắc cho chị thôi 🌷",
+        "🌤️ Nhấn vào đám mây nhỏ đi chị, em sẽ xem hôm nay trời có dễ chịu không nha.",
+        "☔ Cho phép em xem thời tiết một chút nhé chị, biết đâu hôm nay cần một chiếc ô xinh xinh đó 🌂",
+        "☀️ Chị Hân ơi, để em xem hôm nay nắng có đẹp không nha. Chị chỉ cần chọn Cho phép khi trình duyệt hỏi thôi 💛",
+        "🍃 Em muốn xem gió hôm nay thế nào để nhắc chị nếu trời hơi lạnh hoặc gió mạnh nha.",
+        "🌡️ Chị bấm vào mây nhỏ và chọn Cho phép nhé, em xem nhiệt độ rồi báo lại cho chị thật dễ hiểu nha.",
+        "🌧️ Nếu hôm nay có mưa, em sẽ nhắc chị chuẩn bị trước để khỏi bị bất ngờ nha ☔",
+        "🌤️ Chị cứ nhấn Cho phép khi trình duyệt hỏi nhé, em sẽ lấy thông tin thời tiết để làm những lời nhắc dễ thương cho chị.",
+        "💧 Em muốn biết hôm nay trời có nóng không để còn nhắc chị uống nước nữa nè 💕",
+        "☁️ Chị Hân ơi, cho em nhìn bầu trời hôm nay một chút nha, em sẽ xem thời tiết giúp chị 🌥️",
+        "🌈 Chỉ một lần nhấn Cho phép thôi nha chị, rồi em có thể xem dự báo thời tiết để nhắc chị khi cần.",
+        "🌅 Nếu chị đồng ý, em còn có thể báo chị giờ mặt trời mọc và lặn hôm nay nữa đó ✨",
+        "☀️ Chị cho phép em xem thời tiết nha, để mỗi ngày em gửi chị một lời nhắc thật vừa đủ.",
+        "☔ Trời mà có dấu hiệu mưa, em sẽ nhắc chị mang ô trước khi ra ngoài nha 🌧️",
+        "🍃 Chị Hân chỉ cần nhấn vào đám mây nhỏ, rồi chọn Cho phép nếu trình duyệt hỏi nhé.",
+        "🌤️ Em sẽ xem nhiệt độ, mưa nắng và một vài thông tin thời tiết cần thiết để nhắc chị nha 💛",
+        "☁️ Đám mây nhỏ này có một nhiệm vụ dễ thương: giúp em xem thời tiết để chăm sóc chị đó 🌷",
+        "🌦️ Chị nhấn Cho phép nha, để em biết hôm nay nên chúc chị một ngày nắng đẹp hay một ngày mưa dịu dàng ☔",
+        "💛 Chị đừng lo nha, em chỉ cần thông tin thời tiết để gửi những lời nhắc phù hợp cho chị thôi.",
+        "🌡️ Cho em xem thời tiết một chút nha chị Hân, em sẽ báo nhiệt độ hiện tại cho chị thật gọn gàng.",
+        "☀️ Nếu hôm nay trời nắng, em sẽ nhắc chị chú ý che nắng và uống đủ nước nha.",
+        "☔ Nếu trời có mưa, em sẽ nhẹ nhàng nhắc chị chuẩn bị ô trước khi ra ngoài 🌂",
+        "🍃 Nếu gió hôm nay hơi mạnh, em cũng có thể nhắc chị để chị chuẩn bị trước nha.",
+        "🌤️ Chị Hân ơi, bấm vào mây nhỏ và chọn Cho phép nhé, để em làm người nhắc thời tiết cho chị 💕",
+        "🌈 Em không cần chị làm gì phức tạp đâu, chỉ cần chọn Cho phép khi trình duyệt hỏi là được nha.",
+        "☁️ Cho em xem thời tiết hôm nay một chút nhé chị, em muốn biết bầu trời đang dịu dàng hay có chút mưa 🌦️",
+        "💧 Chị cho phép nha, để em biết hôm nay trời có nóng không và nhắc chị uống nước đúng lúc.",
+        "🌅 Em có thể xem cả thời điểm mặt trời mọc và lặn để những lời nhắc trong ngày của chị tự nhiên hơn đó.",
+        "☔ Chị Hân ơi, nếu thấy trình duyệt hỏi thì cứ chọn Cho phép nhé, em sẽ dùng thông tin đó để xem thời tiết cho chị.",
+        "🌤️ Một cú chạm nhỏ của chị, đổi lại em có thể chuẩn bị cho chị những lời nhắc thời tiết dễ thương hơn 💛",
+        "🍃 Chị cứ yên tâm nha, em chỉ cần thông tin cần thiết để xem thời tiết và đưa ra lời nhắc phù hợp thôi.",
+        "☁️ Bấm mây nhỏ nhé chị, để em xem hôm nay bầu trời dành cho chị một ngày nắng hay một ngày mưa 🌤️",
+        "🌡️ Em muốn biết nhiệt độ hôm nay để còn nhắc chị mặc đồ cho phù hợp nha chị Hân.",
+        "🌧️ Nếu thời tiết thay đổi, em sẽ cố gắng nhắc chị sớm để chị không bị bất ngờ nha 💕",
+        "☀️ Chị Hân cho phép em xem thời tiết nhé, để mỗi lần chị mở bầu trời này lên em có thể chăm sóc phần thời tiết tốt hơn.",
+        "🌦️ Chị nhấn vào đám mây nhỏ rồi chọn Cho phép nha, em sẽ gửi chị thông tin thời tiết thật nhẹ nhàng thôi.",
+        "💛 Không cần lo đâu chị, chỉ cần một lần Cho phép khi trình duyệt hỏi, rồi em sẽ xem thời tiết giúp chị nha.",
+        "☁️ Chị Hân ơi, để em biết hôm nay trời bên chị thế nào nhé. Nhấn mây nhỏ và chọn Cho phép nha 🌤️",
+        "🌙 Dù là sáng hay tối, em vẫn có thể xem thông tin thời tiết để gửi chị những lời nhắc phù hợp nha.",
+        "🌷 Chị chỉ cần cho phép một lần thôi, phần còn lại để em âm thầm chăm chút những lời nhắc thời tiết cho chị nhé.",
+        "☀️ Em muốn mỗi lời nhắc gửi đến chị đều đúng lúc một chút, nên cho em xem thời tiết hôm nay nha Hân 💕",
+        "🌤️ Chị Hân ơi, mở đám mây nhỏ và chọn Cho phép nhé. Để em xem trời hôm nay có đang dịu dàng với chị không nha ☁️💛"
+    ],
 
-   ========================================================= */
+    "shootingStar": [
+        "Ước một điều đi chị... ✨",
+        "Có những điều chỉ cần giữ trong lòng là đủ 🌠",
+        "Một điều ước nhỏ, gửi theo ngôi sao này nha 🌌",
+        "Nếu chị vừa ước một điều, mong nó tìm được đường đến với chị 💫",
+        "Đừng nói ra nhé... cứ để bầu trời giữ bí mật này cho chị 🌙"
+    ],
 
-window.GCH_MESSAGES = {
+    "lanternMemory": [
+        "Chiếc đèn này mang theo một lời chúc thật ấm áp dành cho chị 🏮",
+        "Có những điều nhỏ xíu nhưng vẫn đủ làm một đêm dịu lại ✨",
+        "Một chiếc đèn bay ngang, để lại cho chị một chút bình yên 🌙",
+        "Nếu hôm nay mệt rồi, cứ để chiếc đèn này mang bớt mệt mỏi đi nha 🏮",
+        "Đêm nay em gửi chị một ánh sáng nhỏ, không cần phải trả lại đâu 💛",
+        "Có người đang âm thầm chúc chị ngủ thật ngon 🌌"
+    ],
 
-  /* =======================================================
-     THÔNG ĐIỆP BUỔI SÁNG
-     ======================================================= */
+    "aquariusPoems": [
+        [
+            "Trời đêm lấp lánh",
+            "Ôm trọn sao sa",
+            "Mệt thì cứ khóc",
+            "Có em ở nhà ✨"
+        ],
+        [
+            "Đêm nay trăng sáng",
+            "Sao rơi thật xa",
+            "Nếu lòng em mỏi",
+            "Về đây có nhà 🌙"
+        ],
+        [
+            "Bầu trời vẫn đó",
+            "Gió vẫn đi qua",
+            "Nếu chị buồn quá",
+            "Có em bên nhà 💛"
+        ]
+    ],
 
-  "morning": [
-    "Chị Hân ơi, bên ngoài nắng đẹp lắm! ☀️",
-    "Buổi sáng rạng rỡ như nụ cười của chị nha ✨",
-    "Bên chị buổi sáng có lạnh không? Nhớ mặc áo ấm nhé! 🧥",
-    "Hãy mang theo ô phòng cơn mưa bất chợt nha chị ☔",
-    "Cô gái Bảo Bình của em ngày mới tràn đầy năng lượng 🔋",
-    "Uống một ly nước ấm cho buổi sáng an lành 🍵",
-    "Một nụ cười bằng mười thang thuốc bổ, cười lên nha chị 😊",
-    "Chúc chị một ngày làm việc thật hiệu quả 💼",
-    "Hôm nay có mệt mỏi thì tối về em bù cho cái ôm nhé 🤗",
-    "Ngày mới ngập tràn niềm vui nha chị Hân 🌻",
-    "Dù bận rộn cũng nhớ ăn sáng đầy đủ nha 🍳",
-    "Trời trong xanh như tâm hồn tự do của Bảo Bình vậy 🍃",
-    "Mây trắng bay ngang mang theo lời chúc tốt lành đến chị ☁️",
-    "Chị Hân là điều tuyệt vời nhất! 💖",
-    "Gửi chị chút ấm áp của ánh mặt trời sớm mai 🌅",
-    "Hãy để những muộn phiền trôi đi như đám mây kia nhé ☁️",
-    "Sự thông minh của Bảo Bình sẽ giúp chị giải quyết mọi việc hôm nay 🧠✨",
-    "Chị ra đường nhớ thoa kem chống nắng nha ☀️",
-    "Tít tít! Có một thông điệp siêu dễ thương gửi đến chị Hân 💌",
-    "Chúc chị một ngày suôn sẻ, không quạu cọ nha 😊",
-    "Dù ngày hôm nay thế nào, hãy nhớ có em luôn ủng hộ chị 🌟",
-    "Sáng nay đường đông, chị đi lại cẩn thận nhé 🛵",
-    "Bầu trời hôm nay đẹp như chính chị vậy 🌸",
-    "Nhớ giữ gìn sức khỏe, đừng làm việc quá sức nha chị 💪",
-    "Chị Hân cười lên một cái là bừng sáng cả góc trời ✨",
-    "Một ngày bình yên, vô lo vô nghĩ nha chị 🍀",
-    "Cứ tự do, bay bổng và rạng rỡ như đám mây này nhé Bảo Bình ☁️",
-    "Mỗi đám mây là một lời chúc em gửi đến chị trong hôm nay 🌬️",
-    "Hãy bắt đầu ngày mới bằng sự tích cực nhé 🌻",
-    "Chào buổi sáng cô gái tuyệt vời nhất thế giới! 🌍❤️",
-    "Mở mắt ra là một ngày mới, chị cứ thong thả tận hưởng nha 🌤️",
-    "Nắng sớm dịu dàng, mong lòng chị hôm nay cũng thật nhẹ nhàng 🌼",
-    "Chúc chị hôm nay gặp toàn những điều nhỏ xinh và dễ thương 💛",
-    "Đừng quên dành cho bản thân một chút thời gian nghỉ ngơi nha chị ☕",
-    "Một ngày mới, một chút bình yên, một chút may mắn gửi chị 🍀",
-    "Nếu hôm nay nhiều việc quá thì mình làm từng chút một thôi nha 🌿",
-    "Gửi chị một tia nắng nhỏ để mở đầu ngày thật ấm áp ☀️",
-    "Mong mọi chuyện hôm nay đến với chị thật vừa vặn và dịu dàng 🌷",
-    "Chị cứ bước chậm một chút cũng được, miễn là hôm nay chị vui 💕",
-    "Bầu trời sáng rồi, em cũng gửi chị một lời chúc thật trong trẻo 🌈",
-    "Chúc chị có một buổi sáng nhẹ tênh, không vội vàng và thật vui 🌤️"
-  ],
+    "quietNight": [
+        "Đêm nay yên một chút cũng được. 🌙",
+        "Không cần vội đâu chị, cứ nghỉ ngơi một chút nhé.",
+        "Bầu trời vẫn ở đây, chị cứ thở chậm lại nha. 🌌",
+        "Mọi thứ có thể để ngày mai rồi. Đêm nay ngủ ngon nhé.",
+        "Nếu mệt thì mình im lặng một chút cũng được. 💛"
+    ],
 
-
-  /* =======================================================
-     THÔNG ĐIỆP BUỔI TỐI
-     ======================================================= */
-
-  "evening": [
-    "Chị Hân ơi, đêm nay trăng đẹp quá nhỉ? 🌕",
-    "Nếu chị thấy lạnh, em gửi chị vạn cái ôm! ❄️🫂",
-    "Cô gái Bảo Bình độc lập và ấm áp của em ♒❤️",
-    "Mệt mỏi quá thì về đây, em cho mượn cái ôm nè 🤗",
-    "Đang gửi một cái ôm online đến chị Hân... Loading 100% 📶",
-    "Bảo Bình luôn độc lập, sáng tạo nhưng lại vô cùng dịu dàng với em 💫",
-    "Trời lạnh rồi, chị nhớ mặc ấm và nhận cái ôm của em nha 🧣",
-    "Em không có quà to, chỉ có cái ôm siêu to tặng chị thôi 🎁🙆‍♂️",
-    "Thế giới này xô bồ quá, để em ôm chị một cái cho bình yên 🍃",
-    "Chúc chị ngủ ngon kèm một cái ôm thật chặt! 🌙💤",
-    "Ôm chị Hân một cái để sạc đầy năng lượng nè! 🔋⚡",
-    "Dù cả thế giới quay lưng, em vẫn dang tay ôm chị 🤗",
-    "Chị Hân cười lên là xinh nhất! 😊",
-    "Mỗi ngọn đèn là một cái ôm ấm áp gửi tới chị ✨",
-    "Chị nhớ giữ gìn sức khỏe nha ❤️",
-    "Chị là điều tuyệt vời nhất! 💖",
-    "Phí dịch vụ tư vấn hôm nay là một cái ôm nha chị :> ✨",
-    "Chị Hân cười lên là rạng rỡ như mặt trời! ☀️",
-    "Người ta bảo Bảo Bình hay lạnh lùng, nhưng em chỉ thấy chị ấm áp và đáng yêu thôi 💫",
-    "Mong chị luôn an yên và hạnh phúc 🌸",
-    "Chị nhớ giữ gìn sức khỏe nha, đừng thức khuya nữa 🌙",
-    "Gửi chị một chút may mắn của ngọn đèn này ✨",
-    "Sự thông minh và độc lập của Bảo Bình sẽ giúp chị vượt qua mọi thứ 🧠✨",
-    "Em luôn ở đây ủng hộ chị Hân! 🌟",
-    "Chúc chị một đời an nhiên, vô lo vô nghĩ 🍀",
-    "Chị là người sâu sắc và tinh tế nhất em từng gặp 💖",
-    "Mãi tự do, rạng rỡ và tràn đầy năng lượng nha cô nàng Bảo Bình ♒🌻",
-    "Tâm hồn tự do của Bảo Bình trong chị luôn truyền cảm hứng cho em ✨",
-    "Dù Bảo Bình có đôi lúc bướng bỉnh và khó đoán, nhưng đó là điều em thích nhất ở chị 😊",
-    "Chị Hân là điều tuyệt vời nhất! ✨"
-  ],
-
-
-  /* =======================================================
-     THÔNG ĐIỆP XIN QUYỀN THỜI TIẾT
-     ======================================================= */
-
-  "location": [
-    "☁️ Chị Hân ơi, nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ xem thời tiết ngay chỗ chị nha 🌤️",
-    "📍 Chị nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ báo nhiệt độ hiện tại cho chị 🌡️",
-    "☔ Chị nhấn vào đám mây nhỏ và chọn Cho phép, em sẽ xem hôm nay trời có khả năng mưa không để nhắc chị mang ô nha.",
-    "🌤️ Bấm vào đám mây nhỏ đi chị, em sẽ xem trời hôm nay nắng, mưa hay nhiều mây ở chỗ chị.",
-    "💧 Chị nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ kiểm tra độ ẩm và nhiệt độ cảm nhận ngoài trời cho chị.",
-    "🍃 Chị nhấn vào đám mây nhỏ và chọn Cho phép, em còn xem được hôm nay gió mạnh hay nhẹ nữa đó.",
-    "☀️ Em có thể xem chỉ số UV hôm nay để nhắc chị lúc nào nên che nắng nữa nè.",
-    "🌅 Nếu chị cho phép, em có thể báo cả giờ mặt trời mọc và lặn ở chỗ chị hôm nay.",
-    "🌦️ Chị bấm mây và chọn Cho phép nhé, rồi em gửi chị một bản dự báo thời tiết nhỏ xinh.",
-    "💛 Chị chỉ cần nhấn vào đám mây nhỏ và chọn Cho phép khi trình duyệt hỏi, em sẽ xem thời tiết giúp chị nha."
-  ],
-
-
-  /* =======================================================
-     THÔNG ĐIỆP SAO BĂNG
-     ======================================================= */
-
-  "shootingStar": [
-    "Ước một điều đi chị... ✨",
-    "Có những điều chỉ cần giữ trong lòng là đủ 🌠",
-    "Một điều ước nhỏ, gửi theo ngôi sao này nha 🌌",
-    "Nếu chị vừa ước một điều, mong nó tìm được đường đến với chị 💫",
-    "Đừng nói ra nhé... cứ để bầu trời giữ bí mật này cho chị 🌙"
-  ],
-
-
-  /* =======================================================
-     THÔNG ĐIỆP ĐÈN LỒNG
-     ======================================================= */
-
-  "lanternMemory": [
-    "Chiếc đèn này mang theo một lời chúc thật ấm áp dành cho chị 🏮",
-    "Có những điều nhỏ xíu nhưng vẫn đủ làm một đêm dịu lại ✨",
-    "Một chiếc đèn bay ngang, để lại cho chị một chút bình yên 🌙",
-    "Nếu hôm nay mệt rồi, cứ để chiếc đèn này mang bớt mệt mỏi đi nha 🏮",
-    "Đêm nay em gửi chị một ánh sáng nhỏ, không cần phải trả lại đâu 💛",
-    "Có người đang âm thầm chúc chị ngủ thật ngon 🌌"
-  ],
-
-
-  /* =======================================================
-     THƠ CHÒM BẢO BÌNH
-     -------------------------------------------------------
-     QUAN TRỌNG:
-
-     Mỗi [ ... ] bên dưới là MỘT KHỔ THƠ.
-
-     Mỗi khổ nên có 4 dòng.
-
-     Sau này muốn thêm thơ:
-     → copy một khối [ ... ]
-     → sửa 4 dòng bên trong
-     → thêm dấu phẩy sau khổ cũ
-     → lưu file.
-
-     KHÔNG CẦN SỬA INDEX.HTML.
-     ======================================================= */
-
-  "aquariusPoems": [
-
-    [
-      "Trời đêm lấp lánh",
-      "Ôm trọn sao sa",
-      "Mệt thì cứ khóc",
-      "Có em ở nhà ✨"
+    "nightAtmosphere": [
+        "Đêm nay trăng dịu quá... 🌙",
+        "Một khoảng trời thật yên dành cho chị. 🌌",
+        "Gió đêm đi ngang, mang theo một lời chúc ngủ ngon. 🍃",
+        "Bầu trời tối rồi, nhưng vẫn còn rất nhiều ánh sáng nhỏ. ✨"
     ]
-
-    /*
-     =====================================================
-     THÊM KHỔ THƠ MỚI Ở ĐÂY
-     =====================================================
-
-     Ví dụ:
-
-     [
-       "Đêm nay trăng sáng",
-       "Sao rơi thật xa",
-       "Nếu lòng em mỏi",
-       "Về đây có nhà 🌙"
-     ],
-
-     Hoặc:
-
-     [
-       "Bầu trời vẫn đó",
-       "Gió vẫn đi qua",
-       "Nếu chị buồn quá",
-       "Có em bên nhà 💛"
-     ]
-
-     =====================================================
-     */
-  ],
-
-
-  /* =======================================================
-     ĐÊM YÊN TĨNH
-     ======================================================= */
-
-  "quietNight": [
-    "Đêm nay yên một chút cũng được. 🌙",
-    "Không cần vội đâu chị, cứ nghỉ ngơi một chút nhé.",
-    "Bầu trời vẫn ở đây, chị cứ thở chậm lại nha. 🌌",
-    "Mọi thứ có thể để ngày mai rồi. Đêm nay ngủ ngon nhé.",
-    "Nếu mệt thì mình im lặng một chút cũng được. 💛"
-  ],
-
-
-  /* =======================================================
-     KHÔNG KHÍ BAN ĐÊM
-     ======================================================= */
-
-  "nightAtmosphere": [
-    "Đêm nay trăng dịu quá... 🌙",
-    "Một khoảng trời thật yên dành cho chị. 🌌",
-    "Gió đêm đi ngang, mang theo một lời chúc ngủ ngon. 🍃",
-    "Bầu trời tối rồi, nhưng vẫn còn rất nhiều ánh sáng nhỏ. ✨"
-  ]
-
 };
