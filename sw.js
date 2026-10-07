@@ -40,7 +40,17 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
   if (url.origin !== self.location.origin) return;
+
+  /*
+   * QUAN TRỌNG:
+   * App chính không được can thiệp vào khu vực Admin.
+   * Admin có Service Worker riêng tại /GuichiHan/admin/
+   */
+  if (url.pathname.startsWith('/GuichiHan/admin/')) {
+    return;
+  }
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
@@ -49,7 +59,9 @@ self.addEventListener('fetch', event => {
           const copy = response.clone();
 
           caches.open(CACHE)
-            .then(cache => cache.put(`${BASE}index.html`, copy))
+            .then(cache => {
+              cache.put(`${BASE}index.html`, copy);
+            })
             .catch(() => {});
 
           return response;
@@ -67,7 +79,9 @@ self.addEventListener('fetch', event => {
           const copy = response.clone();
 
           caches.open(CACHE)
-            .then(cache => cache.put(event.request, copy))
+            .then(cache => {
+              cache.put(event.request, copy);
+            })
             .catch(() => {});
         }
 
