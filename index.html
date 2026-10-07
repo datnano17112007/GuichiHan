@@ -347,7 +347,7 @@
             box-shadow: 0 14px 30px rgba(51,65,85,.10), 0 0 22px rgba(255,255,255,.48);
         }
 
-        .sky-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; transition: transform 0.1s ease-out, opacity 1.5s ease; }
+        .sky-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; isolation: isolate; pointer-events: none; transition: transform 0.1s ease-out, opacity 1.5s ease; }
         .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0; animation: twinkleStar var(--twinkle-dur) ease-in-out infinite alternate; }
         @keyframes twinkleStar { 0% { transform: scale(0.8); opacity: 0.1; box-shadow: none; } 100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 6px rgba(255,240,200,0.9); } }
 
@@ -818,10 +818,162 @@
         body:not(.morning) .github-bird-flock { display:none; }
 
 
+        /* --- KHINH KHÍ CẦU: MODEL GỐC GITHUB + QUỸ ĐẠO BAY TỰ NHIÊN --- */
+        .hot-air-balloon-wrapper {
+            position:absolute;
+            left:0;
+            top:0;
+            width:25rem;
+            height:25rem;
+            z-index:4;
+            pointer-events:none;
+            opacity:0;
+            will-change:left,top,transform,opacity;
+        }
+
+        /* Chiều sâu: nhỏ và mờ hơn ở xa, nhưng KHÔNG bao giờ phóng quá to. */
+        .hot-air-balloon-wrapper.balloon-far {
+            opacity:.25;
+            filter:blur(1.05px) saturate(.84);
+            z-index:8;
+        }
+
+        .hot-air-balloon-wrapper.balloon-normal {
+            opacity:.60;
+            filter:blur(.24px) saturate(.94);
+            z-index:18;
+        }
+
+        .hot-air-balloon-wrapper.balloon-near {
+            opacity:.78;
+            filter:none;
+            z-index:30;
+        }
+
+        /* Chiều sâu khí quyển: mỗi lớp có độ rõ, tương phản và haze khác nhau. */
+        .hot-air-balloon-wrapper.balloon-far .hot-air-balloon { filter:saturate(.82) brightness(1.03); }
+        .hot-air-balloon-wrapper.balloon-normal .hot-air-balloon { filter:saturate(.94) brightness(1.01); }
+        .hot-air-balloon-wrapper.balloon-near .hot-air-balloon { filter:saturate(1.02); }
+
+        .hot-air-balloon-wrapper .balloon {
+            background-color:var(--balloon-main, #F27C68);
+            box-shadow:
+                inset -10px -7px 13px rgba(96,58,52,.11),
+                inset 9px 6px 15px rgba(255,255,255,.16),
+                0 7px 14px rgba(67,87,105,.07);
+        }
+
+        /* ===== MODEL GỐC GITHUB: .hotair-balloon / .balloon / .basket ===== */
+        .hot-air-balloon {
+            width:25rem;
+            height:25rem;
+            margin-top:2rem;
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%, -50%) scale(var(--balloon-model-scale, .48));
+            transform-origin:50% 50%;
+        }
+
+        .balloon {
+            width:9.35rem;
+            height:9.35rem;
+            background-color:var(--balloon-main, #F27C68);
+            border-radius:50%;
+            border:none;
+            position:absolute;
+            left:50%;
+            top:50px;
+            transform:translateX(-50%);
+            animation:moving-balloon var(--balloon-bob-duration, 4.6s) ease-in-out infinite;
+        }
+
+        .balloon::after {
+            width:4.35rem;
+            height:0;
+            border-top:3.75rem solid var(--balloon-main, #F27C68);
+            border-left:1.85rem solid transparent;
+            border-right:1.85rem solid transparent;
+            content:"";
+            position:absolute;
+            top:100px;
+            left:50%;
+            transform:translateX(-50%);
+        }
+
+        .balloon::before {
+            width:70px;
+            height:25px;
+            background-color:var(--balloon-bottom, #E86B5A);
+            border-radius:5px;
+            content:"";
+            position:absolute;
+            left:50%;
+            top:9.35rem;
+            transform:translateX(-50%);
+        }
+
+        .basket {
+            width:2.65rem;
+            height:1.75rem;
+            background:#D1C1A6;
+            border-radius:0 0 3px 3px;
+            position:absolute;
+            left:50%;
+            transform:translateX(-50%);
+            top:16.05rem;
+            animation:moving-basket var(--balloon-bob-duration, 5.2s) ease-in-out infinite;
+            animation-delay:-1.15s;
+            transform-origin:50% 0;
+            will-change:transform;
+        }
+
+        .basket::before {
+            width:3.15rem;
+            height:.65rem;
+            background:#B2A082;
+            border-radius:3px;
+            content:"";
+            position:absolute;
+            top:-.65rem;
+            left:50%;
+            transform:translateX(-50%);
+        }
+
+        .basket::after {
+            width:1.55rem;
+            height:2.15rem;
+            border-left:2px solid #B2A082;
+            border-right:2px solid #B2A082;
+            content:"";
+            position:absolute;
+            top:-3.05rem;
+            left:50%;
+            width:1.7rem;
+            height:2.55rem;
+            transform:translateX(-50%) perspective(50px) rotateX(-40deg);
+        }
+
+        /* Phần .cloud của bản GitHub CỐ Ý KHÔNG được mang sang. */
+
+        @keyframes moving-balloon {
+            0%   { transform:translateX(-50%) translateY(0) rotate(-.35deg); }
+            50%  { transform:translateX(-50%) translateY(-2.2%) rotate(.45deg); }
+            100% { transform:translateX(-50%) translateY(0) rotate(-.25deg); }
+        }
+
+        @keyframes moving-basket {
+            0%   { transform:translateX(-50%) translateY(0) rotate(-1.1deg); }
+            50%  { transform:translateX(calc(-50% + 1px)) translateY(-1.5px) rotate(1.4deg); }
+            100% { transform:translateX(calc(-50% - 1px)) translateY(.5px) rotate(-.8deg); }
+        }
+
+        body:not(.morning) .hot-air-balloon-wrapper { display:none; }
+
         /* --- MÁY BAY: XA / THƯỜNG / GẦN + VỆT GIÓ --- */
         .airplane-wrapper {
             position: absolute;
-            z-index: 5;
+            z-index: 12;
             pointer-events: none;
             width: 0;
             height: 0;
@@ -830,9 +982,11 @@
             transition: left var(--plane-dur) linear, top var(--plane-dur) linear;
         }
 
-        .airplane-wrapper.airplane-far { opacity: .52; filter: blur(.12px); }
-        .airplane-wrapper.airplane-normal { opacity: .84; filter: blur(.02px); }
-        .airplane-wrapper.airplane-near { opacity: .97; }
+        /* Máy bay vẫn có chiều sâu, nhưng không tự động đè một khinh khí cầu
+           đang ở lớp gần hơn. */
+        .airplane-wrapper.airplane-far { opacity: .52; filter: blur(.12px); z-index: 5; }
+        .airplane-wrapper.airplane-normal { opacity: .84; filter: blur(.02px); z-index: 10; }
+        .airplane-wrapper.airplane-near { opacity: .97; z-index: 20; }
 
         .airplane-rotator {
             position: relative;
@@ -1813,7 +1967,7 @@
         <div id="gift-counter">0/50</div>
     </div>
 
-    <button id="location-cloud" type="button" aria-label="Bấm để cho phép vị trí và xem thời tiết" title="Bấm để cho phép vị trí và xem thời tiết">☁️</button>
+    <button id="location-cloud" type="button" aria-label="Bấm để cho phép và xem thời tiết" title="Bấm để cho phép và xem thời tiết">☁️</button>
 
     <div id="password-modal" class="modal">
         <div class="modal-content">
@@ -1949,20 +2103,31 @@
             "Cứ tự do, bay bổng và rạng rỡ như đám mây này nhé Bảo Bình ☁️",
             "Mỗi đám mây là một lời chúc em gửi đến chị trong hôm nay 🌬️",
             "Hãy bắt đầu ngày mới bằng sự tích cực nhé 🌻",
-            "Chào buổi sáng cô gái tuyệt vời nhất thế giới! 🌍❤️"
+            "Chào buổi sáng cô gái tuyệt vời nhất thế giới! 🌍❤️",
+            "Mở mắt ra là một ngày mới, chị cứ thong thả tận hưởng nha 🌤️",
+            "Nắng sớm dịu dàng, mong lòng chị hôm nay cũng thật nhẹ nhàng 🌼",
+            "Chúc chị hôm nay gặp toàn những điều nhỏ xinh và dễ thương 💛",
+            "Đừng quên dành cho bản thân một chút thời gian nghỉ ngơi nha chị ☕",
+            "Một ngày mới, một chút bình yên, một chút may mắn gửi chị 🍀",
+            "Nếu hôm nay nhiều việc quá thì mình làm từng chút một thôi nha 🌿",
+            "Gửi chị một tia nắng nhỏ để mở đầu ngày thật ấm áp ☀️",
+            "Mong mọi chuyện hôm nay đến với chị thật vừa vặn và dịu dàng 🌷",
+            "Chị cứ bước chậm một chút cũng được, miễn là hôm nay chị vui 💕",
+            "Bầu trời sáng rồi, em cũng gửi chị một lời chúc thật trong trẻo 🌈",
+            "Chúc chị có một buổi sáng nhẹ tênh, không vội vàng và thật vui 🌤️"
         ];
 
         const locationMessages = [
-            "☁️ Chị Hân ơi, bấm vào đám mây nhỏ và cho phép vị trí, em sẽ xem thời tiết ngay chỗ chị nha 🌤️",
-            "📍 Chị cho em biết vị trí một chút nhé, em có thể báo nhiệt độ hiện tại cho chị 🌡️",
-            "☔ Nếu chị cho phép vị trí, em sẽ xem hôm nay chỗ chị có khả năng mưa không để nhắc chị mang ô nha.",
+            "☁️ Chị Hân ơi, nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ xem thời tiết ngay chỗ chị nha 🌤️",
+            "📍 Chị nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ báo nhiệt độ hiện tại cho chị 🌡️",
+            "☔ Chị nhấn vào đám mây nhỏ và chọn Cho phép, em sẽ xem hôm nay trời có khả năng mưa không để nhắc chị mang ô nha.",
             "🌤️ Bấm vào đám mây nhỏ đi chị, em sẽ xem trời hôm nay nắng, mưa hay nhiều mây ở chỗ chị.",
-            "💧 Cho em xin quyền vị trí nhé, em sẽ kiểm tra cả độ ẩm và nhiệt độ cảm nhận ngoài trời cho chị.",
-            "🍃 Chị cho phép vị trí thì em còn xem được gió hôm nay mạnh hay nhẹ nữa đó.",
+            "💧 Chị nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ kiểm tra độ ẩm và nhiệt độ cảm nhận ngoài trời cho chị.",
+            "🍃 Chị nhấn vào đám mây nhỏ và chọn Cho phép, em còn xem được hôm nay gió mạnh hay nhẹ nữa đó.",
             "☀️ Em có thể xem chỉ số UV hôm nay để nhắc chị lúc nào nên che nắng nữa nè.",
             "🌅 Nếu chị cho phép, em có thể báo cả giờ mặt trời mọc và lặn ở chỗ chị hôm nay.",
             "🌦️ Chị bấm mây và chọn Cho phép nhé, rồi em gửi chị một bản dự báo thời tiết nhỏ xinh.",
-            "💛 Chị không muốn chia sẻ vị trí cũng không sao nha. Nếu chị đồng ý, em sẽ dùng nó chỉ để xem thời tiết cho chị."
+            "💛 Chị chỉ cần nhấn vào đám mây nhỏ và chọn Cho phép khi trình duyệt hỏi, em sẽ xem thời tiết giúp chị nha."
         ];
 
         let mainContentQueue = [];
@@ -1974,6 +2139,10 @@
         let tinyLanternInterval;
         let airplaneInterval;
         let airplaneStartTimeout;
+        let balloonInterval;
+        let balloonStartTimeout;
+        let balloonRespawnTimeout;
+        let balloonFrameId = 0;
         let birdInterval;
         let birdStartTimeout;
         let sunInteractionInterval;
@@ -2147,16 +2316,16 @@
            Chỉ hiển thị khi chưa có vị trí được cấp phép/lưu trên thiết bị.
            Không tự xin quyền; quyền chỉ được yêu cầu sau một thao tác của chị. */
         const LOCATION_PROMPT_MESSAGES = [
-            'Chị ấn vào đám mây nhỏ ☁️ và cho phép vị trí, em sẽ xem thời tiết ngay chỗ chị nha 🌤️',
-            'Nếu chị cho em biết vị trí, em có thể báo chị hôm nay trời nắng hay mưa đó ☀️☔',
+            'Chị nhấn vào đám mây nhỏ ☁️ và chọn Cho phép nhé, em sẽ xem thời tiết ngay chỗ chị nha 🌤️',
+            'Chị nhấn vào đám mây nhỏ và chọn Cho phép, em có thể báo chị hôm nay trời nắng hay mưa đó ☀️☔',
             'Chị bấm chiếc mây nhỏ nhé, em sẽ xem thời tiết nơi chị đang ở cho tiện nè ☁️',
-            'Cho em xin vị trí của chị một chút nha, để em xem hôm nay chị có cần mang ô không ☔',
-            'Chị cho phép vị trí thì em có thể xem nhiệt độ và thời tiết hiện tại chỗ chị 🌡️',
+            'Chị nhấn vào đám mây nhỏ và chọn Cho phép nha, để em xem hôm nay chị có cần mang ô không ☔',
+            'Chị nhấn vào đám mây nhỏ và chọn Cho phép, em sẽ xem nhiệt độ và thời tiết hiện tại chỗ chị 🌡️',
             'Một cú chạm vào đám mây nhỏ thôi, em sẽ thử xem bầu trời chỗ chị hôm nay thế nào 🌤️',
-            'Nếu hôm nay chị ra ngoài, cho em biết vị trí để em nhắc chị mang ô hay áo khoác nha 🧥☔',
-            'Em không cần vị trí nếu chị không muốn đâu. Còn nếu chị cho phép, em sẽ xem thời tiết giúp chị ☁️💛',
+            'Nếu hôm nay chị ra ngoài, chị nhấn vào đám mây nhỏ và chọn Cho phép để em nhắc chị mang ô hay áo khoác nha 🧥☔',
+            'Chị chỉ cần nhấn vào đám mây nhỏ và chọn Cho phép khi trình duyệt hỏi, em sẽ xem thời tiết giúp chị ☁️💛',
             'Chị bấm mây nhỏ và chọn Cho phép khi trình duyệt hỏi nhé, rồi em xem thời tiết cho chị 🌦️',
-            'Cho em biết chị đang ở đâu nhé, em sẽ đổi những đám mây này thành lời nhắn thời tiết dành riêng cho chị ☁️✨'
+            'Chị nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ đổi những đám mây này thành lời nhắn thời tiết dành riêng cho chị ☁️✨'
         ];
 
         const WMO_WEATHER = {
@@ -2253,8 +2422,8 @@
             locationCloud.classList.toggle('loading', isLoading);
             if (isLoading) {
                 locationCloud.textContent = '⌖';
-                locationCloud.title = 'Đang kiểm tra vị trí và thời tiết…';
-                locationCloud.setAttribute('aria-label', 'Đang kiểm tra vị trí và thời tiết');
+                locationCloud.title = 'Đang kiểm tra và xem thời tiết…';
+                locationCloud.setAttribute('aria-label', 'Đang kiểm tra và xem thời tiết');
             } else {
                 locationCloud.textContent = '☁️';
             }
@@ -2455,7 +2624,7 @@
             const riseTime = formatTime(sunrise);
             const setTime = formatTime(sunset);
             if (riseTime && setTime) {
-                add(`Theo vị trí của chị, mặt trời mọc khoảng ${riseTime} và lặn khoảng ${setTime} hôm nay 🌅`);
+                add(`Hôm nay, mặt trời mọc khoảng ${riseTime} và lặn khoảng ${setTime} ở chỗ chị 🌅`);
             }
 
             // 11) Dự báo tổng quát cho hôm nay.
@@ -2482,21 +2651,49 @@
             const sourceArr = currentModeTime === 'morning' ? morningMessages : eveningMessages;
             const hasLocation = !!getSavedLocation();
 
-            // Tạo một queue mới có xáo trộn để 23+ lần mở không cứ lặp cùng thứ tự.
-            const normalItems = sourceArr.map(msg => ({ type: 'text', val: msg }));
+            /*
+             * Queue được chia thành 2 nhóm:
+             *   1) thông điệp bình thường
+             *   2) nội dung thời tiết / lời nhắc thời tiết
+             *
+             * Hai nhóm được đan xen ngay từ lúc tạo queue, thay vì xáo trộn
+             * toàn bộ một lần. Nhờ vậy không thể xuất hiện 2-3 mây thời tiết
+             * liên tiếp chỉ vì random.
+             */
+            const textItems = sourceArr.map(msg => ({ type: 'text', val: msg }));
+            const specialItems = hasLocation
+                ? weatherMessages.map(msg => ({ type: 'weather', val: msg }))
+                : locationMessages.map(msg => ({ type: 'location', val: msg }));
 
-            // Chưa có vị trí: luôn có nhiều lời mời rõ ràng để chị biết phải bấm đâu.
-            if (!hasLocation) {
-                locationMessages.forEach(msg => normalItems.push({ type: 'location', val: msg }));
+            // Xáo trộn riêng từng nhóm để nội dung vẫn ngẫu nhiên nhưng nhịp
+            // hiển thị luôn cân bằng: text → weather → text → weather...
+            const shuffle = (arr) => {
+                const copy = [...arr];
+                for (let i = copy.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [copy[i], copy[j]] = [copy[j], copy[i]];
+                }
+                return copy;
+            };
+
+            let texts = shuffle(textItems);
+            let specials = shuffle(specialItems);
+            const interleaved = [];
+            const maxLen = Math.max(texts.length, specials.length);
+
+            // Luôn ưu tiên bắt đầu bằng một thông điệp bình thường.
+            for (let i = 0; i < maxLen; i++) {
+                if (texts[i]) interleaved.push(texts[i]);
+                if (specials[i]) interleaved.push(specials[i]);
             }
 
-            // Đã có vị trí: đưa dữ liệu thời tiết thật vào queue.
-            weatherMessages.forEach(msg => normalItems.push({ type: 'weather', val: msg }));
+            // Nếu đã có thời tiết, queue trên đã xen kẽ text/weather.
+            // Nếu chưa có dữ liệu thời tiết, specialItems là lời nhắc bấm mây,
+            // nên vẫn giữ được nhịp text → mẹo thời tiết → text → mẹo thời tiết.
 
-            // Loại trùng tuyệt đối theo type + nội dung.
             const uniqueNormalItems = [];
             const seen = new Set();
-            normalItems.forEach(item => {
+            interleaved.forEach(item => {
                 const key = `${item.type}:${item.val}`;
                 if (!seen.has(key)) {
                     seen.add(key);
@@ -2504,18 +2701,12 @@
                 }
             });
 
-            // Xáo trộn Fisher-Yates.
-            for (let i = uniqueNormalItems.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [uniqueNormalItems[i], uniqueNormalItems[j]] = [uniqueNormalItems[j], uniqueNormalItems[i]];
-            }
-
             const passwordItems = passwordParts.map(val => ({ type: 'pass', val }));
             const totalLength = uniqueNormalItems.length + passwordItems.length;
             const PASSWORD_MIN_GAP = 8;
             const positions = [];
 
-            // Đặt 3 mảnh mật khẩu cách xa nhau.
+            // Đặt 3 mảnh mật khẩu cách xa nhau như logic cũ.
             for (let attempt = 0; attempt < 1000 && positions.length < passwordItems.length; attempt++) {
                 const candidate = Math.floor(Math.random() * totalLength);
                 if (positions.every(pos => Math.abs(pos - candidate) > PASSWORD_MIN_GAP)) {
@@ -2540,15 +2731,6 @@
                     queue.push(passwordItems[passwordIndex++]);
                 } else if (normalIndex < uniqueNormalItems.length) {
                     queue.push(uniqueNormalItems[normalIndex++]);
-                }
-            }
-
-            // Nếu chưa có vị trí, ép ít nhất một lời mời lên đầu queue.
-            if (!hasLocation) {
-                const firstLocation = queue.findIndex(item => item.type === 'location');
-                if (firstLocation > 0) {
-                    const [locationItem] = queue.splice(firstLocation, 1);
-                    queue.unshift(locationItem);
                 }
             }
 
@@ -2638,7 +2820,7 @@
         function requestUserLocation() {
             return new Promise((resolve, reject) => {
                 if (!window.isSecureContext) {
-                    reject(new Error('Trang cần HTTPS để dùng vị trí.'));
+                    reject(new Error('Trang cần HTTPS để dùng tính năng thời tiết.'));
                     return;
                 }
 
@@ -2657,9 +2839,9 @@
                     },
                     error => {
                         const message =
-                            error.code === 1 ? 'Em chưa cấp quyền vị trí nên chưa thể kiểm tra thời tiết.' :
-                            error.code === 2 ? 'Không xác định được vị trí để kiểm tra thời tiết.' :
-                            'Lấy vị trí quá thời gian, chưa thể kiểm tra thời tiết.';
+                            error.code === 1 ? 'Em chưa được cấp quyền nên chưa thể kiểm tra thời tiết.' :
+                            error.code === 2 ? 'Chưa xác định được nơi cần xem để kiểm tra thời tiết.' :
+                            'Chờ quá lâu nên chưa thể kiểm tra thời tiết.';
                         reject(new Error(message));
                     },
                     {
@@ -2684,7 +2866,7 @@
                 weatherData = null;
                 weatherMessages = [];
                 rebuildMessageQueue({ resetIndex: true });
-                syncLocationCloud(true, 'Bấm để cho phép vị trí và xem thời tiết');
+                syncLocationCloud(true, 'Bấm để cho phép và xem thời tiết');
                 if (locationCloud) locationCloud.textContent = '☁️';
             } finally {
                 clearTimeout(weatherRefreshTimer);
@@ -2709,7 +2891,7 @@
         });
 
         /* Chỉ hiện mây nhỏ khi chưa có vị trí đã lưu. */
-        syncLocationCloud(!getSavedLocation(), 'Bấm để cho phép vị trí và xem thời tiết');
+        syncLocationCloud(!getSavedLocation(), 'Bấm để cho phép và xem thời tiết');
         scheduleWeatherRefresh();
 
         const giftIcon = document.getElementById('gift-icon');
@@ -2724,6 +2906,14 @@
             clearInterval(spawnInterval);
             clearInterval(airplaneInterval);
             clearTimeout(airplaneStartTimeout);
+            clearInterval(balloonInterval);
+            clearTimeout(balloonStartTimeout);
+            clearTimeout(balloonRespawnTimeout);
+            balloonRespawnTimeout = null;
+            if (balloonFrameId) {
+                cancelAnimationFrame(balloonFrameId);
+                balloonFrameId = 0;
+            }
             clearInterval(birdInterval);
             clearTimeout(birdStartTimeout);
             clearInterval(sunInteractionInterval);
@@ -2754,6 +2944,18 @@
                 if (Math.random() < 0.32) createBirdFlock();
             }, 18000);
 
+            // Khinh khí cầu: chuyến đầu tiên xuất hiện sớm và chắc chắn.
+            // Từ đó mỗi chuyến tự hẹn chuyến tiếp theo sau khi bay khuất màn hình.
+            clearTimeout(balloonRespawnTimeout);
+            clearTimeout(balloonStartTimeout);
+            balloonStartTimeout = setTimeout(() => {
+                balloonStartTimeout = null;
+                if (currentModeTime === 'morning' &&
+                    document.querySelectorAll('.hot-air-balloon-wrapper').length === 0) {
+                    createHotAirBalloon();
+                }
+            }, 4500);
+
             updateSunCloudOcclusion();
             sunInteractionInterval = setInterval(updateSunCloudOcclusion, 450);
         }
@@ -2774,6 +2976,8 @@
             clearInterval(tinyLanternInterval);
             clearInterval(airplaneInterval);
             clearTimeout(airplaneStartTimeout);
+            clearInterval(balloonInterval);
+            clearTimeout(balloonStartTimeout);
             clearInterval(birdInterval);
             clearTimeout(birdStartTimeout);
             clearInterval(sunInteractionInterval);
@@ -2781,7 +2985,7 @@
 
             document.querySelectorAll(
                 '.lantern-container, .cloud-container, .tiny-lantern-container, ' +
-                '.airplane-wrapper, .github-bird-flock'
+                '.airplane-wrapper, .github-bird-flock, .hot-air-balloon-wrapper'
             ).forEach(e => e.remove());
 
             /* Xóa mọi mây động còn sót trước khi chuyển mode. */
@@ -3153,7 +3357,7 @@
             let item = mainContentQueue[queueIndex]; queueIndex = (queueIndex + 1) % mainContentQueue.length;
             let pStyle = item.type === 'pass' ? 'color: #ffdf85; font-size: 1.25rem;' : '';
             const weatherTag = item.type === 'weather' ? '<span class="weather-message-tag">THỜI TIẾT CHỖ CHỊ</span>' : '';
-            const locationTag = item.type === 'location' ? '<span class="weather-message-tag">MẸO NHỎ CHO CHỊ</span>' : '';
+            const locationTag = item.type === 'location' ? '<span class="weather-message-tag">MẸO NHỎ THỜI TIẾT</span>' : '';
 
             const stickerKey = item.type === 'weather' || item.type === 'location'
                 ? (currentModeTime === 'morning' ? 'cloud' : 'moon')
@@ -3165,7 +3369,12 @@
 
 
             container.innerHTML = `<div class="lantern-popup">${stickerHTML}${weatherTag}${locationTag}<p style="${pStyle}"></p></div><div class="lantern-body"><div class="lantern-top"></div><div class="lantern-bottom"></div></div><div class="tassel"></div>`;
-            let textArr = [...item.val]; 
+            let textArr = [...item.val];
+
+            if (item.type === 'location') {
+                const pElem = container.querySelector('.lantern-popup p');
+                if (pElem) { pElem.textContent = item.val; container.dataset.typed = 'true'; }
+            }
             
             container.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -3266,7 +3475,7 @@
             let item = mainContentQueue[queueIndex]; queueIndex = (queueIndex + 1) % mainContentQueue.length;
             let pStyle = item.type === 'pass' ? 'color: #ff8c32; font-size: 1.25rem;' : '';
             const weatherTag = item.type === 'weather' ? '<span class="weather-message-tag">THỜI TIẾT CHỖ CHỊ</span>' : '';
-            const locationTag = item.type === 'location' ? '<span class="weather-message-tag">MẸO NHỎ CHO CHỊ</span>' : '';
+            const locationTag = item.type === 'location' ? '<span class="weather-message-tag">MẸO NHỎ THỜI TIẾT</span>' : '';
 
             const stickerKey = item.type === 'weather' || item.type === 'location'
                 ? (currentModeTime === 'morning' ? 'cloud' : 'moon')
@@ -3286,7 +3495,12 @@
             const body = container.querySelector('.cloud-body');
             body.style.opacity = opacity;
             body.style.setProperty('--message-filter', filter);
-            let textArr = [...item.val]; 
+            let textArr = [...item.val];
+
+            if (item.type === 'location') {
+                const pElem = container.querySelector('.lantern-popup p');
+                if (pElem) { pElem.textContent = item.val; container.dataset.typed = 'true'; }
+            }
             
             container.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -3565,6 +3779,166 @@
             setTimeout(refreshBirdViewportWidth, 150);
         }, { passive:true });
 
+
+        function createHotAirBalloon() {
+            if (currentModeTime !== 'morning') return;
+            if (document.querySelectorAll('.hot-air-balloon-wrapper').length > 0) return;
+
+            const sky = document.getElementById('sky');
+            if (!sky) return;
+
+            /*
+             * Mỗi lần spawn là một chuyến bay mới:
+             * 1) Spawn HOÀN TOÀN khuất dưới màn hình.
+             * 2) requestAnimationFrame điều khiển quỹ đạo => không còn đứng im trước khi bay.
+             * 3) Y luôn là chuyển động chính; X chỉ bị gió đẩy nhẹ.
+             * 4) Size + speed random nhưng có giới hạn chặt để không quá to.
+             */
+            const depthRoll = Math.random();
+            let depthClass;
+            let scale;
+            let duration;
+
+            if (depthRoll < .25) {
+                depthClass = 'balloon-far';
+                scale = Math.random() * .045 + .25;      // .25 – .295
+                duration = Math.random() * 20 + 62;       // 62 – 82s
+            } else if (depthRoll < .84) {
+                depthClass = 'balloon-normal';
+                scale = Math.random() * .05 + .29;       // .29 – .34
+                duration = Math.random() * 18 + 50;      // 50 – 68s
+            } else {
+                depthClass = 'balloon-near';
+                scale = Math.random() * .05 + .35;       // .35 – .40
+                duration = Math.random() * 16 + 44;      // 44 – 60s
+            }
+
+            /* Giảm nhẹ thêm trên màn hình hẹp để không có cảm giác quá khổ. */
+            const viewportFactor = Math.min(1, Math.max(.84, window.innerWidth / 390));
+            scale *= viewportFactor;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `hot-air-balloon-wrapper ${depthClass}`;
+            wrapper.dataset.depth = depthClass.replace('balloon-', '');
+
+            // Bảng màu buổi sáng: pastel ấm, đủ nổi trên nền trời nhưng không chói.
+            const morningBalloonPalette = [
+                { main:'#F28C7A', bottom:'#E97765' }, // san hô đào
+                { main:'#F4C95D', bottom:'#E9AE3D' }, // vàng nắng
+                { main:'#E98BA5', bottom:'#D86F8E' }, // hồng bình minh
+                { main:'#F3A66A', bottom:'#E8894F' }, // cam đào
+                { main:'#B7A6E6', bottom:'#9986D0' }, // tím lavender
+                { main:'#83C9B2', bottom:'#65AD98' }  // xanh mint
+            ];
+            const palette = morningBalloonPalette[Math.floor(Math.random() * morningBalloonPalette.length)];
+            wrapper.style.setProperty('--balloon-main', palette.main);
+            wrapper.style.setProperty('--balloon-bottom', palette.bottom);
+            wrapper.style.setProperty('--balloon-model-scale', scale.toFixed(3));
+            wrapper.style.setProperty('--balloon-bob-duration', `${(Math.random() * 1.5 + 4.2).toFixed(2)}s`);
+
+            const balloon = document.createElement('div');
+            balloon.className = 'hot-air-balloon';
+            balloon.innerHTML = `
+                <div class="balloon"></div>
+                <div class="basket"></div>
+            `;
+            wrapper.appendChild(balloon);
+
+            const margin = Math.min(42, window.innerWidth * .10);
+            const startX = margin + Math.random() * Math.max(40, window.innerWidth - margin * 2);
+
+            /* Tâm model bắt đầu thấp hơn mép màn hình đủ xa để 100% không lộ ngay. */
+            const startY = window.innerHeight + 320;
+            const endY = -320;
+
+            /* Hướng gió + độ cong quỹ đạo. */
+            const windDir = Math.random() < .5 ? -1 : 1;
+            const baseDrift = (Math.random() * 80 + 45) * windDir; // 45–125px
+            const gust = (Math.random() * 34 + 10) * windDir;
+            const crossDrift = Math.random() * 20 - 10;
+            const curve = Math.random() * .65 + .28;
+            const phase = Math.random() * Math.PI * 2;
+            const wobbleAmp = Math.random() * 8 + 3;
+
+            const depthSpeedFactor = depthClass === 'balloon-far' ? .84 : (depthClass === 'balloon-near' ? 1.08 : 1);
+            const flightDuration = (duration / depthSpeedFactor) * 1000;
+            const startTime = performance.now();
+
+            wrapper.style.left = `${startX}px`;
+            wrapper.style.top = `${startY}px`;
+            wrapper.style.opacity = '0';
+            wrapper.style.transform = 'translate3d(-50%, -50%, 0)';
+            sky.appendChild(wrapper);
+
+            const clamp01 = (v) => Math.max(0, Math.min(1, v));
+            const easeVertical = (t) => 1 - Math.pow(1 - t, 1.15); // vào nhịp sớm, không đứng hình
+            const bezier = (p0, p1, p2, p3, t) => {
+                const inv = 1 - t;
+                return inv ** 3 * p0 + 3 * inv ** 2 * t * p1 + 3 * inv * t ** 2 * p2 + t ** 3 * p3;
+            };
+
+            const animate = (now) => {
+                if (!wrapper.isConnected || currentModeTime !== 'morning') {
+                    if (wrapper.isConnected) wrapper.remove();
+                    balloonFrameId = 0;
+                    return;
+                }
+
+                const raw = clamp01((now - startTime) / flightDuration);
+                const t = easeVertical(raw);
+
+                /* Y luôn tăng từ dưới lên trên, tuyệt đối không có delay ở màn hình. */
+                const y = startY + (endY - startY) * t;
+
+                /* X là quỹ đạo gió cong nhẹ, không lấn át chuyển động Y. */
+                const p1 = baseDrift * curve * .45;
+                const p2 = baseDrift * curve + crossDrift;
+                const drift = bezier(0, p1, p2, baseDrift + gust, raw);
+                const gustWave = Math.sin(phase + raw * Math.PI * 2.2) * (wobbleAmp * (.35 + raw * .65));
+                const microSway = Math.sin(phase * .7 + raw * Math.PI * 5.1) * 2.0;
+                const x = startX + drift + gustWave + microSway;
+
+                /* Độ nghiêng cực nhỏ theo hướng trôi; nhìn như đang chịu gió chứ không lắc máy. */
+                const nextRaw = clamp01(raw + .004);
+                const nextDrift = bezier(0, p1, p2, baseDrift + gust, nextRaw);
+                const dx = (nextDrift - drift) + .15;
+                const dy = (endY - startY) * .004;
+                const angle = Math.max(-2.2, Math.min(2.2,
+                    Math.atan2(dy, dx) * 180 / Math.PI + Math.sin(phase + raw * 5) * .55
+                ));
+
+                /* Fade rất ngắn ở ngoài khung hình; khi đã vào màn hình thì bay liên tục. */
+                const fadeIn = clamp01(raw / .025);
+                const fadeOut = clamp01((1 - raw) / .055);
+                const opacity = Math.min(fadeIn, fadeOut);
+
+                wrapper.style.left = `${x.toFixed(2)}px`;
+                wrapper.style.top = `${y.toFixed(2)}px`;
+                wrapper.style.opacity = opacity.toFixed(3);
+                wrapper.style.transform = `translate3d(-50%, -50%, 0) rotate(${angle.toFixed(2)}deg)`;
+
+                if (raw >= 1) {
+                    wrapper.remove();
+                    balloonFrameId = 0;
+
+                    /* Khoảng nghỉ để khinh khí cầu xuất hiện thưa, không thành hiệu ứng spam. */
+                    const gap = Math.random() * 22000 + 18000; // 18–40s
+                    balloonRespawnTimeout = setTimeout(() => {
+                        balloonRespawnTimeout = null;
+                        if (currentModeTime === 'morning' &&
+                            document.querySelectorAll('.hot-air-balloon-wrapper').length === 0) {
+                            createHotAirBalloon();
+                        }
+                    }, gap);
+                    return;
+                }
+
+                balloonFrameId = requestAnimationFrame(animate);
+            };
+
+            balloonFrameId = requestAnimationFrame(animate);
+        }
+
         function createAirplane() {
             if (currentModeTime !== 'morning') return;
             if (document.querySelectorAll('.airplane-wrapper').length > 0) return;
@@ -3630,7 +4004,8 @@
                 </div>
             `;
 
-            document.body.appendChild(wrapper);
+            const sky = document.getElementById('sky');
+            (sky || document.body).appendChild(wrapper);
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
