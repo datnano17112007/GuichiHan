@@ -1962,6 +1962,15 @@
             html, body { transition: none !important; }
         }
     </style>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#64b5f6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Gửi Chị Hân">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body class="evening">
     </div>
@@ -4352,6 +4361,16 @@
         });
         
         createStars();
+    </script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/GuichiHan/sw.js', {
+            scope: '/GuichiHan/'
+          }).catch(err => console.warn('PWA service worker:', err));
+        });
+      }
     </script>
 </body>
 </html>
