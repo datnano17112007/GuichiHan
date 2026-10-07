@@ -51,17 +51,14 @@ async function loadLocations(){
   }
 
   const session=sessionData.session;
-  if(session.user?.id !== '601dcb10-08fa-42e8-8b25-adbe67154779'){
-    await client.auth.signOut().catch(()=>{});
-    renderSession(null);
-    $('loginStatus').textContent='Tài khoản này không có quyền quản trị.';
-    return;
-  }
 
+  // Quyền quản trị được bảo vệ ở Supabase (RLS + get_admin_locations).
+  // Không kiểm tra UID ở phía trình duyệt để tránh lỗi session/cache giả.
   const {data,error}=await client.rpc('get_admin_locations');
   if(error){
     console.error('get_admin_locations error:',error);
-    $('dataStatus').textContent='Không đọc được dữ liệu: '+error.message;
+    console.error('RPC get_admin_locations:', error);
+    $('dataStatus').textContent='Không đọc được dữ liệu: '+(error.message || 'Lỗi không xác định');
     $('countText').textContent='Lỗi';
     return;
   }
