@@ -381,6 +381,7 @@
         .aquarius-container:hover .c-lines polyline, .aquarius-container.active-tap .c-lines polyline { stroke: rgba(255,255,255,0.7); stroke-width: 1.5; }
         @keyframes drawConstellation { to { stroke-dashoffset: 0; } }
         .constellation-msg { position: absolute; top: 100%; left: 50%; width: 240px; text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-weight: 500; color: #fff; font-size: 1.1rem; text-shadow: 0 1px 5px rgba(0,0,0,0.8); opacity: 0; pointer-events: none; transition: all 0.4s ease; background: rgba(25, 20, 35, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 25px rgba(0,0,0,0.4); line-height: 1.5; transform: translateX(-50%) translateY(-15px); margin-top: 15px; }
+        .aquarius-poem-line { min-height: 1.5em; }
         .aquarius-container.flash .c-star { background: #fff; box-shadow: 0 0 30px #ffdf85, 0 0 50px #fff; transform: scale(1.8); transition: all 0.15s ease; }
         .aquarius-container.flash .c-lines polyline { stroke: #ffdf85; stroke-width: 2; transition: all 0.15s ease; }
 
@@ -1976,8 +1977,6 @@
         #quiet-night-message.show { opacity:1; transform:translate(-50%,0); }
         .meteor-secret-bubble { position:fixed; transform:translateY(4px); padding:9px 13px; max-width:min(72vw,280px); border-radius:14px; background:rgba(18,20,39,.82); border:1px solid rgba(255,223,133,.18); color:#fff8df; font:700 .88rem/1.35 'Nunito',sans-serif; box-shadow:0 10px 30px rgba(0,0,0,.35); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); opacity:0; transition:opacity .35s ease,transform .35s ease; pointer-events:none; z-index:9998; }
         .meteor-secret-bubble.show { opacity:1; transform:translateY(0); }
-        .aquarius-secret-bubble { position:absolute; left:50%; top:100%; width:min(270px,78vw); transform:translate(-50%,8px); margin-top:16px; padding:10px 14px; border-radius:14px; background:rgba(18,20,39,.76); border:1px solid rgba(255,255,255,.10); color:rgba(255,255,255,.92); font:600 .88rem/1.45 'Nunito',sans-serif; box-shadow:0 12px 30px rgba(0,0,0,.30); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); opacity:0; pointer-events:none; transition:opacity .45s ease,transform .45s ease; z-index:120; }
-        .aquarius-secret-bubble.show { opacity:1; transform:translate(-50%,0); }
     </style>
 
     <!-- PWA -->
@@ -2014,12 +2013,7 @@
         <div class="moon" title="Bầu trời hôm nay"></div>
         
         <div class="aquarius-container" title="Bảo Bình độc lập và sáng tạo">
-            <div class="constellation-msg">
-                Trời đêm lấp lánh<br>
-                Ôm trọn sao sa<br>
-                Mệt thì cứ khóc<br>
-                Có em ở nhà ✨
-            </div>
+            <div class="constellation-msg" aria-live="polite"></div>
             <svg class="c-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <polyline points="15,30 35,60 55,40 75,75 85,25" />
             </svg>
@@ -4298,16 +4292,57 @@
 
         // --- SỰ KIỆN CLICK CHÒM SAO & MẶT TRĂNG ---
         const aquariusContainer = document.querySelector('.aquarius-container');
+        const constellationMsg = aquariusContainer?.querySelector('.constellation-msg');
+
+        function pickAquariusPoem() {
+            const poems = Array.isArray(GCH_MESSAGES?.aquariusPoems)
+                ? GCH_MESSAGES.aquariusPoems
+                : [];
+
+            if (!poems.length) {
+                return [
+                    'Trời đêm lấp lánh',
+                    'Ôm trọn sao sa',
+                    'Mệt thì cứ khóc',
+                    'Có em ở nhà ✨'
+                ];
+            }
+
+            const validPoems = poems.filter(poem => Array.isArray(poem) && poem.length);
+            return validPoems.length
+                ? validPoems[Math.floor(Math.random() * validPoems.length)]
+                : [
+                    'Trời đêm lấp lánh',
+                    'Ôm trọn sao sa',
+                    'Mệt thì cứ khóc',
+                    'Có em ở nhà ✨'
+                ];
+        }
+
+        function renderAquariusPoem() {
+            if (!constellationMsg) return;
+
+            const poem = pickAquariusPoem();
+            constellationMsg.innerHTML = poem
+                .map(line => `<div class="aquarius-poem-line">${line}</div>`)
+                .join('');
+        }
+
+        // Hiện sẵn một khổ thơ khi app tải lên.
+        renderAquariusPoem();
+
         aquariusContainer.addEventListener('click', (e) => {
-            e.stopPropagation(); 
+            e.stopPropagation();
+
+            // Mỗi lần bấm chỉ đổi sang một khổ thơ khác.
+            // Không tạo thêm bubble nên sẽ không bao giờ có 2 thông điệp chồng nhau.
+            renderAquariusPoem();
+
             aquariusContainer.classList.toggle('active-tap');
             aquariusContainer.classList.add('flash');
             setTimeout(() => aquariusContainer.classList.remove('flash'), 300);
+
             createGiantShootingStar();
-            if (currentModeTime === 'evening') {
-                const secret=document.createElement('div'); secret.className='aquarius-secret-bubble'; secret.textContent=pickGchMessage('aquariusSecret','Chòm sao này có một bí mật nhỏ dành riêng cho chị ♒✨');
-                aquariusContainer.appendChild(secret); requestAnimationFrame(()=>secret.classList.add('show')); setTimeout(()=>secret.classList.remove('show'),3200); setTimeout(()=>secret.remove(),3900);
-            }
         });
 
         let moonClickCount = 0;
