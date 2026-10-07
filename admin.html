@@ -41,8 +41,8 @@ const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
 async function loadLocations(){
-  $('dataStatus').textContent='Đang tải dữ liệu...';
-  $('debugStatus').textContent='Đang kiểm tra phiên đăng nhập trên trình duyệt...';
+  $('dataStatus').textContent='Đang kiểm tra dữ liệu...';
+  $('debugStatus').textContent='Đang kiểm tra quyền đọc trong database...';
 
   const {data:sessionData,error:sessionError}=await client.auth.getSession();
   if(sessionError || !sessionData.session){
@@ -64,9 +64,7 @@ async function loadLocations(){
     jwtRole=payload.role ?? '?';
     jwtSub=payload.sub ?? '?';
     jwtEmail=payload.email ?? '?';
-  }catch(err){
-    console.error('JWT decode error:',err);
-  }
+  }catch(err){ console.error('JWT decode error:',err); }
 
   $('debugStatus').textContent=
     'BROWSER SESSION\n'+
@@ -74,22 +72,24 @@ async function loadLocations(){
     'Email: '+(user?.email||'?')+'\n'+
     'JWT role: '+jwtRole+'\n'+
     'JWT sub: '+jwtSub+'\n'+
-    'JWT email: '+jwtEmail+'\n'+
-    'Project: '+SUPABASE_URL;
+    'JWT email: '+jwtEmail;
 
-  const {data:authDebug,error:authDebugError}=await client.rpc('debug_admin_auth');
+  const {data:accessDebug,error:accessError}=await client.rpc('debug_location_access');
 
-  if(authDebugError){
+  if(accessError){
     $('debugStatus').textContent +=
-      '\n\nRPC debug_admin_auth ERROR:\n'+
-      authDebugError.message+
-      '\nCode: '+(authDebugError.code||'?');
-  }else{
-    $('debugStatus').textContent +=
-      '\n\nSERVER AUTH (RPC):\n'+
-      JSON.stringify(authDebug);
+      '\n\nDATABASE ACCESS ERROR:\n'+
+      accessError.message+
+      '\nCode: '+(accessError.code||'?');
+    $('dataStatus').textContent='Không kiểm tra được quyền database.';
+    return;
   }
 
+  $('debugStatus').textContent +=
+    '\n\nDATABASE ACCESS (RPC):\n'+
+    JSON.stringify(accessDebug);
+
+  // Chỉ đọc locations nếu phép kiểm tra database xác nhận đúng UID và có dữ liệu.
   const {data,error}=await client.rpc('get_admin_locations');
 
   if(error){
@@ -97,16 +97,13 @@ async function loadLocations(){
     $('dataStatus').textContent='Không đọc được dữ liệu: '+error.message;
     $('countText').textContent='Lỗi';
     $('debugStatus').textContent +=
-      '\n\nLOCATIONS RPC ERROR:\n'+
-      error.message+
-      '\nCode: '+(error.code||'?');
+      '\n\nLOCATIONS RPC ERROR:\n'+error.message;
     return;
   }
 
   if(!Array.isArray(data)){
     $('dataStatus').textContent='Supabase trả về dữ liệu không đúng dạng.';
     $('countText').textContent='Lỗi dữ liệu';
-    $('debugStatus').textContent += '\n\nLOCATIONS RPC: dữ liệu không phải mảng.';
     return;
   }
 
