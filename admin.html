@@ -25,7 +25,7 @@
         <div><h1>📍 Vị trí đã chia sẻ</h1><div class="muted" id="countText">Đang tải...</div></div>
         <div><button class="secondary" id="refreshBtn">Làm mới</button><button class="secondary" id="logoutBtn">Đăng xuất</button></div>
       </div>
-      <div class="status" id="dataStatus"></div>
+      <div class="status" id="dataStatus"></div><div class="status" id="debugStatus" style="font-size:12px;white-space:pre-wrap;opacity:.85"></div>
     </div>
     <div class="card table-wrap">
       <table><thead><tr><th>Thời gian</th><th>Vĩ độ</th><th>Kinh độ</th><th>Độ chính xác</th><th>Bản đồ</th></tr></thead>
@@ -42,8 +42,8 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
 async function loadLocations(sessionArg=null, retry=true){
   $('dataStatus').textContent='Đang tải dữ liệu...';
+  $('debugStatus').textContent='';
 
-  // Luôn lấy session hiện tại để request đọc dữ liệu có JWT của admin.
   let session=sessionArg;
   if(!session){
     const {data,error}=await client.auth.getSession();
@@ -55,8 +55,24 @@ async function loadLocations(sessionArg=null, retry=true){
     session=data.session;
   }
 
-  // Gửi JWT trực tiếp trong Authorization header để chắc chắn request
-  // được Supabase xử lý với vai trò authenticated thay vì anon.
+  // Chỉ đọc metadata không nhạy cảm từ payload JWT để chẩn đoán:
+  // role + sub. Không bao giờ hiển thị access_token.
+  let jwtRole='?';
+  let jwtSub='?';
+  try{
+    const parts=session.access_token.split('.');
+    const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    jwtRole=payload.role||'?';
+    jwtSub=payload.sub||'?';
+  }catch(e){
+    console.error('JWT decode error',e);
+  }
+
+  $('debugStatus').textContent=
+    'Auth: role='+jwtRole+
+    ' | sub='+jwtSub+
+    ' | session user='+String(session.user?.id||'?');
+
   const url=new URL('/rest/v1/locations',SUPABASE_URL);
   url.searchParams.set('select','id,latitude,longitude,accuracy,created_at');
   url.searchParams.set('order','created_at.desc');
@@ -79,20 +95,30 @@ async function loadLocations(sessionArg=null, retry=true){
     return;
   }
 
-  // Nếu token hết hạn, làm mới session rồi thử lại một lần.
   if(response.status===401 && retry){
     const {data,error}=await client.auth.refreshSession();
     if(!error && data.session) return loadLocations(data.session,false);
   }
 
+  const responseText=await response.text();
   let data=null;
-  try{ data=await response.json(); }catch(_){}
+  try{ data=JSON.parse(responseText); }catch(_){}
+
+  $('debugStatus').textContent +=
+    ' | REST HTTP='+response.status+
+    ' | response='+(Array.isArray(data)?('array['+data.length+']'):String(data?.message||responseText||'empty'));
 
   if(!response.ok){
     const message=data?.message || data?.hint || data?.details || ('HTTP '+response.status);
     console.error('Supabase REST error:',response.status,data);
     $('dataStatus').textContent='Không đọc được dữ liệu: '+message;
     $('countText').textContent='Lỗi';
+    return;
+  }
+
+  if(!Array.isArray(data)){
+    $('dataStatus').textContent='Supabase trả về dữ liệu không đúng dạng.';
+    $('countText').textContent='Lỗi dữ liệu';
     return;
   }
 
@@ -105,12 +131,13 @@ async function loadLocations(sessionArg=null, retry=true){
   }).join('');
 }
 
+
 function renderSession(session){
   $('loginCard').style.display=session?'none':'block';
   $('adminArea').style.display=session?'block':'none';
   if(!session){
     $('countText').textContent='Chưa đăng nhập';
-    $('locationsBody').innerHTML='';
+    $('locationsBody').innerHTML='';$('debugStatus').textContent='';
   }
 }
 
