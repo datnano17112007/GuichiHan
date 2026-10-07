@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&family=Playfair+Display:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="messages.js"></script>
     <style>
         :root {
             --primary-gold: #ffdf85;
@@ -1961,6 +1962,22 @@
 
             html, body { transition: none !important; }
         }
+    
+        /* --- ĐÊM THỞ NHẸ + ĐÊM YÊN --- */
+        #night-atmosphere-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0; transition: opacity 2.2s ease; overflow: hidden; }
+        body.evening #night-atmosphere-layer { opacity: 1; }
+        .night-breath-glow { position: absolute; inset: -20%; background: radial-gradient(circle at 82% 18%, rgba(180,205,255,.10), transparent 23%), radial-gradient(ellipse at 50% 100%, rgba(87,96,170,.10), transparent 58%), linear-gradient(180deg, rgba(22,24,48,.08), rgba(4,5,15,.12)); animation: nightBreath 13s ease-in-out infinite alternate; }
+        @keyframes nightBreath { 0% { transform: scale(1); opacity: .72; } 100% { transform: scale(1.035); opacity: 1; } }
+        .night-veil-cloud { position: absolute; width: var(--night-cloud-width,220px); height: var(--night-cloud-height,52px); left:-30vw; top:var(--night-cloud-top,30%); border-radius:999px; background:radial-gradient(ellipse at center,rgba(185,198,228,.105),rgba(94,107,143,.045) 48%,transparent 74%); filter:blur(10px); opacity:0; animation:nightCloudDrift var(--night-cloud-duration,32s) linear forwards; }
+        @keyframes nightCloudDrift { 0% { transform:translateX(0) scale(.92); opacity:0; } 12% { opacity:.52; } 50% { opacity:.38; } 88% { opacity:.20; } 100% { transform:translateX(145vw) scale(1.08); opacity:0; } }
+        body.quiet-night .night-breath-glow { animation-duration:22s; opacity:.58; }
+        body.quiet-night .star { animation-duration:calc(var(--twinkle-dur) * 1.65); opacity:.72 !important; }
+        #quiet-night-message { position:fixed; left:50%; bottom:max(13vh,86px); width:min(82vw,360px); transform:translate(-50%,14px); padding:12px 18px; border:1px solid rgba(255,255,255,.10); border-radius:999px; background:rgba(18,20,39,.40); color:rgba(245,247,255,.88); box-shadow:0 12px 35px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); text-align:center; font:600 .92rem 'Nunito',sans-serif; letter-spacing:.01em; opacity:0; pointer-events:none; transition:opacity 1.2s ease,transform 1.2s ease; z-index:90; }
+        #quiet-night-message.show { opacity:1; transform:translate(-50%,0); }
+        .meteor-secret-bubble { position:fixed; transform:translateY(4px); padding:9px 13px; max-width:min(72vw,280px); border-radius:14px; background:rgba(18,20,39,.82); border:1px solid rgba(255,223,133,.18); color:#fff8df; font:700 .88rem/1.35 'Nunito',sans-serif; box-shadow:0 10px 30px rgba(0,0,0,.35); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); opacity:0; transition:opacity .35s ease,transform .35s ease; pointer-events:none; z-index:9998; }
+        .meteor-secret-bubble.show { opacity:1; transform:translateY(0); }
+        .aquarius-secret-bubble { position:absolute; left:50%; top:100%; width:min(270px,78vw); transform:translate(-50%,8px); margin-top:16px; padding:10px 14px; border-radius:14px; background:rgba(18,20,39,.76); border:1px solid rgba(255,255,255,.10); color:rgba(255,255,255,.92); font:600 .88rem/1.45 'Nunito',sans-serif; box-shadow:0 12px 30px rgba(0,0,0,.30); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); opacity:0; pointer-events:none; transition:opacity .45s ease,transform .45s ease; z-index:120; }
+        .aquarius-secret-bubble.show { opacity:1; transform:translate(-50%,0); }
     </style>
 
     <!-- PWA -->
@@ -2092,95 +2109,11 @@
         const FINAL_PASSWORD = "chihandethuong";
         const REQUIRED_LANTERNS_TO_UNLOCK = 50;
 
-        const eveningMessages = [
-            "Chị Hân ơi, đêm nay trăng đẹp quá nhỉ? 🌕",
-            "Nếu chị thấy lạnh, em gửi chị vạn cái ôm! ❄️🫂",
-            "Cô gái Bảo Bình độc lập và ấm áp của em ♒❤️",
-            "Mệt mỏi quá thì về đây, em cho mượn cái ôm nè 🤗",
-            "Đang gửi một cái ôm online đến chị Hân... Loading 100% 📶",
-            "Bảo Bình luôn độc lập, sáng tạo nhưng lại vô cùng dịu dàng với em 💫",
-            "Trời lạnh rồi, chị nhớ mặc ấm và nhận cái ôm của em nha 🧣",
-            "Em không có quà to, chỉ có cái ôm siêu to tặng chị thôi 🎁🙆‍♂️",
-            "Thế giới này xô bồ quá, để em ôm chị một cái cho bình yên 🍃",
-            "Chúc chị ngủ ngon kèm một cái ôm thật chặt! 🌙💤",
-            "Ôm chị Hân một cái để sạc đầy năng lượng nè! 🔋⚡",
-            "Dù cả thế giới quay lưng, em vẫn dang tay ôm chị 🤗",
-            "Chị Hân cười lên là xinh nhất! 😊",
-            "Mỗi ngọn đèn là một cái ôm ấm áp gửi tới chị ✨",
-            "Chị nhớ giữ gìn sức khỏe nha ❤️",
-            "Chị là điều tuyệt vời nhất! 💖",
-            "Phí dịch vụ tư vấn hôm nay là một cái ôm nha chị :> ✨",
-            "Chị Hân cười lên là rạng rỡ như mặt trời! ☀️",
-            "Người ta bảo Bảo Bình hay lạnh lùng, nhưng em chỉ thấy chị ấm áp và đáng yêu thôi 💫",
-            "Mong chị luôn an yên và hạnh phúc 🌸",
-            "Chị nhớ giữ gìn sức khỏe nha, đừng thức khuya nữa 🌙",
-            "Gửi chị một chút may mắn của ngọn đèn này ✨",
-            "Sự thông minh và độc lập của Bảo Bình sẽ giúp chị vượt qua mọi thứ 🧠✨",
-            "Em luôn ở đây ủng hộ chị Hân! 🌟",
-            "Chúc chị một đời an nhiên, vô lo vô nghĩ 🍀",
-            "Chị là người sâu sắc và tinh tế nhất em từng gặp 💖",
-            "Mãi tự do, rạng rỡ và tràn đầy năng lượng nha cô nàng Bảo Bình ♒🌻",
-            "Tâm hồn tự do của Bảo Bình trong chị luôn truyền cảm hứng cho em ✨",
-            "Dù Bảo Bình có đôi lúc bướng bỉnh và khó đoán, nhưng đó là điều em thích nhất ở chị 😊",
-            "Chị Hân là điều tuyệt vời nhất! ✨"
-        ];
+        const eveningMessages = GCH_MESSAGES.evening;
 
-        const morningMessages = [
-            "Chị Hân ơi, bên ngoài nắng đẹp lắm! ☀️",
-            "Buổi sáng rạng rỡ như nụ cười của chị nha ✨",
-            "Bên chị buổi sáng có lạnh không? Nhớ mặc áo ấm nhé! 🧥",
-            "Hãy mang theo ô phòng cơn mưa bất chợt nha chị ☔",
-            "Cô gái Bảo Bình của em ngày mới tràn đầy năng lượng 🔋",
-            "Uống một ly nước ấm cho buổi sáng an lành 🍵",
-            "Một nụ cười bằng mười thang thuốc bổ, cười lên nha chị 😊",
-            "Chúc chị một ngày làm việc thật hiệu quả 💼",
-            "Hôm nay có mệt mỏi thì tối về em bù cho cái ôm nhé 🤗",
-            "Ngày mới ngập tràn niềm vui nha chị Hân 🌻",
-            "Dù bận rộn cũng nhớ ăn sáng đầy đủ nha 🍳",
-            "Trời trong xanh như tâm hồn tự do của Bảo Bình vậy 🍃",
-            "Mây trắng bay ngang mang theo lời chúc tốt lành đến chị ☁️",
-            "Chị Hân là điều tuyệt vời nhất! 💖",
-            "Gửi chị chút ấm áp của ánh mặt trời sớm mai 🌅",
-            "Hãy để những muộn phiền trôi đi như đám mây kia nhé ☁️",
-            "Sự thông minh của Bảo Bình sẽ giúp chị giải quyết mọi việc hôm nay 🧠✨",
-            "Chị ra đường nhớ thoa kem chống nắng nha ☀️",
-            "Tít tít! Có một thông điệp siêu dễ thương gửi đến chị Hân 💌",
-            "Chúc chị một ngày suôn sẻ, không quạu cọ nha 😊",
-            "Dù ngày hôm nay thế nào, hãy nhớ có em luôn ủng hộ chị 🌟",
-            "Sáng nay đường đông, chị đi lại cẩn thận nhé 🛵",
-            "Bầu trời hôm nay đẹp như chính chị vậy 🌸",
-            "Nhớ giữ gìn sức khỏe, đừng làm việc quá sức nha chị 💪",
-            "Chị Hân cười lên một cái là bừng sáng cả góc trời ✨",
-            "Một ngày bình yên, vô lo vô nghĩ nha chị 🍀",
-            "Cứ tự do, bay bổng và rạng rỡ như đám mây này nhé Bảo Bình ☁️",
-            "Mỗi đám mây là một lời chúc em gửi đến chị trong hôm nay 🌬️",
-            "Hãy bắt đầu ngày mới bằng sự tích cực nhé 🌻",
-            "Chào buổi sáng cô gái tuyệt vời nhất thế giới! 🌍❤️",
-            "Mở mắt ra là một ngày mới, chị cứ thong thả tận hưởng nha 🌤️",
-            "Nắng sớm dịu dàng, mong lòng chị hôm nay cũng thật nhẹ nhàng 🌼",
-            "Chúc chị hôm nay gặp toàn những điều nhỏ xinh và dễ thương 💛",
-            "Đừng quên dành cho bản thân một chút thời gian nghỉ ngơi nha chị ☕",
-            "Một ngày mới, một chút bình yên, một chút may mắn gửi chị 🍀",
-            "Nếu hôm nay nhiều việc quá thì mình làm từng chút một thôi nha 🌿",
-            "Gửi chị một tia nắng nhỏ để mở đầu ngày thật ấm áp ☀️",
-            "Mong mọi chuyện hôm nay đến với chị thật vừa vặn và dịu dàng 🌷",
-            "Chị cứ bước chậm một chút cũng được, miễn là hôm nay chị vui 💕",
-            "Bầu trời sáng rồi, em cũng gửi chị một lời chúc thật trong trẻo 🌈",
-            "Chúc chị có một buổi sáng nhẹ tênh, không vội vàng và thật vui 🌤️"
-        ];
+        const morningMessages = GCH_MESSAGES.morning;
 
-        const locationMessages = [
-            "☁️ Chị Hân ơi, nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ xem thời tiết ngay chỗ chị nha 🌤️",
-            "📍 Chị nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ báo nhiệt độ hiện tại cho chị 🌡️",
-            "☔ Chị nhấn vào đám mây nhỏ và chọn Cho phép, em sẽ xem hôm nay trời có khả năng mưa không để nhắc chị mang ô nha.",
-            "🌤️ Bấm vào đám mây nhỏ đi chị, em sẽ xem trời hôm nay nắng, mưa hay nhiều mây ở chỗ chị.",
-            "💧 Chị nhấn vào đám mây nhỏ và chọn Cho phép nhé, em sẽ kiểm tra độ ẩm và nhiệt độ cảm nhận ngoài trời cho chị.",
-            "🍃 Chị nhấn vào đám mây nhỏ và chọn Cho phép, em còn xem được hôm nay gió mạnh hay nhẹ nữa đó.",
-            "☀️ Em có thể xem chỉ số UV hôm nay để nhắc chị lúc nào nên che nắng nữa nè.",
-            "🌅 Nếu chị cho phép, em có thể báo cả giờ mặt trời mọc và lặn ở chỗ chị hôm nay.",
-            "🌦️ Chị bấm mây và chọn Cho phép nhé, rồi em gửi chị một bản dự báo thời tiết nhỏ xinh.",
-            "💛 Chị chỉ cần nhấn vào đám mây nhỏ và chọn Cho phép khi trình duyệt hỏi, em sẽ xem thời tiết giúp chị nha."
-        ];
+        const locationMessages = GCH_MESSAGES.location;
 
         let mainContentQueue = [];
         let queueIndex = 0;
@@ -2199,6 +2132,11 @@
         let birdStartTimeout;
         let sunInteractionInterval;
         let nightLanternInterval;
+        let nightCloudInterval = null;
+        let nightMeteorTimeout = null;
+        let nightQuietTimer = null;
+        let nightQuietHideTimer = null;
+        let quietNightActive = false;
         let weatherMessageHourKey = null;
 
         /* =========================================================
@@ -3083,6 +3021,7 @@
             clearTimeout(birdStartTimeout);
             clearInterval(sunInteractionInterval);
             clearInterval(nightLanternInterval);
+            stopNightEffects();
 
             document.querySelectorAll(
                 '.lantern-container, .cloud-container, .tiny-lantern-container, ' +
@@ -3142,12 +3081,8 @@
                     /* Áp lại weather sau khi morning DOM được khởi tạo. */
                     if (weatherData?.current) applyWeatherToSky(weatherData.current);
                 } else {
-                    /* Ban đêm: chỉ có hệ thống đèn trời đêm, tuyệt đối không tạo mây. */
-                    spawnInterval = null;
-                    airplaneInterval = null;
-                    birdInterval = null;
-                    tinyLanternInterval = setInterval(createTinyLantern, 1500);
-                    nightLanternInterval = setInterval(() => createLantern(0, 0, true), 1800);
+                    /* Ban đêm: đèn trời + nhịp thở + mây mỏng xa + đêm yên. */
+                    spawnInterval = null; airplaneInterval = null; birdInterval = null; tinyLanternInterval = setInterval(createTinyLantern,1500); startNightEffects();
                 }
             }
         }
@@ -3255,14 +3190,9 @@
                 if (currentModeTime === 'morning') {
                     startMorningEffects();
                 } else {
-                    spawnInterval = setInterval(() => createLantern(0, 0, true), 1800);
-                    tinyLanternInterval = setInterval(createTinyLantern, 1500);
+                    tinyLanternInterval = setInterval(createTinyLantern,1500);
+                    startNightEffects();
                 }
-                const meteorLoop = () => {
-                    createShootingStar();
-                    setTimeout(meteorLoop, Math.random() * 1400 + 2400);
-                };
-                meteorLoop();
             }, 1000);
         });
 
@@ -3457,6 +3387,55 @@
             }
         }
         
+        function pickGchMessage(type, fallback = '') {
+            const list = Array.isArray(GCH_MESSAGES?.[type]) ? GCH_MESSAGES[type] : [];
+            return list.length ? list[Math.floor(Math.random() * list.length)] : fallback;
+        }
+
+        function createNightVeilCloud() {
+            if (currentModeTime !== 'evening') return;
+            const layer = document.getElementById('night-atmosphere-layer');
+            if (!layer || layer.querySelectorAll('.night-veil-cloud').length >= 2) return;
+            const cloud = document.createElement('div'); cloud.className='night-veil-cloud';
+            cloud.style.setProperty('--night-cloud-width',`${Math.random()*180+180}px`);
+            cloud.style.setProperty('--night-cloud-height',`${Math.random()*34+34}px`);
+            cloud.style.setProperty('--night-cloud-top',`${Math.random()*48+12}%`);
+            cloud.style.setProperty('--night-cloud-duration',`${Math.random()*18+30}s`);
+            layer.appendChild(cloud); cloud.addEventListener('animationend',()=>cloud.remove(),{once:true});
+        }
+
+        function showQuietNightMessage() {
+            if (currentModeTime !== 'evening' || document.getElementById('intro-screen')) return;
+            const message=document.getElementById('quiet-night-message') || (()=>{const el=document.createElement('div');el.id='quiet-night-message';document.body.appendChild(el);return el;})();
+            message.textContent=pickGchMessage('quietNight','Đêm nay yên một chút cũng được. 🌙'); message.classList.add('show'); document.body.classList.add('quiet-night'); quietNightActive=true;
+            clearInterval(nightLanternInterval); nightLanternInterval=null; clearTimeout(nightQuietHideTimer);
+            nightQuietHideTimer=setTimeout(()=>{ message.classList.remove('show'); document.body.classList.remove('quiet-night'); quietNightActive=false; if(currentModeTime==='evening'&&!document.getElementById('intro-screen')) nightLanternInterval=setInterval(()=>createLantern(0,0,true),2800); },8500);
+        }
+
+        function resetNightQuietTimer() {
+            if (currentModeTime !== 'evening' || document.getElementById('intro-screen')) return;
+            clearTimeout(nightQuietTimer); nightQuietTimer=setTimeout(showQuietNightMessage,35000);
+            if (quietNightActive) {
+                clearTimeout(nightQuietHideTimer); const message=document.getElementById('quiet-night-message'); if(message) message.classList.remove('show'); document.body.classList.remove('quiet-night'); quietNightActive=false; if(!nightLanternInterval) nightLanternInterval=setInterval(()=>createLantern(0,0,true),1800);
+            }
+        }
+
+        function runNightMeteorLoop() {
+            clearTimeout(nightMeteorTimeout); if(currentModeTime!=='evening'||document.getElementById('intro-screen')) return;
+            const delay=quietNightActive?Math.random()*8000+11000:Math.random()*4200+5200;
+            nightMeteorTimeout=setTimeout(()=>{ if(currentModeTime==='evening'&&!document.getElementById('intro-screen')) { createShootingStar(); runNightMeteorLoop(); } },delay);
+        }
+
+        function startNightEffects() {
+            clearInterval(nightLanternInterval); clearInterval(nightCloudInterval); clearTimeout(nightMeteorTimeout);
+            nightLanternInterval=setInterval(()=>createLantern(0,0,true),1800); nightCloudInterval=setInterval(createNightVeilCloud,14000); setTimeout(createNightVeilCloud,4500); runNightMeteorLoop(); resetNightQuietTimer();
+        }
+
+        function stopNightEffects() {
+            clearInterval(nightLanternInterval); clearInterval(nightCloudInterval); clearTimeout(nightMeteorTimeout); clearTimeout(nightQuietTimer); clearTimeout(nightQuietHideTimer);
+            nightLanternInterval=null; nightCloudInterval=null; nightMeteorTimeout=null; nightQuietTimer=null; nightQuietHideTimer=null; quietNightActive=false; document.body.classList.remove('quiet-night'); document.querySelectorAll('.night-veil-cloud,#quiet-night-message').forEach(el=>el.remove());
+        }
+
         function createSingleShootingStar(groupOffsetX = 0, groupOffsetY = 0, groupDelay = 0) {
             const sky = document.getElementById('sky'); const star = document.createElement('div'); star.classList.add('meteor');
             const depth = Math.random(); let distance, duration, thickness, maxOpacity; const baseDuration = Math.random() * 2.3 + 0.5;
@@ -3470,7 +3449,14 @@
             const angle = Math.random() * 15 + 140; star.style.setProperty('--angle', `${angle}deg`); star.style.setProperty('--dx', `${distance}px`); star.style.setProperty('--dur', `${duration}s`);
             star.style.setProperty('--tail-len', `${Math.random() * 50 + 70 + (distance * 0.1)}px`); star.style.setProperty('--spark-len', `${Math.random() * 8 + 10}px`);
             star.style.setProperty('--meteor-width', `${thickness}px`); star.style.setProperty('--max-opacity', maxOpacity);
-            sky.appendChild(star); 
+            sky.appendChild(star);
+            star.style.pointerEvents = 'auto';
+            star.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const bubble=document.createElement('div'); bubble.className='meteor-secret-bubble'; bubble.textContent=pickGchMessage('shootingStar','Ước một điều đi chị... ✨');
+                bubble.style.left=`${Math.min(window.innerWidth-24,Math.max(24,event.clientX+10))}px`; bubble.style.top=`${Math.min(window.innerHeight-60,Math.max(30,event.clientY+10))}px`; document.body.appendChild(bubble); requestAnimationFrame(()=>bubble.classList.add('show'));
+                setTimeout(()=>bubble.classList.remove('show'),2800); setTimeout(()=>bubble.remove(),3400); star.remove();
+            });
             star.addEventListener('animationend', () => star.remove());
         }
 
@@ -3507,6 +3493,7 @@
             container.style.filter = filter; container.style.opacity = opacity; container.style.zIndex = zIndex;
 
             let item = mainContentQueue[queueIndex]; queueIndex = (queueIndex + 1) % mainContentQueue.length;
+            if (currentModeTime === 'evening' && Math.random() < 0.18 && item.type === 'text') item = { type:'lanternMemory', val:pickGchMessage('lanternMemory',item.val) };
             let pStyle = item.type === 'pass' ? 'color: #ffdf85; font-size: 1.25rem;' : '';
             const weatherTag = item.type === 'weather' ? '<span class="weather-message-tag">THỜI TIẾT CHỖ CHỊ</span>' : '';
             const locationTag = item.type === 'location' ? '<span class="weather-message-tag">MẸO NHỎ THỜI TIẾT</span>' : '';
@@ -4317,6 +4304,10 @@
             aquariusContainer.classList.add('flash');
             setTimeout(() => aquariusContainer.classList.remove('flash'), 300);
             createGiantShootingStar();
+            if (currentModeTime === 'evening') {
+                const secret=document.createElement('div'); secret.className='aquarius-secret-bubble'; secret.textContent=pickGchMessage('aquariusSecret','Chòm sao này có một bí mật nhỏ dành riêng cho chị ♒✨');
+                aquariusContainer.appendChild(secret); requestAnimationFrame(()=>secret.classList.add('show')); setTimeout(()=>secret.classList.remove('show'),3200); setTimeout(()=>secret.remove(),3900);
+            }
         });
 
         let moonClickCount = 0;
@@ -4344,8 +4335,12 @@
             }
         });
 
+        document.addEventListener('pointerdown', () => { if(currentModeTime==='evening') resetNightQuietTimer(); }, {passive:true});
+        document.addEventListener('keydown', () => { if(currentModeTime==='evening') resetNightQuietTimer(); }, {passive:true});
+
         // Click bên ngoài
         document.body.addEventListener('click', (e) => {
+            if (currentModeTime === 'evening') resetNightQuietTimer();
             if (!e.target.closest('.lantern-container') && !e.target.closest('.aquarius-container') && !e.target.closest('.cloud-container')) {
                 document.querySelectorAll('.lantern-container.active, .cloud-container.active').forEach(l => {
                     l.classList.remove('active');
