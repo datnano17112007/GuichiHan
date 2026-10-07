@@ -1813,7 +1813,7 @@
         <div id="gift-counter">0/50</div>
     </div>
 
-    <button id="location-cloud" type="button" aria-label="Bấm để kiểm tra thời tiết" title="Bấm để kiểm tra thời tiết">☁️</button>
+    <button id="location-cloud" type="button" aria-label="Bấm để cho phép vị trí và xem thời tiết" title="Bấm để cho phép vị trí và xem thời tiết">☁️</button>
 
     <div id="password-modal" class="modal">
         <div class="modal-content">
@@ -2130,6 +2130,22 @@
         let weatherData = null;
         let weatherMessages = [];
 
+        /* Các lời mời nhẹ nhàng để chị biết vì sao nên bấm mây vị trí.
+           Chỉ hiển thị khi chưa có vị trí được cấp phép/lưu trên thiết bị.
+           Không tự xin quyền; quyền chỉ được yêu cầu sau một thao tác của chị. */
+        const LOCATION_PROMPT_MESSAGES = [
+            'Chị ấn vào đám mây nhỏ ☁️ và cho phép vị trí, em sẽ xem thời tiết ngay chỗ chị nha 🌤️',
+            'Nếu chị cho em biết vị trí, em có thể báo chị hôm nay trời nắng hay mưa đó ☀️☔',
+            'Chị bấm chiếc mây nhỏ nhé, em sẽ xem thời tiết nơi chị đang ở cho tiện nè ☁️',
+            'Cho em xin vị trí của chị một chút nha, để em xem hôm nay chị có cần mang ô không ☔',
+            'Chị cho phép vị trí thì em có thể xem nhiệt độ và thời tiết hiện tại chỗ chị 🌡️',
+            'Một cú chạm vào đám mây nhỏ thôi, em sẽ thử xem bầu trời chỗ chị hôm nay thế nào 🌤️',
+            'Nếu hôm nay chị ra ngoài, cho em biết vị trí để em nhắc chị mang ô hay áo khoác nha 🧥☔',
+            'Em không cần vị trí nếu chị không muốn đâu. Còn nếu chị cho phép, em sẽ xem thời tiết giúp chị ☁️💛',
+            'Chị bấm mây nhỏ và chọn Cho phép khi trình duyệt hỏi nhé, rồi em xem thời tiết cho chị 🌦️',
+            'Cho em biết chị đang ở đâu nhé, em sẽ đổi những đám mây này thành lời nhắn thời tiết dành riêng cho chị ☁️✨'
+        ];
+
         const WMO_WEATHER = {
             0:  { icon:'☀️', text:'Trời quang' },
             1:  { icon:'🌤️', text:'Gần như quang' },
@@ -2224,8 +2240,8 @@
             locationCloud.classList.toggle('loading', isLoading);
             if (isLoading) {
                 locationCloud.textContent = '⌖';
-                locationCloud.title = 'Đang kiểm tra thời tiết…';
-                locationCloud.setAttribute('aria-label', 'Đang kiểm tra thời tiết');
+                locationCloud.title = 'Đang kiểm tra vị trí và thời tiết…';
+                locationCloud.setAttribute('aria-label', 'Đang kiểm tra vị trí và thời tiết');
             } else {
                 locationCloud.textContent = '☁️';
             }
@@ -2287,55 +2303,166 @@
             if (!data || !data.current) return [];
 
             const c = data.current;
+            const d = data.daily || {};
             const code = Number(c.weather_code);
             const temp = Number(c.temperature_2m);
             const feels = Number(c.apparent_temperature);
             const humidity = Number(c.relative_humidity_2m);
             const cloud = Number(c.cloud_cover);
             const wind = Number(c.wind_speed_10m);
-            const rain = Number(c.rain || 0) + Number(c.showers || 0);
+            const rain = Number(c.rain || 0);
+            const showers = Number(c.showers || 0);
+            const precipitation = Number(c.precipitation || 0);
+            const uv = Number(c.uv_index);
             const isDay = Number(c.is_day) === 1;
             const messages = [];
 
+            const todayMax = Number(Array.isArray(d.temperature_2m_max) ? d.temperature_2m_max[0] : NaN);
+            const todayMin = Number(Array.isArray(d.temperature_2m_min) ? d.temperature_2m_min[0] : NaN);
+            const rainChance = Number(Array.isArray(d.precipitation_probability_max) ? d.precipitation_probability_max[0] : NaN);
+            const todayCode = Number(Array.isArray(d.weather_code) ? d.weather_code[0] : NaN);
+            const maxWind = Number(Array.isArray(d.wind_speed_10m_max) ? d.wind_speed_10m_max[0] : NaN);
+            const uvMax = Number(Array.isArray(d.uv_index_max) ? d.uv_index_max[0] : NaN);
+            const sunrise = Array.isArray(d.sunrise) ? d.sunrise[0] : '';
+            const sunset = Array.isArray(d.sunset) ? d.sunset[0] : '';
+
+            const add = text => {
+                if (text && !messages.includes(text)) messages.push(text);
+            };
+
+            const formatTime = value => {
+                if (!value) return '';
+                const match = String(value).match(/T(\d{2}:\d{2})/);
+                return match ? match[1] : '';
+            };
+
+            // 1) Trạng thái bầu trời / mưa / dông hiện tại.
             if (STORM_CODES.has(code)) {
-                messages.push('Chỗ chị hôm nay có dông, chị nhớ đi lại cẩn thận và tránh đứng ngoài trời lúc mưa nhé ⛈️');
-            } else if (RAIN_CODES.has(code) || rain > 0.1) {
-                if (code === 65 || code === 82 || rain >= 4) {
-                    messages.push('Chỗ chị hôm nay có mưa khá to, nhớ mang ô và đi chậm một chút nhé ☔');
+                add('Chỗ chị hiện đang có dấu hiệu dông, chị nhớ đi lại cẩn thận và tránh đứng ngoài trời lúc mưa nhé ⛈️');
+            } else if (RAIN_CODES.has(code) || rain > 0.1 || showers > 0.1) {
+                if (code === 65 || code === 82 || rain >= 4 || showers >= 4) {
+                    add('Chỗ chị hiện có mưa khá to, nhớ mang ô và đi chậm một chút nhé ☔');
                 } else {
-                    messages.push('Chỗ chị hôm nay có mưa, nhớ mang theo ô nhé ☔');
+                    add('Chỗ chị hiện có mưa, nếu ra ngoài chị nhớ mang theo ô nhé ☔');
                 }
             } else if (Number.isFinite(temp) && temp >= 33 && Number.isFinite(cloud) && cloud < 60) {
-                messages.push('Chỗ chị hôm nay nắng nhiều, nhớ uống đủ nước và mang áo khoác nhé ☀️🧥');
+                add('Chỗ chị hôm nay nắng khá gắt, nhớ uống đủ nước và che nắng nha ☀️🧥');
             } else if (Number.isFinite(temp) && temp >= 30 && Number.isFinite(cloud) && cloud < 65) {
-                messages.push('Hôm nay chỗ chị có nắng, ra ngoài nhớ mang áo khoác mỏng nhé ☀️');
+                add('Hôm nay chỗ chị có nắng, ra ngoài nhớ mang áo khoác mỏng nhé ☀️');
             } else if (Number.isFinite(cloud) && cloud >= 75) {
-                messages.push('Hôm nay chỗ chị nhiều mây, trời dịu hơn rồi nhưng vẫn nhớ giữ gìn sức khỏe nha ☁️');
+                add('Hôm nay chỗ chị nhiều mây, bầu trời dịu hơn một chút rồi đó ☁️');
             } else if (Number.isFinite(cloud) && cloud >= 45) {
-                messages.push('Chỗ chị hôm nay có khá nhiều mây, thời tiết trông dịu nhẹ đó ☁️');
+                add('Chỗ chị hôm nay có khá nhiều mây, thời tiết trông dịu nhẹ đó ☁️');
             } else if (isDay && (code === 0 || code === 1)) {
-                messages.push('Bầu trời chỗ chị hôm nay khá trong, nhớ tranh thủ tận hưởng một chút nắng nhé 🌤️');
+                add('Bầu trời chỗ chị hiện khá trong, tranh thủ tận hưởng chút nắng nhé 🌤️');
             }
 
-            if (Number.isFinite(feels) && feels >= 35) {
-                messages.push('Nhiệt độ cảm nhận hôm nay khá cao, chị tránh nắng lâu và nhớ uống nhiều nước nhé 💧');
-            } else if (Number.isFinite(temp) && temp <= 21) {
-                messages.push('Hôm nay chỗ chị hơi lạnh, nhớ mặc ấm một chút nha chị 🧣');
+            // 2) Nhiệt độ thực tế và nhiệt độ cảm nhận.
+            if (Number.isFinite(temp)) {
+                add(`Nhiệt độ chỗ chị lúc này khoảng ${Math.round(temp)}°C đó 🌡️`);
             }
 
-            if (Number.isFinite(humidity) && humidity >= 85 && !RAIN_CODES.has(code)) {
-                messages.push('Độ ẩm hôm nay khá cao, trời dễ oi và bí, chị nhớ uống nước đều nhé 💧');
+            if (Number.isFinite(feels) && Number.isFinite(temp) && Math.abs(feels - temp) >= 2) {
+                if (feels > temp) {
+                    add(`Cảm giác ngoài trời đang khoảng ${Math.round(feels)}°C, có vẻ oi hơn nhiệt độ thật đó 🥵`);
+                } else {
+                    add(`Nhiệt độ cảm nhận khoảng ${Math.round(feels)}°C, trời có vẻ dễ chịu hơn con số nhiệt độ thật đó 🌿`);
+                }
+            } else if (Number.isFinite(feels)) {
+                add(`Nhiệt độ cảm nhận ở chỗ chị khoảng ${Math.round(feels)}°C nha 🌡️`);
             }
 
-            if (Number.isFinite(wind) && wind >= 30) {
-                messages.push('Hôm nay gió khá mạnh, chị đi đường nhớ cẩn thận và giữ tóc cho đàng hoàng nhé 🍃');
+            // 3) Biên độ nhiệt trong ngày.
+            if (Number.isFinite(todayMin) && Number.isFinite(todayMax)) {
+                add(`Hôm nay nhiệt độ dự kiến dao động khoảng ${Math.round(todayMin)}°C – ${Math.round(todayMax)}°C 🌤️`);
+            }
+
+            if (Number.isFinite(todayMax) && todayMax >= 34) {
+                add(`Nhiệt độ cao nhất hôm nay có thể lên khoảng ${Math.round(todayMax)}°C, chị nhớ tránh nắng lâu nha ☀️💧`);
+            } else if (Number.isFinite(todayMin) && todayMin <= 21) {
+                add(`Sáng hoặc đêm nay có thể xuống khoảng ${Math.round(todayMin)}°C, chị nhớ giữ ấm nha 🧣`);
+            }
+
+            // 4) Độ ẩm.
+            if (Number.isFinite(humidity)) {
+                if (humidity >= 85) {
+                    add(`Độ ẩm hiện khoảng ${Math.round(humidity)}%, trời dễ oi và bí, chị nhớ uống nước đều nhé 💧`);
+                } else if (humidity <= 45) {
+                    add(`Độ ẩm hiện khoảng ${Math.round(humidity)}%, không khí khá khô đó, chị nhớ uống nước nha 💧`);
+                } else {
+                    add(`Độ ẩm ở chỗ chị hiện khoảng ${Math.round(humidity)}%, khá dễ chịu đó 🌿`);
+                }
+            }
+
+            // 5) Mây.
+            if (Number.isFinite(cloud)) {
+                add(`Mây đang che khoảng ${Math.round(cloud)}% bầu trời chỗ chị ☁️`);
+            }
+
+            // 6) Gió.
+            if (Number.isFinite(wind)) {
+                if (wind >= 30) {
+                    add(`Gió hiện khoảng ${Math.round(wind)} km/h, chị đi đường nhớ cẩn thận và giữ tóc cho đàng hoàng nhé 🍃`);
+                } else if (wind >= 15) {
+                    add(`Gió hiện khoảng ${Math.round(wind)} km/h, ngoài trời chắc đang có chút gió mát đó 🍃`);
+                } else {
+                    add(`Gió hiện khá nhẹ, khoảng ${Math.round(wind)} km/h thôi, trời có vẻ yên ả đó 🌿`);
+                }
+            }
+
+            // 7) Lượng mưa / lượng giáng thủy hiện tại.
+            if (Number.isFinite(precipitation) && precipitation > 0) {
+                add(`Lượng giáng thủy ghi nhận gần đây khoảng ${precipitation.toFixed(1)} mm, chị nhớ để ý trời nhé 🌧️`);
+            }
+
+            // 8) Khả năng mưa trong ngày.
+            if (Number.isFinite(rainChance)) {
+                if (rainChance >= 70) {
+                    add(`Khả năng có mưa trong hôm nay khá cao, khoảng ${Math.round(rainChance)}%, chị nhớ để sẵn chiếc ô nha ☔`);
+                } else if (rainChance >= 40) {
+                    add(`Hôm nay vẫn có khả năng mưa khoảng ${Math.round(rainChance)}%, mang theo ô sẽ yên tâm hơn đó 🌦️`);
+                } else if (rainChance > 0) {
+                    add(`Khả năng mưa hôm nay khoảng ${Math.round(rainChance)}%, chưa cao nhưng vẫn nên để ý bầu trời nhé 🌤️`);
+                }
+            }
+
+            // 9) UV.
+            const uvValue = Number.isFinite(uvMax) ? uvMax : uv;
+            if (Number.isFinite(uvValue)) {
+                if (uvValue >= 8) {
+                    add(`Chỉ số UV hôm nay có thể khá cao, khoảng ${uvValue.toFixed(1)}, chị nhớ che nắng và bảo vệ da nha 🧴☀️`);
+                } else if (uvValue >= 6) {
+                    add(`Chỉ số UV hôm nay khoảng ${uvValue.toFixed(1)}, ra nắng lâu chị nhớ che chắn một chút nhé ☀️`);
+                } else if (uvValue >= 3) {
+                    add(`Chỉ số UV hôm nay khoảng ${uvValue.toFixed(1)}, nếu ở ngoài trời lâu thì nhớ che nắng nha 🌤️`);
+                }
+            }
+
+            // 10) Mặt trời mọc / lặn — lấy trực tiếp từ dữ liệu vị trí.
+            const riseTime = formatTime(sunrise);
+            const setTime = formatTime(sunset);
+            if (riseTime && setTime) {
+                add(`Theo vị trí của chị, mặt trời mọc khoảng ${riseTime} và lặn khoảng ${setTime} hôm nay 🌅`);
+            }
+
+            // 11) Dự báo tổng quát cho hôm nay.
+            if (Number.isFinite(todayCode)) {
+                const todayInfo = WMO_WEATHER[todayCode];
+                if (todayInfo && todayInfo.text) {
+                    add(`Dự báo tổng quát hôm nay: ${todayInfo.text} ${todayInfo.icon}`);
+                }
+            }
+
+            if (Number.isFinite(maxWind) && maxWind >= 30) {
+                add(`Gió mạnh nhất hôm nay có thể lên khoảng ${Math.round(maxWind)} km/h, chị đi đường cẩn thận nha 🍃`);
             }
 
             if (!messages.length) {
-                messages.push('Thời tiết chỗ chị hôm nay khá ổn, mong chị có một ngày thật dễ chịu nha 🌿');
+                add('Thời tiết chỗ chị hôm nay khá ổn, mong chị có một ngày thật dễ chịu nha 🌿');
             }
 
-            return [...new Set(messages)].slice(0, 4);
+            // Cho phép nhiều mây thông điệp hơn, nhưng vẫn tránh queue quá dài.
+            return messages.slice(0, 12);
         }
 
         function rebuildMessageQueue({ resetIndex = false } = {}) {
@@ -2350,6 +2477,14 @@
             const PASSWORD_MIN_GAP = 8;
 
             const normalItems = sourceArr.map(msg => ({ type: 'text', val: msg }));
+
+            /* Khi chưa có vị trí, rải nhẹ các lời mời dùng tính năng thời tiết
+               vào giữa các thông điệp; khi đã có vị trí thì tự động biến mất. */
+            if (!getSavedLocation()) {
+                LOCATION_PROMPT_MESSAGES.forEach(msg => {
+                    normalItems.push({ type: 'location', val: msg });
+                });
+            }
 
             weatherMessages.forEach(msg => {
                 normalItems.push({ type: 'weather', val: msg });
@@ -2480,8 +2615,8 @@
                 `https://api.open-meteo.com/v1/forecast` +
                 `?latitude=${encodeURIComponent(location.lat)}` +
                 `&longitude=${encodeURIComponent(location.lon)}` +
-                `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,weather_code,cloud_cover,wind_speed_10m,is_day` +
-                `&daily=sunrise,sunset` +
+                `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,weather_code,cloud_cover,wind_speed_10m,is_day,uv_index` +
+                `&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,wind_speed_10m_max,uv_index_max` +
                 `&forecast_days=1` +
                 `&timezone=auto`;
 
@@ -2552,7 +2687,7 @@
                 weatherData = null;
                 weatherMessages = [];
                 rebuildMessageQueue({ resetIndex: true });
-                syncLocationCloud(true, 'Bấm để kiểm tra thời tiết');
+                syncLocationCloud(true, 'Bấm để cho phép vị trí và xem thời tiết');
                 if (locationCloud) locationCloud.textContent = '☁️';
             } finally {
                 clearTimeout(weatherRefreshTimer);
@@ -2577,7 +2712,7 @@
         });
 
         /* Chỉ hiện mây nhỏ khi chưa có vị trí đã lưu. */
-        syncLocationCloud(!getSavedLocation(), 'Bấm để kiểm tra thời tiết');
+        syncLocationCloud(!getSavedLocation(), 'Bấm để cho phép vị trí và xem thời tiết');
         scheduleWeatherRefresh();
 
         const giftIcon = document.getElementById('gift-icon');
@@ -3021,21 +3156,29 @@
             let item = mainContentQueue[queueIndex]; queueIndex = (queueIndex + 1) % mainContentQueue.length;
             let pStyle = item.type === 'pass' ? 'color: #ffdf85; font-size: 1.25rem;' : '';
             const weatherTag = item.type === 'weather' ? '<span class="weather-message-tag">THỜI TIẾT CHỖ CHỊ</span>' : '';
+            const locationTag = item.type === 'location' ? '<span class="weather-message-tag">MẸO NHỎ CHO CHỊ</span>' : '';
 
-            const stickerKey = item.type === 'weather'
+            const stickerKey = item.type === 'weather' || item.type === 'location'
                 ? (currentModeTime === 'morning' ? 'cloud' : 'moon')
                 : (currentModeTime === 'morning'
                     ? (Math.random() < 0.5 ? 'heart' : 'cloud')
                     : (Math.random() < 0.5 ? 'hug' : 'moon'));
             const stickerSrc = MESSAGE_STICKERS[stickerKey];
-            const stickerHTML = `<img class="message-sticker ${item.type === 'weather' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
+            const stickerHTML = `<img class="message-sticker ${item.type === 'weather' || item.type === 'location' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
 
 
-            container.innerHTML = `<div class="lantern-popup">${stickerHTML}${weatherTag}<p style="${pStyle}"></p></div><div class="lantern-body"><div class="lantern-top"></div><div class="lantern-bottom"></div></div><div class="tassel"></div>`;
+            container.innerHTML = `<div class="lantern-popup">${stickerHTML}${weatherTag}${locationTag}<p style="${pStyle}"></p></div><div class="lantern-body"><div class="lantern-top"></div><div class="lantern-bottom"></div></div><div class="tassel"></div>`;
             let textArr = [...item.val]; 
             
             container.addEventListener('click', (e) => {
-                e.stopPropagation(); 
+                e.stopPropagation();
+
+                if (item.type === 'location') {
+                    container.classList.add('active');
+                    trackLanternOpen(container);
+                    initLocationAndWeather(true);
+                    return;
+                }
                 
                 if (container.classList.contains('active')) {
                     container.classList.remove('active');
@@ -3126,14 +3269,15 @@
             let item = mainContentQueue[queueIndex]; queueIndex = (queueIndex + 1) % mainContentQueue.length;
             let pStyle = item.type === 'pass' ? 'color: #ff8c32; font-size: 1.25rem;' : '';
             const weatherTag = item.type === 'weather' ? '<span class="weather-message-tag">THỜI TIẾT CHỖ CHỊ</span>' : '';
+            const locationTag = item.type === 'location' ? '<span class="weather-message-tag">MẸO NHỎ CHO CHỊ</span>' : '';
 
-            const stickerKey = item.type === 'weather'
+            const stickerKey = item.type === 'weather' || item.type === 'location'
                 ? (currentModeTime === 'morning' ? 'cloud' : 'moon')
                 : (currentModeTime === 'morning'
                     ? (Math.random() < 0.5 ? 'heart' : 'cloud')
                     : (Math.random() < 0.5 ? 'hug' : 'moon'));
             const stickerSrc = MESSAGE_STICKERS[stickerKey];
-            const stickerHTML = `<img class="message-sticker ${item.type === 'weather' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
+            const stickerHTML = `<img class="message-sticker ${item.type === 'weather' || item.type === 'location' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
 
 
             // Mây thông điệp dùng silhouette organic, nhưng vẫn giữ vài mây tầng phía sau để có chiều sâu.
@@ -3141,14 +3285,20 @@
             const messageLayer = layer < 0.35 ? 'message-far' : (layer < 0.75 ? 'message-mid' : 'message-near');
             container.classList.add(messageLayer);
 
-            container.innerHTML = `<div class="lantern-popup">${stickerHTML}${weatherTag}<p style="${pStyle}"></p></div><div class="cloud-body">${createMessageCloudSVG(shape, messageLayer)}</div>`;
+            container.innerHTML = `<div class="lantern-popup">${stickerHTML}${weatherTag}${locationTag}<p style="${pStyle}"></p></div><div class="cloud-body">${createMessageCloudSVG(shape, messageLayer)}</div>`;
             const body = container.querySelector('.cloud-body');
             body.style.opacity = opacity;
             body.style.setProperty('--message-filter', filter);
             let textArr = [...item.val]; 
             
             container.addEventListener('click', (e) => {
-                e.stopPropagation(); 
+                e.stopPropagation();
+                if (item.type === 'location') {
+                    container.classList.add('active');
+                    trackLanternOpen(container);
+                    initLocationAndWeather(true);
+                    return;
+                }
                 if (container.classList.contains('active')) {
                     container.classList.remove('active');
                 } else {
