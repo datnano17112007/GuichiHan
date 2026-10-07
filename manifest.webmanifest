@@ -1,0 +1,16 @@
+{
+  "name": "Gửi Chị Hân",
+  "short_name": "Chị Hân",
+  "description": "Không gian bầu trời dành riêng cho Chị Hân.",
+  "lang": "vi",
+  "start_url": "./?Chedongay",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#64b5f6",
+  "theme_color": "#64b5f6",
+  "icons": [
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
