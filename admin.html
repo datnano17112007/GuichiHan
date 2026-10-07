@@ -25,10 +25,10 @@
         <div><h1>📍 Vị trí đã chia sẻ</h1><div class="muted" id="countText">Đang tải...</div></div>
         <div><button class="secondary" id="refreshBtn">Làm mới</button><button class="secondary" id="logoutBtn">Đăng xuất</button></div>
       </div>
-      <div class="status" id="dataStatus"></div><div class="status" id="debugStatus" style="font-size:12px;white-space:pre-wrap;opacity:.85"></div>
+      <div class="status" id="dataStatus"></div>
     </div>
     <div class="card table-wrap">
-      <table><thead><tr><th>Thời gian</th><th>Vĩ độ</th><th>Kinh độ</th><th>Độ chính xác</th><th>Bản đồ</th></tr></thead>
+      <table><thead><tr><th>Thời gian</th><th>Vĩ độ</th><th>Kinh độ</th><th>Độ chính xác</th><th>Thiết bị</th><th>Hệ điều hành</th><th>Trình duyệt</th><th>Bản đồ</th></tr></thead>
       <tbody id="locationsBody"></tbody></table>
     </div>
   </div>
@@ -41,63 +41,28 @@ const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
 async function loadLocations(){
-  $('dataStatus').textContent='Đang kiểm tra dữ liệu...';
-  $('debugStatus').textContent='Đang kiểm tra quyền đọc trong database...';
+  $('dataStatus').textContent='Đang tải dữ liệu...';
 
   const {data:sessionData,error:sessionError}=await client.auth.getSession();
   if(sessionError || !sessionData.session){
     $('dataStatus').textContent='Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
     $('countText').textContent='Chưa đăng nhập';
-    $('debugStatus').textContent='Không có session trong trình duyệt.';
     return;
   }
 
   const session=sessionData.session;
-  const user=session.user;
-
-  let jwtRole='?';
-  let jwtSub='?';
-  let jwtEmail='?';
-  try{
-    const parts=session.access_token.split('.');
-    const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-    jwtRole=payload.role ?? '?';
-    jwtSub=payload.sub ?? '?';
-    jwtEmail=payload.email ?? '?';
-  }catch(err){ console.error('JWT decode error:',err); }
-
-  $('debugStatus').textContent=
-    'BROWSER SESSION\n'+
-    'UID: '+(user?.id||'?')+'\n'+
-    'Email: '+(user?.email||'?')+'\n'+
-    'JWT role: '+jwtRole+'\n'+
-    'JWT sub: '+jwtSub+'\n'+
-    'JWT email: '+jwtEmail;
-
-  const {data:accessDebug,error:accessError}=await client.rpc('debug_location_access');
-
-  if(accessError){
-    $('debugStatus').textContent +=
-      '\n\nDATABASE ACCESS ERROR:\n'+
-      accessError.message+
-      '\nCode: '+(accessError.code||'?');
-    $('dataStatus').textContent='Không kiểm tra được quyền database.';
+  if(session.user?.id !== '601dcb10-08fa-42e8-8b25-adbe67154779'){
+    await client.auth.signOut().catch(()=>{});
+    renderSession(null);
+    $('loginStatus').textContent='Tài khoản này không có quyền quản trị.';
     return;
   }
 
-  $('debugStatus').textContent +=
-    '\n\nDATABASE ACCESS (RPC):\n'+
-    JSON.stringify(accessDebug);
-
-  // Chỉ đọc locations nếu phép kiểm tra database xác nhận đúng UID và có dữ liệu.
   const {data,error}=await client.rpc('get_admin_locations');
-
   if(error){
     console.error('get_admin_locations error:',error);
     $('dataStatus').textContent='Không đọc được dữ liệu: '+error.message;
     $('countText').textContent='Lỗi';
-    $('debugStatus').textContent +=
-      '\n\nLOCATIONS RPC ERROR:\n'+error.message;
     return;
   }
 
@@ -109,23 +74,39 @@ async function loadLocations(){
 
   $('countText').textContent=`${data.length} lượt chia sẻ`;
   $('dataStatus').textContent=data.length?'':'Chưa có vị trí nào được chia sẻ.';
-  $('debugStatus').textContent +=
-    '\n\nLOCATIONS RPC: '+data.length+' dòng.';
 
   $('locationsBody').innerHTML=data.map(row=>{
     const lat=Number(row.latitude),lon=Number(row.longitude);
-    const mapUrl=`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}`;
-    return `<tr><td>${esc(formatTime(row.created_at))}</td><td>${esc(lat.toFixed(6))}</td><td>${esc(lon.toFixed(6))}</td><td>${row.accuracy==null?'—':esc(Math.round(Number(row.accuracy))+' m')}</td><td><a href="${mapUrl}" target="_blank" rel="noopener">Mở bản đồ</a></td></tr>`;
+    const validLat=Number.isFinite(lat),validLon=Number.isFinite(lon);
+    const mapUrl=validLat&&validLon?`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}`:'#';
+
+    const deviceModel=String(row.device_model ?? '').trim();
+    const deviceType=String(row.device_type ?? '').trim();
+    const device=[deviceModel, deviceType && !deviceModel ? deviceType : ''].filter(Boolean).join(' · ') || '—';
+
+    const osName=String(row.os_name ?? row.os ?? '').trim();
+    const osVersion=String(row.os_version ?? '').trim();
+    const browserName=String(row.browser_name ?? row.browser ?? '').trim();
+    const browserVersion=String(row.browser_version ?? '').trim();
+    const os=[osName, osVersion].filter(Boolean).join(' ') || '—';
+    const browser=[browserName, browserVersion].filter(Boolean).join(' ') || '—';
+
+    const latText=validLat?lat.toFixed(6):'—';
+    const lonText=validLon?lon.toFixed(6):'—';
+    const accuracyNum=Number(row.accuracy);
+    const accuracyText=Number.isFinite(accuracyNum)?Math.round(accuracyNum)+' m':'—';
+    const mapLink=validLat&&validLon?`<a href="${mapUrl}" target="_blank" rel="noopener">Mở bản đồ</a>`:'—';
+
+    return `<tr><td>${esc(formatTime(row.created_at))}</td><td>${esc(latText)}</td><td>${esc(lonText)}</td><td>${esc(accuracyText)}</td><td>${esc(device)}</td><td>${esc(os)}</td><td>${esc(browser)}</td><td>${mapLink}</td></tr>`;
   }).join('');
 }
-
 
 function renderSession(session){
   $('loginCard').style.display=session?'none':'block';
   $('adminArea').style.display=session?'block':'none';
   if(!session){
     $('countText').textContent='Chưa đăng nhập';
-    $('locationsBody').innerHTML='';$('debugStatus').textContent='';
+    $('locationsBody').innerHTML='';
   }
 }
 
@@ -177,8 +158,6 @@ $('refreshBtn').addEventListener('click',async()=>{
   }
 });
 
-// Không gọi getSession lồng bên trong callback auth nữa.
-// Việc đọc locations dùng JWT trực tiếp ở loadLocations().
 client.auth.onAuthStateChange((_event,session)=>{
   renderSession(session);
 });
