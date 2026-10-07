@@ -21,22 +21,6 @@ th{color:#b8c1d1;font-weight:600}a{color:#9fc5ff}
 #adminArea{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#202633;color:#cbd5e1;font-size:12px;margin-top:8px}
 .debug{font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;background:#0d0f13;border:1px solid #2b303b;padding:12px;border-radius:10px;margin-top:10px;color:#cbd5e1;display:none}
-
-.message-section{margin-top:18px}
-.message-toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
-.message-list{display:grid;gap:12px;margin-top:14px}
-.message-card{border:1px solid #2b303b;border-radius:14px;padding:14px;background:#11151c}
-.message-card.unread{border-color:#536b8d;box-shadow:inset 0 0 0 1px rgba(93,126,171,.12)}
-.message-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:#aeb7c6}
-.message-badge{padding:4px 8px;border-radius:999px;background:#202633;color:#d8e0ec;font-weight:700}
-.message-badge.unread{background:#5d4a20;color:#ffe3a6}
-.message-content{margin-top:10px;white-space:pre-wrap;word-break:break-word;line-height:1.55;color:#f3f6fb}
-.message-reply{display:flex;gap:8px;align-items:flex-start;margin-top:12px}
-.message-reply textarea{flex:1;min-height:72px;resize:vertical;background:#0d1118;color:#f3f6fb;border:1px solid #2b303b;border-radius:10px;padding:9px;font:14px/1.45 system-ui,sans-serif}
-.message-reply button{white-space:nowrap}
-.message-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.message-empty{padding:18px;border:1px dashed #2b303b;border-radius:12px;color:#9da8b8}
-.message-note{font-size:12px;color:#929dad;line-height:1.45;margin-top:6px}
 </style>
 </head>
 <body>
@@ -84,18 +68,6 @@ th{color:#b8c1d1;font-weight:600}a{color:#9fc5ff}
         </thead>
         <tbody id="locationsBody"></tbody>
       </table>
-    </div>
-    <div class="card message-section">
-      <div class="message-toolbar">
-        <div>
-          <h2 style="margin:0 0 4px">💌 Hộp thư riêng</h2>
-          <div class="muted" id="messageCountText">Đang tải tin nhắn...</div>
-          <div class="message-note">Tin nhắn của chị Hân nằm ở đây. Em có thể trả lời trực tiếp; khi trả lời, balloon phản hồi sẽ xuất hiện ở trang của chị.</div>
-        </div>
-        <button class="secondary" id="refreshMessagesBtn">Làm mới tin nhắn</button>
-      </div>
-      <div class="status" id="messageStatus"></div>
-      <div class="message-list" id="messagesList"></div>
     </div>
   </div>
 </div>
@@ -235,120 +207,6 @@ async function loadLocations(){
   ]);
 }
 
-async function loadMessages(){
-  const status=$('messageStatus');
-  const list=$('messagesList');
-  const count=$('messageCountText');
-  status.className='status';
-  status.textContent='Đang tải tin nhắn...';
-  list.innerHTML='';
-
-  let session;
-  try{ session=await getValidAdminSession(); }
-  catch(error){
-    status.className='status error';
-    status.textContent='Không xác thực được admin: '+(error?.message||error);
-    count.textContent='Lỗi xác thực';
-    return;
-  }
-  if(!session){ count.textContent='Chưa đăng nhập'; return; }
-
-  const result=await client
-    .from('private_messages')
-    .select('id,sender,receiver,content,reply_to,is_read,created_at')
-    .order('created_at',{ascending:false});
-
-  if(result.error){
-    status.className='status error';
-    status.textContent='Không tải được hộp thư: '+result.error.message;
-    count.textContent='Lỗi';
-    return;
-  }
-
-  const rows=Array.isArray(result.data)?result.data:[];
-  count.textContent=`${rows.length} tin nhắn`;
-  status.className='status ok';
-  status.textContent=rows.length?'Đã tải hộp thư.':'Chưa có tin nhắn.';
-
-  if(!rows.length){
-    list.innerHTML='<div class="message-empty">Chưa có tin nhắn riêng nào.</div>';
-    return;
-  }
-
-  list.innerHTML=rows.map(row=>{
-    const fromHan=row.sender==='han';
-    const unread=!row.is_read;
-    const statusBadge=unread?'<span class="message-badge unread">Chưa đọc</span>':'<span class="message-badge">Đã đọc</span>';
-    const senderText=fromHan?'Chị Hân gửi':'Em gửi';
-    const replyButton=fromHan
-      ? `<div class="message-reply">
-           <textarea id="reply-input-${esc(row.id)}" maxlength="2000" placeholder="Viết phản hồi cho chị..."></textarea>
-           <button id="reply-btn-${esc(row.id)}">Trả lời</button>
-         </div>`
-      : '';
-    const readButton=unread
-      ? `<div class="message-actions"><button class="secondary mark-read-btn" data-id="${esc(row.id)}">Đánh dấu đã đọc</button></div>`
-      : '';
-    return `<article class="message-card ${unread?'unread':''}">
-      <div class="message-meta">
-        <span class="message-badge">${esc(senderText)}</span>
-        ${statusBadge}
-        <span>${esc(formatTime(row.created_at))}</span>
-      </div>
-      <div class="message-content">${esc(row.content||'')}</div>
-      ${replyButton}
-      ${readButton}
-    </article>`;
-  }).join('');
-
-  rows.filter(r=>r.sender==='han').forEach(row=>{
-    const button=$(`reply-btn-${row.id}`);
-    const input=$(`reply-input-${row.id}`);
-    button?.addEventListener('click',()=>replyToMessage(row,input,button));
-  });
-  list.querySelectorAll('.mark-read-btn').forEach(btn=>{
-    btn.addEventListener('click',async()=>{
-      btn.disabled=true;
-      try{
-        await client.from('private_messages').update({is_read:true}).eq('id',btn.dataset.id);
-        await loadMessages();
-      }catch(error){
-        btn.disabled=false;
-        status.className='status error';
-        status.textContent='Không đánh dấu được: '+(error?.message||error);
-      }
-    });
-  });
-}
-
-async function replyToMessage(row,input,button){
-  const content=(input?.value||'').trim();
-  if(!content){ $('messageStatus').className='status error'; $('messageStatus').textContent='Hãy nhập nội dung phản hồi trước nhé.'; return; }
-  button.disabled=true;
-  button.textContent='Đang gửi...';
-  try{
-    const {data:sessionData,error:sessionError}=await client.auth.getSession();
-    if(sessionError) throw sessionError;
-    const session=sessionData.session;
-    if(!session) throw new Error('Phiên quản trị đã hết hạn.');
-
-    const result=await client.from('private_messages').insert({
-      sender:'em',
-      receiver:'han',
-      content,
-      reply_to:row.id,
-      is_read:false
-    }).select('id').single();
-    if(result.error) throw result.error;
-    await loadMessages();
-  }catch(error){
-    button.disabled=false;
-    button.textContent='Trả lời';
-    $('messageStatus').className='status error';
-    $('messageStatus').textContent='Gửi phản hồi lỗi: '+(error?.message||error);
-  }
-}
-
 function renderSession(session){
   const isAdmin=!!(session&&session.user&&((session.user.id===ADMIN_UID)||((session.user.email||'').toLowerCase()===ADMIN_EMAIL)));
   $('loginCard').style.display=isAdmin?'none':'block';
@@ -370,7 +228,6 @@ async function init(){
   if(session&&session.user&&((session.user.id===ADMIN_UID)||((session.user.email||'').toLowerCase()===ADMIN_EMAIL))){
     renderSession(session);
     await loadLocations();
-    await loadMessages();
   }else if(session){
     await client.auth.signOut();
     renderSession(null);
@@ -397,7 +254,6 @@ $('loginBtn').addEventListener('click',async()=>{
     $('loginStatus').textContent='';
     renderSession(data.session);
     await loadLocations();
-    await loadMessages();
   }catch(error){
     $('loginStatus').className='status error';
     $('loginStatus').textContent='Đăng nhập thất bại: '+(error?.message||error);
@@ -424,20 +280,13 @@ $('logoutBtn').addEventListener('click',async()=>{
 
 $('refreshBtn').addEventListener('click',async()=>{
   $('refreshBtn').disabled=true;
-  try{await loadLocations(); await loadMessages();}
+  try{await loadLocations();}
   finally{$('refreshBtn').disabled=false;}
-});
-
-$('refreshMessagesBtn').addEventListener('click',async()=>{
-  $('refreshMessagesBtn').disabled=true;
-  try{await loadMessages();}
-  finally{$('refreshMessagesBtn').disabled=false;}
 });
 
 client.auth.onAuthStateChange((_event,session)=>{
   const isAdmin=!!(session&&session.user&&((session.user.id===ADMIN_UID)||((session.user.email||'').toLowerCase()===ADMIN_EMAIL)));
   renderSession(isAdmin?session:null);
-  if(isAdmin) loadMessages();
 });
 
 init();
