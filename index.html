@@ -2544,7 +2544,6 @@
 
             const todayMax = Number(Array.isArray(d.temperature_2m_max) ? d.temperature_2m_max[0] : NaN);
             const todayMin = Number(Array.isArray(d.temperature_2m_min) ? d.temperature_2m_min[0] : NaN);
-            const rainChance = Number(Array.isArray(d.precipitation_probability_max) ? d.precipitation_probability_max[0] : NaN);
             const todayCode = Number(Array.isArray(d.weather_code) ? d.weather_code[0] : NaN);
             const maxWind = Number(Array.isArray(d.wind_speed_10m_max) ? d.wind_speed_10m_max[0] : NaN);
             const uvMax = Number(Array.isArray(d.uv_index_max) ? d.uv_index_max[0] : NaN);
@@ -2562,23 +2561,55 @@
             };
 
             /*
-             * Weather message = THỜI GIAN + THỜI TIẾT.
+             * Weather message = GIỜ THỰC TẾ + THỜI TIẾT THỰC TẾ.
              * Có thể test riêng một khung giờ bằng ?gio=21.
-             * ?Chedodem / ?Chedongay vẫn chỉ ép giao diện, nhưng khi test
-             * một mode ở sai thời điểm trong ngày thì dùng mốc đại diện
-             * để lời nhắn vẫn đúng với giao diện đang xem.
+             * Quan trọng: ?Chedodem / ?Chedongay chỉ đổi giao diện,
+             * tuyệt đối không được đổi giờ dùng để tạo nội dung thời tiết.
              */
             const params = new URLSearchParams(window.location.search);
-            const forcedMode = getUrlForcedMode();
             let messageHour = new Date().getHours();
             const debugHour = Number(params.get('gio'));
 
             if (Number.isFinite(debugHour) && debugHour >= 0 && debugHour <= 23) {
                 messageHour = Math.floor(debugHour);
-            } else if (forcedMode === 'evening' && messageHour >= 6 && messageHour < 18) {
-                messageHour = 21;
-            } else if (forcedMode === 'morning' && (messageHour >= 18 || messageHour < 6)) {
-                messageHour = 12;
+            }
+
+            /*
+             * Dự báo mưa phải lấy theo các giờ thuộc đúng khung giờ hiện tại,
+             * không dùng precipitation_probability_max của cả ngày.
+             * Nếu không có hourly data thì không suy diễn sang buổi tối.
+             */
+            let rainChance = NaN;
+            const hourly = data.hourly || {};
+            const hourlyTimes = Array.isArray(hourly.time) ? hourly.time : [];
+            const hourlyRainProb = Array.isArray(hourly.precipitation_probability) ? hourly.precipitation_probability : [];
+            if (hourlyTimes.length && hourlyRainProb.length) {
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+                const currentHourKey = `${dateKey}T${pad(messageHour)}:00`;
+                let startIndex = hourlyTimes.findIndex(value => String(value).startsWith(currentHourKey));
+                if (startIndex < 0) startIndex = Math.max(0, hourlyTimes.findIndex(value => String(value).slice(0, 13) === currentHourKey.slice(0, 13)));
+
+                if (startIndex >= 0) {
+                    const periodEndHour =
+                        messageHour < 11 ? 10 :
+                        messageHour < 14 ? 13 :
+                        messageHour < 18 ? 17 :
+                        messageHour < 21 ? 20 :
+                        messageHour < 24 ? 23 : 4;
+                    const values = [];
+                    for (let i = startIndex; i < hourlyRainProb.length && i < startIndex + 12; i++) {
+                        const time = String(hourlyTimes[i] || '');
+                        const match = time.match(/T(\d{2}):/);
+                        if (!match) continue;
+                        const hour = Number(match[1]);
+                        if (hour > periodEndHour) break;
+                        const value = Number(hourlyRainProb[i]);
+                        if (Number.isFinite(value)) values.push(value);
+                    }
+                    if (values.length) rainChance = Math.max(...values);
+                }
             }
 
             let period;
@@ -2659,7 +2690,7 @@
             }
 
             if (Number.isFinite(rainChance)) {
-                const timeLabel = period === 'morning' ? 'sáng nay' : period === 'noon' ? 'trưa nay' : period === 'afternoon' ? 'chiều nay' : period === 'evening' ? 'tối nay' : 'đêm nay';
+                const timeLabel = period === 'morning' ? 'sáng nay' : period === 'noon' ? 'trưa nay' : period === 'afternoon' ? 'chiều nay' : period === 'evening' ? 'tối nay' : period === 'night' ? 'đêm nay' : 'khuya nay';
                 if (rainChance >= 70) add(`Khả năng mưa ${timeLabel} khoảng ${Math.round(rainChance)}%, chị nhớ để sẵn áo mưa nha ☔`);
                 else if (rainChance >= 40) add(`${timeLabel.charAt(0).toUpperCase() + timeLabel.slice(1)} vẫn có khả năng mưa khoảng ${Math.round(rainChance)}% 🌦️`);
             }
@@ -2848,6 +2879,7 @@
                 `?latitude=${encodeURIComponent(location.lat)}` +
                 `&longitude=${encodeURIComponent(location.lon)}` +
                 `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,weather_code,cloud_cover,wind_speed_10m,is_day,uv_index` +
+                `&hourly=precipitation_probability,temperature_2m,precipitation,rain,showers,weather_code,wind_speed_10m,relative_humidity_2m` +
                 `&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,wind_speed_10m_max,uv_index_max` +
                 `&forecast_days=1` +
                 `&timezone=auto`;
@@ -3894,7 +3926,7 @@
          * câu "tối nay" sau khi đã sang buổi trưa/chiều.
          */
         setInterval(() => {
-            if (!weatherData || !weatherData.current || getUrlForcedMode()) return;
+            if (!weatherData || !weatherData.current) return;
             const currentHour = new Date().getHours();
             if (weatherMessageHourKey === currentHour) return;
 
