@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quản trị vị trí — Gửi Chị Hân</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0f1115;color:#f5f7fb;padding:20px}.wrap{max-width:1000px;margin:auto}.card{background:#171a21;border:1px solid #2b303b;border-radius:18px;padding:20px;margin-bottom:18px}h1{margin:0 0 6px;font-size:24px}.muted{color:#aab1bf;font-size:14px}input{width:100%;padding:13px 14px;margin:7px 0;background:#0d0f13;color:#fff;border:1px solid #343b48;border-radius:10px}button{padding:12px 16px;border:0;border-radius:10px;background:#fff;color:#111;font-weight:700;cursor:pointer;margin-top:8px}button.secondary{background:#2a303b;color:#fff}.status{margin-top:10px;color:#b8c1d1;min-height:22px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #2b303b;font-size:14px}th{color:#b8c1d1;font-weight:600}a{color:#9fc5ff}#adminArea{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="loginCard">
+    <h1>🔐 Quản trị vị trí</h1>
+    <div class="muted">Chỉ tài khoản Supabase được phép mới xem được dữ liệu.</div>
+    <input id="email" type="email" autocomplete="username" placeholder="Email quản trị">
+    <input id="password" type="password" autocomplete="current-password" placeholder="Mật khẩu">
+    <button id="loginBtn">Đăng nhập</button>
+    <div class="status" id="loginStatus"></div>
+  </div>
+  <div id="adminArea">
+    <div class="card">
+      <div class="top">
+        <div><h1>📍 Vị trí đã chia sẻ</h1><div class="muted" id="countText">Đang tải...</div></div>
+        <div><button class="secondary" id="refreshBtn">Làm mới</button><button class="secondary" id="logoutBtn">Đăng xuất</button></div>
+      </div>
+      <div class="status" id="dataStatus"></div>
+    </div>
+    <div class="card table-wrap">
+      <table><thead><tr><th>Thời gian</th><th>Vĩ độ</th><th>Kinh độ</th><th>Độ chính xác</th><th>Bản đồ</th></tr></thead>
+      <tbody id="locationsBody"></tbody></table>
+    </div>
+  </div>
+</div>
+<script>
+const SUPABASE_URL='https://vmowbgukusoluzgknhgr.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_2MdEmCevCjYLEVRdoHvSnA_0CwkA8TD';
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
+async function loadLocations(){
+  $('dataStatus').textContent='Đang tải dữ liệu...';
+  const {data,error}=await client.from('locations').select('id,latitude,longitude,accuracy,created_at').order('created_at',{ascending:false});
+  if(error){console.error(error);$('dataStatus').textContent='Không đọc được dữ liệu: '+error.message;$('countText').textContent='Lỗi';return;}
+  $('countText').textContent=`${data.length} lượt chia sẻ`;
+  $('dataStatus').textContent=data.length?'':'Chưa có vị trí nào được chia sẻ.';
+  $('locationsBody').innerHTML=data.map(row=>{
+    const lat=Number(row.latitude),lon=Number(row.longitude);
+    const mapUrl=`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}`;
+    return `<tr><td>${esc(formatTime(row.created_at))}</td><td>${esc(lat.toFixed(6))}</td><td>${esc(lon.toFixed(6))}</td><td>${row.accuracy==null?'—':esc(Math.round(Number(row.accuracy))+' m')}</td><td><a href="${mapUrl}" target="_blank" rel="noopener">Mở bản đồ</a></td></tr>`;
+  }).join('');
+}
+async function showSession(){
+  const {data:{session}}=await client.auth.getSession();
+  $('loginCard').style.display=session?'none':'block';
+  $('adminArea').style.display=session?'block':'none';
+  if(session) await loadLocations();
+}
+$('loginBtn').addEventListener('click',async()=>{
+  $('loginStatus').textContent='Đang đăng nhập...';
+  const {error}=await client.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+  if(error){$('loginStatus').textContent='Đăng nhập thất bại: '+error.message;return;}
+  $('loginStatus').textContent='';await showSession();
+});
+$('logoutBtn').addEventListener('click',async()=>{await client.auth.signOut();await showSession();});
+$('refreshBtn').addEventListener('click',loadLocations);
+client.auth.onAuthStateChange(()=>showSession());
+showSession();
+</script>
+</body>
+</html>
