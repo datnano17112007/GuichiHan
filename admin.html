@@ -40,83 +40,32 @@ const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY)
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
-async function loadLocations(sessionArg=null, retry=true){
+async function loadLocations(){
   $('dataStatus').textContent='Đang tải dữ liệu...';
   $('debugStatus').textContent='';
 
-  let session=sessionArg;
-  if(!session){
-    const {data,error}=await client.auth.getSession();
-    if(error||!data.session){
-      $('dataStatus').textContent='Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
-      $('countText').textContent='Chưa đăng nhập';
-      return;
-    }
-    session=data.session;
-  }
-
-  // Chỉ đọc metadata không nhạy cảm từ payload JWT để chẩn đoán:
-  // role + sub. Không bao giờ hiển thị access_token.
-  let jwtRole='?';
-  let jwtSub='?';
-  try{
-    const parts=session.access_token.split('.');
-    const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-    jwtRole=payload.role||'?';
-    jwtSub=payload.sub||'?';
-  }catch(e){
-    console.error('JWT decode error',e);
-  }
-
-  $('debugStatus').textContent=
-    'Auth: role='+jwtRole+
-    ' | sub='+jwtSub+
-    ' | session user='+String(session.user?.id||'?');
-
-  const url=new URL('/rest/v1/locations',SUPABASE_URL);
-  url.searchParams.set('select','id,latitude,longitude,accuracy,created_at');
-  url.searchParams.set('order','created_at.desc');
-
-  let response;
-  try{
-    response=await fetch(url.toString(),{
-      method:'GET',
-      headers:{
-        apikey:SUPABASE_PUBLISHABLE_KEY,
-        Authorization:'Bearer '+session.access_token,
-        Accept:'application/json'
-      },
-      cache:'no-store'
-    });
-  }catch(err){
-    console.error(err);
-    $('dataStatus').textContent='Không kết nối được Supabase: '+(err?.message||err);
-    $('countText').textContent='Lỗi kết nối';
+  const {data:sessionData,error:sessionError}=await client.auth.getSession();
+  if(sessionError || !sessionData.session){
+    $('dataStatus').textContent='Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
+    $('countText').textContent='Chưa đăng nhập';
     return;
   }
 
-  if(response.status===401 && retry){
-    const {data,error}=await client.auth.refreshSession();
-    if(!error && data.session) return loadLocations(data.session,false);
-  }
+  const session=sessionData.session;
+  $('debugStatus').textContent='Đã xác thực tài khoản quản trị. Đang đọc dữ liệu...';
 
-  const responseText=await response.text();
-  let data=null;
-  try{ data=JSON.parse(responseText); }catch(_){}
+  const {data,error}=await client.rpc('get_admin_locations');
 
-  $('debugStatus').textContent +=
-    ' | REST HTTP='+response.status+
-    ' | response='+(Array.isArray(data)?('array['+data.length+']'):String(data?.message||responseText||'empty'));
-
-  if(!response.ok){
-    const message=data?.message || data?.hint || data?.details || ('HTTP '+response.status);
-    console.error('Supabase REST error:',response.status,data);
-    $('dataStatus').textContent='Không đọc được dữ liệu: '+message;
+  if(error){
+    console.error('get_admin_locations error:',error);
+    $('dataStatus').textContent='Không đọc được dữ liệu: '+error.message;
     $('countText').textContent='Lỗi';
+    $('debugStatus').textContent='RPC lỗi: '+(error.code||'unknown');
     return;
   }
 
   if(!Array.isArray(data)){
+    console.error('RPC returned unexpected data:',data);
     $('dataStatus').textContent='Supabase trả về dữ liệu không đúng dạng.';
     $('countText').textContent='Lỗi dữ liệu';
     return;
@@ -124,6 +73,8 @@ async function loadLocations(sessionArg=null, retry=true){
 
   $('countText').textContent=`${data.length} lượt chia sẻ`;
   $('dataStatus').textContent=data.length?'':'Chưa có vị trí nào được chia sẻ.';
+  $('debugStatus').textContent='Đã đọc dữ liệu qua RPC bảo vệ.';
+
   $('locationsBody').innerHTML=data.map(row=>{
     const lat=Number(row.latitude),lon=Number(row.longitude);
     const mapUrl=`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}`;
@@ -166,7 +117,7 @@ $('loginBtn').addEventListener('click',async()=>{
   }
   $('loginStatus').textContent='';
   renderSession(data.session);
-  if(data.session) await loadLocations(data.session);
+  if(data.session) await loadLocations();
 });
 
 $('logoutBtn').addEventListener('click',async()=>{
@@ -182,7 +133,7 @@ $('refreshBtn').addEventListener('click',async()=>{
   $('refreshBtn').disabled=true;
   try{
     const {data}=await client.auth.getSession();
-    if(data.session) await loadLocations(data.session);
+    if(data.session) await loadLocations();
     else renderSession(null);
   }finally{
     $('refreshBtn').disabled=false;
