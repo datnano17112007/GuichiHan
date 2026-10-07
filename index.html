@@ -2566,13 +2566,13 @@
              * Quan trọng: ?Chedodem / ?Chedongay chỉ đổi giao diện,
              * tuyệt đối không được đổi giờ dùng để tạo nội dung thời tiết.
              */
-            const params = new URLSearchParams(window.location.search);
-            let messageHour = new Date().getHours();
-            const debugHour = Number(params.get('gio'));
-
-            if (Number.isFinite(debugHour) && debugHour >= 0 && debugHour <= 23) {
-                messageHour = Math.floor(debugHour);
-            }
+            /*
+             * Giờ của lời nhắn luôn lấy trực tiếp từ đồng hồ trên thiết bị.
+             * Không đọc bất kỳ query debug nào (?gio=...), để URL test giao diện
+             * không thể vô tình làm nội dung thời tiết nhảy sang buổi tối/khuya.
+             * ?Chedodem / ?Chedongay chỉ được phép đổi giao diện.
+             */
+            const messageHour = new Date().getHours();
 
             /*
              * Dự báo mưa phải lấy theo các giờ thuộc đúng khung giờ hiện tại,
@@ -2677,7 +2677,14 @@
 
             /* 2) Một thông tin thời tiết thực tế bổ sung, ưu tiên thứ phù hợp với giờ. */
             if (Number.isFinite(temp)) {
-                add(`${period === 'noon' ? 'Nhiệt độ trưa nay' : period === 'afternoon' ? 'Nhiệt độ chiều nay' : period === 'evening' || period === 'night' || period === 'lateNight' ? 'Nhiệt độ tối nay' : 'Nhiệt độ sáng nay'} khoảng ${Math.round(temp)}°C đó 🌡️`);
+                const tempLabel =
+                    period === 'morning' ? 'Nhiệt độ sáng nay' :
+                    period === 'noon' ? 'Nhiệt độ trưa nay' :
+                    period === 'afternoon' ? 'Nhiệt độ chiều nay' :
+                    period === 'evening' ? 'Nhiệt độ tối nay' :
+                    period === 'night' ? 'Nhiệt độ đêm nay' :
+                    'Nhiệt độ khuya nay';
+                add(`${tempLabel} khoảng ${Math.round(temp)}°C đó 🌡️`);
             }
 
             if (Number.isFinite(feels) && Number.isFinite(temp) && Math.abs(feels - temp) >= 2) {
