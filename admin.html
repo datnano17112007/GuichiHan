@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quản trị vị trí — Gửi Chị Hân</title>
+<title>Quản trị vị trí — Gửi Chị Hân — Debug</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0f1115;color:#f5f7fb;padding:20px}.wrap{max-width:1000px;margin:auto}.card{background:#171a21;border:1px solid #2b303b;border-radius:18px;padding:20px;margin-bottom:18px}h1{margin:0 0 6px;font-size:24px}.muted{color:#aab1bf;font-size:14px}input{width:100%;padding:13px 14px;margin:7px 0;background:#0d0f13;color:#fff;border:1px solid #343b48;border-radius:10px}button{padding:12px 16px;border:0;border-radius:10px;background:#fff;color:#111;font-weight:700;cursor:pointer;margin-top:8px}button.secondary{background:#2a303b;color:#fff}.status{margin-top:10px;color:#b8c1d1;min-height:22px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #2b303b;font-size:14px}th{color:#b8c1d1;font-weight:600}a{color:#9fc5ff}#adminArea{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
@@ -26,6 +26,7 @@
         <div><button class="secondary" id="refreshBtn">Làm mới</button><button class="secondary" id="logoutBtn">Đăng xuất</button></div>
       </div>
       <div class="status" id="dataStatus"></div>
+      <div class="status" id="debugStatus" style="font-family:monospace;font-size:12px;white-space:pre-wrap;opacity:.9"></div>
     </div>
     <div class="card table-wrap">
       <table><thead><tr><th>Thời gian</th><th>Vĩ độ</th><th>Kinh độ</th><th>Độ chính xác</th><th>Thiết bị</th><th>Hệ điều hành</th><th>Trình duyệt</th><th>Bản đồ</th></tr></thead>
@@ -42,24 +43,49 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
 async function loadLocations(){
   $('dataStatus').textContent='Đang tải dữ liệu...';
+  $('debugStatus').textContent='Đang kiểm tra phiên đăng nhập...';
 
   const {data:sessionData,error:sessionError}=await client.auth.getSession();
   if(sessionError || !sessionData.session){
     $('dataStatus').textContent='Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
     $('countText').textContent='Chưa đăng nhập';
+    $('debugStatus').textContent='Session: KHÔNG CÓ\nAuth error: '+(sessionError?.message || 'không có');
     return;
   }
 
-  // Luôn lấy token mới nhất trước khi gọi RPC để tránh dùng session/JWT cũ.
+  const session=sessionData.session;
+  const user=session.user;
+  $('debugStatus').textContent=
+    'Session: OK\n'+
+    'User ID: '+(user?.id || 'NULL')+'\n'+
+    'Email: '+(user?.email || 'NULL')+'\n'+
+    'Role: '+(user?.role || 'NULL')+'\n'+
+    'Access token: '+(session.access_token ? 'CÓ' : 'KHÔNG')+'\n'+
+    'Đang gọi RPC get_admin_locations...';
+
+  // Làm mới token nếu có thể; nếu refresh thất bại vẫn dùng session hiện tại.
   const {data:refreshData,error:refreshError}=await client.auth.refreshSession();
-  const session=refreshError ? sessionData.session : refreshData.session;
-  if(!session){
-    $('dataStatus').textContent='Không làm mới được phiên đăng nhập. Vui lòng đăng nhập lại.';
-    $('countText').textContent='Chưa đăng nhập';
+  const activeSession=refreshData?.session || session;
+  if(!activeSession){
+    $('dataStatus').textContent='Không có session hoạt động.';
+    $('countText').textContent='Lỗi';
+    $('debugStatus').textContent+='\nRefresh: '+(refreshError?.message || 'không có session');
     return;
   }
 
+  const activeUser=activeSession.user;
   const {data,error}=await client.rpc('get_admin_locations');
+
+  $('debugStatus').textContent=
+    'Session: OK\n'+
+    'User ID: '+(activeUser?.id || 'NULL')+'\n'+
+    'Email: '+(activeUser?.email || 'NULL')+'\n'+
+    'Role: '+(activeUser?.role || 'NULL')+'\n'+
+    'Refresh: '+(refreshError ? 'LỖI — '+refreshError.message : 'OK')+'\n'+
+    'RPC data type: '+(Array.isArray(data) ? 'array' : typeof data)+'\n'+
+    'RPC rows: '+(Array.isArray(data) ? data.length : 'N/A')+'\n'+
+    'RPC error: '+(error ? (error.message || JSON.stringify(error)) : 'NONE');
+
   if(error){
     console.error('get_admin_locations error:',error);
     $('dataStatus').textContent='Không đọc được dữ liệu: '+(error.message || 'Lỗi không xác định');
@@ -80,24 +106,20 @@ async function loadLocations(){
     const lat=Number(row.latitude),lon=Number(row.longitude);
     const validLat=Number.isFinite(lat),validLon=Number.isFinite(lon);
     const mapUrl=validLat&&validLon?`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}`:'#';
-
     const deviceModel=String(row.device_model ?? '').trim();
     const deviceType=String(row.device_type ?? '').trim();
     const device=[deviceModel, deviceType && !deviceModel ? deviceType : ''].filter(Boolean).join(' · ') || '—';
-
     const osName=String(row.os_name ?? row.os ?? '').trim();
     const osVersion=String(row.os_version ?? '').trim();
     const browserName=String(row.browser_name ?? row.browser ?? '').trim();
     const browserVersion=String(row.browser_version ?? '').trim();
     const os=[osName, osVersion].filter(Boolean).join(' ') || '—';
     const browser=[browserName, browserVersion].filter(Boolean).join(' ') || '—';
-
     const latText=validLat?lat.toFixed(6):'—';
     const lonText=validLon?lon.toFixed(6):'—';
     const accuracyNum=Number(row.accuracy);
     const accuracyText=Number.isFinite(accuracyNum)?Math.round(accuracyNum)+' m':'—';
     const mapLink=validLat&&validLon?`<a href="${mapUrl}" target="_blank" rel="noopener">Mở bản đồ</a>`:'—';
-
     return `<tr><td>${esc(formatTime(row.created_at))}</td><td>${esc(latText)}</td><td>${esc(lonText)}</td><td>${esc(accuracyText)}</td><td>${esc(device)}</td><td>${esc(os)}</td><td>${esc(browser)}</td><td>${mapLink}</td></tr>`;
   }).join('');
 }
