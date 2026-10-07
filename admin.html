@@ -3,145 +3,213 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quản trị vị trí — Gửi Chị Hân — Debug</title>
+<title>Quản trị vị trí — Gửi Chị Hân</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0f1115;color:#f5f7fb;padding:20px}.wrap{max-width:1000px;margin:auto}.card{background:#171a21;border:1px solid #2b303b;border-radius:18px;padding:20px;margin-bottom:18px}h1{margin:0 0 6px;font-size:24px}.muted{color:#aab1bf;font-size:14px}input{width:100%;padding:13px 14px;margin:7px 0;background:#0d0f13;color:#fff;border:1px solid #343b48;border-radius:10px}button{padding:12px 16px;border:0;border-radius:10px;background:#fff;color:#111;font-weight:700;cursor:pointer;margin-top:8px}button.secondary{background:#2a303b;color:#fff}.status{margin-top:10px;color:#b8c1d1;min-height:22px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #2b303b;font-size:14px}th{color:#b8c1d1;font-weight:600}a{color:#9fc5ff}#adminArea{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0f1115;color:#f5f7fb;padding:20px}
+.wrap{max-width:1100px;margin:auto}
+.card{background:#171a21;border:1px solid #2b303b;border-radius:18px;padding:20px;margin-bottom:18px}
+h1{margin:0 0 6px;font-size:24px}.muted{color:#aab1bf;font-size:14px}
+input{width:100%;padding:13px 14px;margin:7px 0;background:#0d0f13;color:#fff;border:1px solid #343b48;border-radius:10px}
+button{padding:12px 16px;border:0;border-radius:10px;background:#fff;color:#111;font-weight:700;cursor:pointer;margin-top:8px}
+button.secondary{background:#2a303b;color:#fff}button:disabled{opacity:.55;cursor:wait}
+.status{margin-top:10px;color:#b8c1d1;min-height:22px}.error{color:#ff9b9b}.ok{color:#9ff0b3}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:980px}
+th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #2b303b;font-size:14px;vertical-align:top}
+th{color:#b8c1d1;font-weight:600}a{color:#9fc5ff}
+#adminArea{display:none}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#202633;color:#cbd5e1;font-size:12px;margin-top:8px}
+.debug{font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;background:#0d0f13;border:1px solid #2b303b;padding:12px;border-radius:10px;margin-top:10px;color:#cbd5e1;display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card" id="loginCard">
     <h1>🔐 Quản trị vị trí</h1>
-    <div class="muted">Chỉ tài khoản Supabase được phép mới xem được dữ liệu.</div>
+    <div class="muted">Chỉ tài khoản quản trị được phép mới xem được dữ liệu.</div>
     <input id="email" type="email" autocomplete="username" placeholder="Email quản trị">
     <input id="password" type="password" autocomplete="current-password" placeholder="Mật khẩu">
     <button id="loginBtn">Đăng nhập</button>
     <div class="status" id="loginStatus"></div>
   </div>
+
   <div id="adminArea">
     <div class="card">
       <div class="top">
-        <div><h1>📍 Vị trí đã chia sẻ</h1><div class="muted" id="countText">Đang tải...</div></div>
-        <div><button class="secondary" id="refreshBtn">Làm mới</button><button class="secondary" id="logoutBtn">Đăng xuất</button></div>
+        <div>
+          <h1>📍 Vị trí đã chia sẻ</h1>
+          <div class="muted" id="countText">Đang tải...</div>
+          <div class="badge" id="sessionBadge">Đã xác thực</div>
+        </div>
+        <div>
+          <button class="secondary" id="refreshBtn">Làm mới</button>
+          <button class="secondary" id="logoutBtn">Đăng xuất</button>
+        </div>
       </div>
       <div class="status" id="dataStatus"></div>
-      <div class="status" id="debugStatus" style="font-family:monospace;font-size:12px;white-space:pre-wrap;opacity:.9"></div>
+      <div class="debug" id="debugBox"></div>
     </div>
+
     <div class="card table-wrap">
-      <table><thead><tr><th>Thời gian</th><th>Vĩ độ</th><th>Kinh độ</th><th>Độ chính xác</th><th>Thiết bị</th><th>Hệ điều hành</th><th>Trình duyệt</th><th>Bản đồ</th></tr></thead>
-      <tbody id="locationsBody"></tbody></table>
+      <table>
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Vĩ độ</th>
+            <th>Kinh độ</th>
+            <th>Độ chính xác</th>
+            <th>Loại thiết bị</th>
+            <th>Model thiết bị</th>
+            <th>Hệ điều hành</th>
+            <th>Trình duyệt</th>
+            <th>Bản đồ</th>
+          </tr>
+        </thead>
+        <tbody id="locationsBody"></tbody>
+      </table>
     </div>
   </div>
 </div>
+
 <script>
 const SUPABASE_URL='https://vmowbgukusoluzgknhgr.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_2MdEmCevCjYLEVRdoHvSnA_0CwkA8TD';
+const ADMIN_UID='601dcb10-08fa-42e8-8b25-adbe67154779';
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function esc(v){
+  return String(v??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
-async function loadLocations(){
-  $('dataStatus').textContent='Đang tải dữ liệu...';
-  $('debugStatus').textContent='Đang kiểm tra phiên đăng nhập...';
-
-  const {data:sessionData,error:sessionError}=await client.auth.getSession();
-  if(sessionError || !sessionData.session){
-    $('dataStatus').textContent='Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
-    $('countText').textContent='Chưa đăng nhập';
-    $('debugStatus').textContent='Session: KHÔNG CÓ\nAuth error: '+(sessionError?.message || 'không có');
-    return;
-  }
-
-  const session=sessionData.session;
-  const user=session.user;
-  $('debugStatus').textContent=
-    'Session: OK\n'+
-    'User ID: '+(user?.id || 'NULL')+'\n'+
-    'Email: '+(user?.email || 'NULL')+'\n'+
-    'Role: '+(user?.role || 'NULL')+'\n'+
-    'Access token: '+(session.access_token ? 'CÓ' : 'KHÔNG')+'\n'+
-    'Đang gọi RPC get_admin_locations...';
-
-  // Làm mới token nếu có thể; nếu refresh thất bại vẫn dùng session hiện tại.
-  const {data:refreshData,error:refreshError}=await client.auth.refreshSession();
-  const activeSession=refreshData?.session || session;
-  if(!activeSession){
-    $('dataStatus').textContent='Không có session hoạt động.';
-    $('countText').textContent='Lỗi';
-    $('debugStatus').textContent+='\nRefresh: '+(refreshError?.message || 'không có session');
-    return;
-  }
-
-  const activeUser=activeSession.user;
-
-  const {data:debugData,error:debugError}=await client.rpc('debug_admin_context');
-  const dbg=Array.isArray(debugData) ? debugData[0] : null;
-  const debugBlock='\n\nDEBUG RPC: '+(debugError
-    ? ('ERROR: '+debugError.message)
-    : ('OK\nUID in RPC: '+(dbg?.auth_uid ?? 'NULL')+
-       '\nJWT sub: '+(dbg?.jwt_sub ?? 'NULL')+
-       '\nRole in RPC: '+(dbg?.jwt_role ?? 'NULL')+
-       '\nEmail in JWT: '+(dbg?.jwt_email ?? 'NULL')+
-       '\nRows visible in RPC: '+(dbg?.visible_rows ?? 'NULL')+
-       '\nUID matches admin: '+(dbg?.uid_matches_admin ?? 'NULL')));
-
-  const {data,error}=await client.rpc('get_admin_locations');
-
-  $('debugStatus').textContent=
-    'Session: OK\n'+
-    'User ID: '+(activeUser?.id || 'NULL')+'\n'+
-    'Email: '+(activeUser?.email || 'NULL')+'\n'+
-    'Role: '+(activeUser?.role || 'NULL')+'\n'+
-    'Refresh: '+(refreshError ? 'LỖI — '+refreshError.message : 'OK')+'\n'+
-    'RPC data type: '+(Array.isArray(data) ? 'array' : typeof data)+'\n'+
-    'RPC rows: '+(Array.isArray(data) ? data.length : 'N/A')+'\n'+
-    'RPC error: '+(error ? (error.message || JSON.stringify(error)) : 'NONE');
-
-  $('debugStatus').textContent += debugBlock;
-
-  if(error){
-    console.error('get_admin_locations error:',error);
-    $('dataStatus').textContent='Không đọc được dữ liệu: '+(error.message || 'Lỗi không xác định');
-    $('countText').textContent='Lỗi';
-    return;
-  }
-
-  if(!Array.isArray(data)){
-    $('dataStatus').textContent='Supabase trả về dữ liệu không đúng dạng.';
-    $('countText').textContent='Lỗi dữ liệu';
-    return;
-  }
-
-  $('countText').textContent=`${data.length} lượt chia sẻ`;
-  $('dataStatus').textContent=data.length?'':'Chưa có vị trí nào được chia sẻ.';
-
+function deviceText(row){
+  const type=row.device_type||'';
+  const model=row.device_model||'';
+  return [type,model].filter(Boolean).join(' · ')||'—';
+}
+function osText(row){
+  return [row.os_name,row.os_version].filter(Boolean).join(' ')||'—';
+}
+function browserText(row){
+  return [row.browser_name,row.browser_version].filter(Boolean).join(' ')||'—';
+}
+function showDebug(lines,visible=true){
+  const el=$('debugBox');
+  el.textContent=lines.join('\n');
+  el.style.display=visible?'block':'none';
+}
+function renderRows(data){
   $('locationsBody').innerHTML=data.map(row=>{
-    const lat=Number(row.latitude),lon=Number(row.longitude);
-    const validLat=Number.isFinite(lat),validLon=Number.isFinite(lon);
-    const mapUrl=validLat&&validLon?`https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}`:'#';
-    const deviceModel=String(row.device_model ?? '').trim();
-    const deviceType=String(row.device_type ?? '').trim();
-    const device=[deviceModel, deviceType && !deviceModel ? deviceType : ''].filter(Boolean).join(' · ') || '—';
-    const osName=String(row.os_name ?? row.os ?? '').trim();
-    const osVersion=String(row.os_version ?? '').trim();
-    const browserName=String(row.browser_name ?? row.browser ?? '').trim();
-    const browserVersion=String(row.browser_version ?? '').trim();
-    const os=[osName, osVersion].filter(Boolean).join(' ') || '—';
-    const browser=[browserName, browserVersion].filter(Boolean).join(' ') || '—';
-    const latText=validLat?lat.toFixed(6):'—';
-    const lonText=validLon?lon.toFixed(6):'—';
-    const accuracyNum=Number(row.accuracy);
-    const accuracyText=Number.isFinite(accuracyNum)?Math.round(accuracyNum)+' m':'—';
-    const mapLink=validLat&&validLon?`<a href="${mapUrl}" target="_blank" rel="noopener">Mở bản đồ</a>`:'—';
-    return `<tr><td>${esc(formatTime(row.created_at))}</td><td>${esc(latText)}</td><td>${esc(lonText)}</td><td>${esc(accuracyText)}</td><td>${esc(device)}</td><td>${esc(os)}</td><td>${esc(browser)}</td><td>${mapLink}</td></tr>`;
+    const lat=Number(row.latitude), lon=Number(row.longitude);
+    const latText=Number.isFinite(lat)?lat.toFixed(6):'—';
+    const lonText=Number.isFinite(lon)?lon.toFixed(6):'—';
+    const mapUrl=(Number.isFinite(lat)&&Number.isFinite(lon))
+      ? `https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}` : '#';
+    const mapLink=mapUrl==='#'?'—':`<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">Mở bản đồ</a>`;
+    const accuracy=row.accuracy==null?'—':`${Math.round(Number(row.accuracy))} m`;
+    return `<tr>
+      <td>${esc(formatTime(row.created_at))}</td>
+      <td>${esc(latText)}</td>
+      <td>${esc(lonText)}</td>
+      <td>${esc(accuracy)}</td>
+      <td>${esc(row.device_type||'—')}</td>
+      <td>${esc(row.device_model||'—')}</td>
+      <td>${esc(osText(row))}</td>
+      <td>${esc(browserText(row))}</td>
+      <td>${mapLink}</td>
+    </tr>`;
   }).join('');
 }
 
-function renderSession(session){
-  $('loginCard').style.display=session?'none':'block';
-  $('adminArea').style.display=session?'block':'none';
+async function getValidAdminSession(){
+  const {data:sessionData,error:sessionError}=await client.auth.getSession();
+  if(sessionError) throw sessionError;
+  let session=sessionData.session;
+  if(!session) return null;
+
+  const {data:userData,error:userError}=await client.auth.getUser();
+  if(userError) throw userError;
+  const user=userData.user;
+  if(!user || user.id!==ADMIN_UID){
+    await client.auth.signOut();
+    throw new Error('Tài khoản này không có quyền quản trị.');
+  }
+  return session;
+}
+
+async function loadLocations(){
+  $('dataStatus').className='status';
+  $('dataStatus').textContent='Đang tải dữ liệu...';
+  $('countText').textContent='Đang tải...';
+  $('locationsBody').innerHTML='';
+  showDebug([],false);
+
+  let session;
+  try{
+    session=await getValidAdminSession();
+  }catch(error){
+    $('dataStatus').className='status error';
+    $('dataStatus').textContent='Không xác thực được admin: '+(error?.message||error);
+    $('countText').textContent='Lỗi xác thực';
+    return;
+  }
+
   if(!session){
+    renderSession(null);
+    return;
+  }
+
+  $('sessionBadge').textContent='Admin UID: '+session.user.id;
+
+  // Đường chính: RPC SECURITY DEFINER mới.
+  const rpcResult=await client.rpc('get_admin_locations_v2');
+  if(!rpcResult.error && Array.isArray(rpcResult.data) && rpcResult.data.length>0){
+    renderRows(rpcResult.data);
+    $('countText').textContent=`${rpcResult.data.length} lượt chia sẻ`;
+    $('dataStatus').className='status ok';
+    $('dataStatus').textContent='Đã tải dữ liệu thành công.';
+    return;
+  }
+
+  // Fallback có RLS: dùng chính session hiện tại để SELECT bảng.
+  const tableResult=await client
+    .from('locations')
+    .select('id,latitude,longitude,accuracy,created_at,device_type,device_model,os_name,os_version,browser_name,browser_version')
+    .order('created_at',{ascending:false});
+
+  if(!tableResult.error && Array.isArray(tableResult.data) && tableResult.data.length>0){
+    renderRows(tableResult.data);
+    $('countText').textContent=`${tableResult.data.length} lượt chia sẻ`;
+    $('dataStatus').className='status ok';
+    $('dataStatus').textContent='Đã tải dữ liệu thành công qua quyền RLS.';
+    return;
+  }
+
+  const rpcError=rpcResult.error;
+  const tableError=tableResult.error;
+  const rpcRows=Array.isArray(rpcResult.data)?rpcResult.data.length:'—';
+  const tableRows=Array.isArray(tableResult.data)?tableResult.data.length:'—';
+
+  $('countText').textContent='Chưa đọc được dữ liệu';
+  $('dataStatus').className='status error';
+  $('dataStatus').textContent='Database vẫn có dữ liệu nhưng phiên admin chưa đọc được. Chị đã bật chẩn đoán để xác định đúng điểm lỗi.';
+  showDebug([
+    'ADMIN UID: '+session.user.id,
+    'RPC v2 rows: '+rpcRows,
+    'RPC v2 error: '+(rpcError?rpcError.message:'NONE'),
+    'TABLE SELECT rows: '+tableRows,
+    'TABLE SELECT error: '+(tableError?tableError.message:'NONE')
+  ]);
+}
+
+function renderSession(session){
+  const isAdmin=!!(session&&session.user&&session.user.id===ADMIN_UID);
+  $('loginCard').style.display=isAdmin?'none':'block';
+  $('adminArea').style.display=isAdmin?'block':'none';
+  if(!isAdmin){
     $('countText').textContent='Chưa đăng nhập';
     $('locationsBody').innerHTML='';
   }
@@ -150,53 +218,73 @@ function renderSession(session){
 async function init(){
   const {data,error}=await client.auth.getSession();
   if(error){
-    console.error(error);
     renderSession(null);
-    $('loginStatus').textContent='Không kiểm tra được phiên đăng nhập.';
+    $('loginStatus').textContent='Không kiểm tra được phiên đăng nhập: '+error.message;
     return;
   }
   const session=data.session;
-  renderSession(session);
-  if(session) await loadLocations(session);
+  if(session&&session.user&&session.user.id===ADMIN_UID){
+    renderSession(session);
+    await loadLocations();
+  }else if(session){
+    await client.auth.signOut();
+    renderSession(null);
+    $('loginStatus').textContent='Tài khoản này không có quyền quản trị.';
+  }else{
+    renderSession(null);
+  }
 }
 
 $('loginBtn').addEventListener('click',async()=>{
+  $('loginBtn').disabled=true;
+  $('loginStatus').className='status';
   $('loginStatus').textContent='Đang đăng nhập...';
-  const {data,error}=await client.auth.signInWithPassword({
-    email:$('email').value.trim(),
-    password:$('password').value
-  });
-  if(error){
-    $('loginStatus').textContent='Đăng nhập thất bại: '+error.message;
-    return;
+  try{
+    const {data,error}=await client.auth.signInWithPassword({
+      email:$('email').value.trim(),
+      password:$('password').value
+    });
+    if(error) throw error;
+    if(!data.session || !data.user || data.user.id!==ADMIN_UID){
+      await client.auth.signOut();
+      throw new Error('Tài khoản này không có quyền quản trị.');
+    }
+    $('loginStatus').textContent='';
+    renderSession(data.session);
+    await loadLocations();
+  }catch(error){
+    $('loginStatus').className='status error';
+    $('loginStatus').textContent='Đăng nhập thất bại: '+(error?.message||error);
+  }finally{
+    $('loginBtn').disabled=false;
   }
-  $('loginStatus').textContent='';
-  renderSession(data.session);
-  if(data.session) await loadLocations();
 });
 
 $('logoutBtn').addEventListener('click',async()=>{
   $('logoutBtn').disabled=true;
-  const {error}=await client.auth.signOut();
-  $('logoutBtn').disabled=false;
-  if(error) console.error(error);
-  renderSession(null);
-  $('loginStatus').textContent='Đã đăng xuất.';
+  try{
+    const {error}=await client.auth.signOut();
+    if(error) throw error;
+    renderSession(null);
+    $('loginStatus').className='status';
+    $('loginStatus').textContent='Đã đăng xuất.';
+  }catch(error){
+    $('dataStatus').className='status error';
+    $('dataStatus').textContent='Đăng xuất lỗi: '+(error?.message||error);
+  }finally{
+    $('logoutBtn').disabled=false;
+  }
 });
 
 $('refreshBtn').addEventListener('click',async()=>{
   $('refreshBtn').disabled=true;
-  try{
-    const {data}=await client.auth.getSession();
-    if(data.session) await loadLocations();
-    else renderSession(null);
-  }finally{
-    $('refreshBtn').disabled=false;
-  }
+  try{await loadLocations();}
+  finally{$('refreshBtn').disabled=false;}
 });
 
 client.auth.onAuthStateChange((_event,session)=>{
-  renderSession(session);
+  const isAdmin=!!(session&&session.user&&session.user.id===ADMIN_UID);
+  renderSession(isAdmin?session:null);
 });
 
 init();
