@@ -3058,8 +3058,29 @@
             return (hour >= 6 && hour < 18) ? 'morning' : 'evening';
         }
 
+        /* =========================================================
+           TEST MODE QUA URL
+           /GuichiHan/Chedodem  -> luôn mở CHẾ ĐỘ ĐÊM
+           /GuichiHan/Chedongay -> luôn mở CHẾ ĐỘ NGÀY
+           Không ảnh hưởng logic tự động khi truy cập /GuichiHan/
+           ========================================================= */
+        function getUrlForcedMode() {
+            const path = window.location.pathname
+                .replace(/\/+$/, '')
+                .toLowerCase();
+
+            if (path.endsWith('/chedodem')) return 'evening';
+            if (path.endsWith('/chedongay')) return 'morning';
+            return null;
+        }
+
+        const forcedUrlMode = getUrlForcedMode();
+
         function scheduleAutoDayNight() {
             clearTimeout(autoModeTimer);
+
+            /* Khi đang test bằng URL thì KHÔNG tự đổi mode theo giờ. */
+            if (forcedUrlMode) return;
 
             const now = new Date();
             const next = new Date(now);
@@ -3079,7 +3100,8 @@
             }, Math.max(1000, next.getTime() - now.getTime()));
         }
 
-        setMode(getModeByLocalClock());
+        /* URL test có ưu tiên cao hơn giờ thực tế. */
+        setMode(forcedUrlMode || getModeByLocalClock());
         scheduleAutoDayNight();
 
         const introScreen = document.getElementById("intro-screen");
