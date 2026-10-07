@@ -1141,12 +1141,55 @@
         .lantern-popup p { margin: 0; min-height: 1.5em; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.15rem; line-height: 1.5; color: #fffaf0; text-shadow: 0 2px 4px rgba(0,0,0,0.6); letter-spacing: 0.3px; }
         .weather-message-tag {
             display: inline-block;
-            margin-bottom: 5px;
-            font-size: .65rem;
+            margin-bottom: 6px;
+            font-size: .62rem;
             font-weight: 900;
-            letter-spacing: .08em;
+            letter-spacing: .09em;
             text-transform: uppercase;
-            opacity: .52;
+            color: #fffaf0;
+            opacity: .90;
+            text-shadow: 0 1px 5px rgba(0,0,0,.45);
+        }
+
+        /* Ban đêm: tiêu đề thời tiết sáng rõ, không bị chìm vào nền popup. */
+        body:not(.morning) .weather-message-tag {
+            color: #ffdf85;
+            opacity: .95;
+            text-shadow: 0 0 10px rgba(255,223,133,.20), 0 1px 5px rgba(0,0,0,.55);
+        }
+
+        /* Icon ôm ban đêm: nét đơn giản, sáng và hợp với giao diện đêm. */
+        .night-hug-sticker {
+            width: 74px;
+            height: 56px;
+            margin: -7px auto 7px;
+            display: block;
+            overflow: visible;
+            filter: drop-shadow(0 5px 10px rgba(255,223,133,.18));
+            animation: stickerMessageFloat 2.8s ease-in-out infinite;
+            transform-origin: 50% 75%;
+        }
+        .night-hug-sticker .hug-person {
+            fill: #b8c7ff;
+            stroke: #f5f1ff;
+            stroke-width: 1.8;
+            stroke-linejoin: round;
+        }
+        .night-hug-sticker .hug-face {
+            fill: #ffe0bd;
+            stroke: #f5f1ff;
+            stroke-width: 1.5;
+        }
+        .night-hug-sticker .hug-heart {
+            fill: #ff7f9f;
+            stroke: #ffd6e1;
+            stroke-width: 1.4;
+        }
+        .night-hug-sticker .hug-line {
+            fill: none;
+            stroke: #f5f1ff;
+            stroke-width: 3;
+            stroke-linecap: round;
         }
 
         .lantern-container.active .lantern-popup, .cloud-container.active .lantern-popup { transform: translateX(-50%) scale(1); opacity: 1; z-index: 999 !important;}
@@ -3416,7 +3459,16 @@
                     ? (Math.random() < 0.5 ? 'heart' : 'cloud')
                     : (Math.random() < 0.5 ? 'hug' : 'moon'));
             const stickerSrc = MESSAGE_STICKERS[stickerKey];
-            const stickerHTML = `<img class="message-sticker ${item.type === 'weather' || item.type === 'location' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
+            const stickerHTML = stickerKey === 'hug'
+                ? `<svg class="night-hug-sticker" viewBox="0 0 100 72" aria-hidden="true">
+                        <circle class="hug-face" cx="35" cy="24" r="10"></circle>
+                        <circle class="hug-face" cx="65" cy="24" r="10"></circle>
+                        <path class="hug-person" d="M25 38 C18 42 15 49 17 59 L27 65 L38 53 L50 64 L62 53 L73 65 L83 59 C85 49 82 42 75 38 L65 43 L50 51 L35 43 Z"></path>
+                        <path class="hug-line" d="M29 44 C37 51 43 55 50 56 C57 55 63 51 71 44"></path>
+                        <path class="hug-line" d="M31 22 C33 20 35 20 37 22 M63 22 C65 20 67 20 69 22"></path>
+                        <path class="hug-heart" d="M50 35 C46 30 37 33 39 40 C41 45 50 49 50 49 C50 49 59 45 61 40 C63 33 54 30 50 35 Z"></path>
+                    </svg>`
+                : `<img class="message-sticker ${item.type === 'weather' || item.type === 'location' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
 
 
             container.innerHTML = `<div class="lantern-popup">${stickerHTML}${weatherTag}${locationTag}<p style="${pStyle}"></p></div><div class="lantern-body"><div class="lantern-top"></div><div class="lantern-bottom"></div></div><div class="tassel"></div>`;
@@ -3534,7 +3586,16 @@
                     ? (Math.random() < 0.5 ? 'heart' : 'cloud')
                     : (Math.random() < 0.5 ? 'hug' : 'moon'));
             const stickerSrc = MESSAGE_STICKERS[stickerKey];
-            const stickerHTML = `<img class="message-sticker ${item.type === 'weather' || item.type === 'location' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
+            const stickerHTML = stickerKey === 'hug'
+                ? `<svg class="night-hug-sticker" viewBox="0 0 100 72" aria-hidden="true">
+                        <circle class="hug-face" cx="35" cy="24" r="10"></circle>
+                        <circle class="hug-face" cx="65" cy="24" r="10"></circle>
+                        <path class="hug-person" d="M25 38 C18 42 15 49 17 59 L27 65 L38 53 L50 64 L62 53 L73 65 L83 59 C85 49 82 42 75 38 L65 43 L50 51 L35 43 Z"></path>
+                        <path class="hug-line" d="M29 44 C37 51 43 55 50 56 C57 55 63 51 71 44"></path>
+                        <path class="hug-line" d="M31 22 C33 20 35 20 37 22 M63 22 C65 20 67 20 69 22"></path>
+                        <path class="hug-heart" d="M50 35 C46 30 37 33 39 40 C41 45 50 49 50 49 C50 49 59 45 61 40 C63 33 54 30 50 35 Z"></path>
+                    </svg>`
+                : `<img class="message-sticker ${item.type === 'weather' || item.type === 'location' ? 'weather-message-sticker' : ''}" src="${stickerSrc}" alt="" aria-hidden="true">`;
 
 
             // Mây thông điệp dùng silhouette organic, nhưng vẫn giữ vài mây tầng phía sau để có chiều sâu.
