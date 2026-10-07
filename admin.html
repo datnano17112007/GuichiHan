@@ -52,12 +52,14 @@ async function loadLocations(){
 
   const session=sessionData.session;
 
-  // Quyền quản trị được bảo vệ ở Supabase (RLS + get_admin_locations).
-  // Không kiểm tra UID ở phía trình duyệt để tránh lỗi session/cache giả.
-  const {data,error}=await client.rpc('get_admin_locations');
+  // Đọc trực tiếp bảng locations. RLS của Supabase là lớp bảo vệ quyền đọc.
+  // Không phụ thuộc vào RPC để tránh trường hợp function trả về rỗng dù bảng vẫn có dữ liệu.
+  const {data,error}=await client
+    .from('locations')
+    .select('id,latitude,longitude,accuracy,created_at,device_type,device_model,os_name,os_version,browser_name,browser_version')
+    .order('created_at',{ascending:false});
   if(error){
-    console.error('get_admin_locations error:',error);
-    console.error('RPC get_admin_locations:', error);
+    console.error('locations select error:',error);
     $('dataStatus').textContent='Không đọc được dữ liệu: '+(error.message || 'Lỗi không xác định');
     $('countText').textContent='Lỗi';
     return;
