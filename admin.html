@@ -42,17 +42,53 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
 async function loadLocations(){
   $('dataStatus').textContent='Đang tải dữ liệu...';
-  $('debugStatus').textContent='';
+  $('debugStatus').textContent='Đang kiểm tra phiên đăng nhập trên trình duyệt...';
 
   const {data:sessionData,error:sessionError}=await client.auth.getSession();
   if(sessionError || !sessionData.session){
     $('dataStatus').textContent='Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
     $('countText').textContent='Chưa đăng nhập';
+    $('debugStatus').textContent='Không có session trong trình duyệt.';
     return;
   }
 
   const session=sessionData.session;
-  $('debugStatus').textContent='Đã xác thực tài khoản quản trị. Đang đọc dữ liệu...';
+  const user=session.user;
+
+  let jwtRole='?';
+  let jwtSub='?';
+  let jwtEmail='?';
+  try{
+    const parts=session.access_token.split('.');
+    const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    jwtRole=payload.role ?? '?';
+    jwtSub=payload.sub ?? '?';
+    jwtEmail=payload.email ?? '?';
+  }catch(err){
+    console.error('JWT decode error:',err);
+  }
+
+  $('debugStatus').textContent=
+    'BROWSER SESSION\n'+
+    'UID: '+(user?.id||'?')+'\n'+
+    'Email: '+(user?.email||'?')+'\n'+
+    'JWT role: '+jwtRole+'\n'+
+    'JWT sub: '+jwtSub+'\n'+
+    'JWT email: '+jwtEmail+'\n'+
+    'Project: '+SUPABASE_URL;
+
+  const {data:authDebug,error:authDebugError}=await client.rpc('debug_admin_auth');
+
+  if(authDebugError){
+    $('debugStatus').textContent +=
+      '\n\nRPC debug_admin_auth ERROR:\n'+
+      authDebugError.message+
+      '\nCode: '+(authDebugError.code||'?');
+  }else{
+    $('debugStatus').textContent +=
+      '\n\nSERVER AUTH (RPC):\n'+
+      JSON.stringify(authDebug);
+  }
 
   const {data,error}=await client.rpc('get_admin_locations');
 
@@ -60,20 +96,24 @@ async function loadLocations(){
     console.error('get_admin_locations error:',error);
     $('dataStatus').textContent='Không đọc được dữ liệu: '+error.message;
     $('countText').textContent='Lỗi';
-    $('debugStatus').textContent='RPC lỗi: '+(error.code||'unknown');
+    $('debugStatus').textContent +=
+      '\n\nLOCATIONS RPC ERROR:\n'+
+      error.message+
+      '\nCode: '+(error.code||'?');
     return;
   }
 
   if(!Array.isArray(data)){
-    console.error('RPC returned unexpected data:',data);
     $('dataStatus').textContent='Supabase trả về dữ liệu không đúng dạng.';
     $('countText').textContent='Lỗi dữ liệu';
+    $('debugStatus').textContent += '\n\nLOCATIONS RPC: dữ liệu không phải mảng.';
     return;
   }
 
   $('countText').textContent=`${data.length} lượt chia sẻ`;
   $('dataStatus').textContent=data.length?'':'Chưa có vị trí nào được chia sẻ.';
-  $('debugStatus').textContent='Đã đọc dữ liệu qua RPC bảo vệ.';
+  $('debugStatus').textContent +=
+    '\n\nLOCATIONS RPC: '+data.length+' dòng.';
 
   $('locationsBody').innerHTML=data.map(row=>{
     const lat=Number(row.latitude),lon=Number(row.longitude);
