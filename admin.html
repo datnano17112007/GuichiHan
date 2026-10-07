@@ -76,6 +76,7 @@ th{color:#b8c1d1;font-weight:600}a{color:#9fc5ff}
 const SUPABASE_URL='https://vmowbgukusoluzgknhgr.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_2MdEmCevCjYLEVRdoHvSnA_0CwkA8TD';
 const ADMIN_UID='601dcb10-08fa-42e8-8b25-adbe67154779';
+const ADMIN_EMAIL='datnano17112007@gmail.com';
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const $=id=>document.getElementById(id);
 
@@ -133,7 +134,7 @@ async function getValidAdminSession(){
   const {data:userData,error:userError}=await client.auth.getUser();
   if(userError) throw userError;
   const user=userData.user;
-  if(!user || user.id!==ADMIN_UID){
+  if(!user || (user.id!==ADMIN_UID && (user.email||'').toLowerCase()!==ADMIN_EMAIL)){
     await client.auth.signOut();
     throw new Error('Tài khoản này không có quyền quản trị.');
   }
@@ -162,7 +163,7 @@ async function loadLocations(){
     return;
   }
 
-  $('sessionBadge').textContent='Admin UID: '+session.user.id;
+  $('sessionBadge').textContent='Admin: '+(session.user.email||'')+' · UID: '+session.user.id;
 
   // Đường chính: RPC SECURITY DEFINER mới.
   const rpcResult=await client.rpc('get_admin_locations_v2');
@@ -197,6 +198,7 @@ async function loadLocations(){
   $('dataStatus').className='status error';
   $('dataStatus').textContent='Database vẫn có dữ liệu nhưng phiên admin chưa đọc được. Chị đã bật chẩn đoán để xác định đúng điểm lỗi.';
   showDebug([
+    'ADMIN EMAIL: '+(session.user.email||'—'),
     'ADMIN UID: '+session.user.id,
     'RPC v2 rows: '+rpcRows,
     'RPC v2 error: '+(rpcError?rpcError.message:'NONE'),
@@ -206,7 +208,7 @@ async function loadLocations(){
 }
 
 function renderSession(session){
-  const isAdmin=!!(session&&session.user&&session.user.id===ADMIN_UID);
+  const isAdmin=!!(session&&session.user&&((session.user.id===ADMIN_UID)||((session.user.email||'').toLowerCase()===ADMIN_EMAIL)));
   $('loginCard').style.display=isAdmin?'none':'block';
   $('adminArea').style.display=isAdmin?'block':'none';
   if(!isAdmin){
@@ -223,7 +225,7 @@ async function init(){
     return;
   }
   const session=data.session;
-  if(session&&session.user&&session.user.id===ADMIN_UID){
+  if(session&&session.user&&((session.user.id===ADMIN_UID)||((session.user.email||'').toLowerCase()===ADMIN_EMAIL))){
     renderSession(session);
     await loadLocations();
   }else if(session){
@@ -245,7 +247,7 @@ $('loginBtn').addEventListener('click',async()=>{
       password:$('password').value
     });
     if(error) throw error;
-    if(!data.session || !data.user || data.user.id!==ADMIN_UID){
+    if(!data.session || !data.user || (data.user.id!==ADMIN_UID && (data.user.email||'').toLowerCase()!==ADMIN_EMAIL)){
       await client.auth.signOut();
       throw new Error('Tài khoản này không có quyền quản trị.');
     }
@@ -283,7 +285,7 @@ $('refreshBtn').addEventListener('click',async()=>{
 });
 
 client.auth.onAuthStateChange((_event,session)=>{
-  const isAdmin=!!(session&&session.user&&session.user.id===ADMIN_UID);
+  const isAdmin=!!(session&&session.user&&((session.user.id===ADMIN_UID)||((session.user.email||'').toLowerCase()===ADMIN_EMAIL)));
   renderSession(isAdmin?session:null);
 });
 
