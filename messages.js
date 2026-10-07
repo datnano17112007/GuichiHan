@@ -64,6 +64,7 @@ const GCH_MESSAGES = {
         "Chị Hân đừng quên ăn sáng nha, bụng đói thì làm gì cũng khó vui đó 🍞🥛",
         "Hôm nay hãy dành cho bản thân một chút dịu dàng trước khi bắt đầu công việc nhé 💛",
         "Nếu ngoài trời nóng, chị nhớ uống đủ nước và nghỉ ngơi một chút nha ☀️💧",
+        "Nếu trời hơi se lạnh thì nhớ mặc thêm áo nhé chị Hân 🧥",
         "Một ngày mới lại bắt đầu, mong chị có thật nhiều lý do để mỉm cười 🌻",
         "Chúc cô gái Bảo Bình hôm nay thật sáng tạo và nghĩ ra thật nhiều điều hay ho 🧠✨",
         "Chị cứ là chính mình thôi, vì phiên bản Hân tự nhiên nhất luôn đáng yêu mà 💕",
@@ -101,14 +102,14 @@ const GCH_MESSAGES = {
         "Chị có thể làm được nhiều hơn chị nghĩ đó, cứ tự tin lên nha ✨",
         "Buổi sáng này em chúc chị có một tâm trí thật nhẹ và một trái tim thật vui 🌼",
         "Nếu có việc khó, chị cứ chia nhỏ ra rồi giải quyết từng chút một nha 🧩",
-        "Chúc chị hôm nay có người hỗ trợ và mọi chuyện đều suôn sẻ 🤝🍀",
+        "Chúc chị hôm nay làm gì cũng có người hỗ trợ và mọi chuyện đều suôn sẻ 🤝🍀",
         "Hân ơi, một ngày đẹp trời đang gọi tên chị rồi đó 🌤️",
         "Mong hôm nay chị không phải suy nghĩ quá nhiều về những chuyện chưa xảy ra 🌿",
         "Chị hãy để những điều tích cực có thêm một chút không gian trong ngày hôm nay nhé 💛",
         "Chúc chị sáng nay gặp một món ăn ngon và một ly nước thật vừa ý 😋🥤",
         "Bảo Bình hôm nay nhớ giữ lại một chút thời gian cho những điều mình thích nha ♒💫",
         "Em gửi chị một chiếc vé vô hình đến một ngày thật bình yên 🎫🌷",
-        "Chị Hân ơi, nếu có ai làm chị buồn thì đừng để chuyện đó ở trong lòng lâu nha 💕",
+        "Chị Hân ơi, hôm nay nếu có ai làm chị buồn thì đừng để chuyện đó ở trong lòng lâu nha 💕",
         "Chúc chị bước qua hôm nay với thật nhiều tự tin và thật ít muộn phiền 🌈",
         "Sáng nay trời có thể thay đổi, nhưng lời chúc dành cho chị thì vẫn ở đây nha ☀️",
         "Mong chị hôm nay có những khoảnh khắc khiến chị bất giác mỉm cười 😊",
@@ -143,8 +144,7 @@ const GCH_MESSAGES = {
         "Chúc chị hôm nay bình an từ lúc ra khỏi nhà cho đến khi trở về 🏡🍀",
         "Bầu trời rộng lắm, nên chị đừng để một chuyện nhỏ làm lòng mình chật lại nha ☁️",
         "Chị Hân cứ vui vẻ lên nhé, hôm nay vẫn còn rất nhiều điều tốt đẹp đang chờ chị 🌻"
-    ],
-
+],
     "evening": [
         "Chị Hân ơi, đêm nay trăng đẹp quá nhỉ? 🌕",
         "Nếu chị thấy lạnh, em gửi chị vạn cái ôm! ❄️🫂",
@@ -274,8 +274,7 @@ const GCH_MESSAGES = {
         "Mong giấc ngủ ôm lấy chị thật nhẹ, giống như một cái ôm không cần nói thành lời 🫂",
         "Tối nay chị cứ thả lỏng đi, những chuyện chưa xong để mai mình tiếp tục nhé 🌙",
         "Chúc chị Hân một đêm bình an, một giấc ngủ ngon và một ngày mai thật rực rỡ ✨🌙"
-    ],
-
+],
     "location": [
         "☁️ Chị Hân ơi, nhấn vào đám mây nhỏ rồi chọn Cho phép nhé, em xem thời tiết giúp chị nha 🌤️",
         "🌤️ Chị bấm vào đám mây nhỏ một chút nha, nếu trình duyệt hỏi thì chọn Cho phép nhé 💛",
@@ -328,16 +327,14 @@ const GCH_MESSAGES = {
         "🌷 Chị chỉ cần cho phép một lần thôi, phần còn lại để em âm thầm chăm chút những lời nhắc thời tiết cho chị nhé.",
         "☀️ Em muốn mỗi lời nhắc gửi đến chị đều đúng lúc một chút, nên cho em xem thời tiết hôm nay nha Hân 💕",
         "🌤️ Chị Hân ơi, mở đám mây nhỏ và chọn Cho phép nhé. Để em xem trời hôm nay có đang dịu dàng với chị không nha ☁️💛"
-    ],
-
+],
     "shootingStar": [
         "Ước một điều đi chị... ✨",
         "Có những điều chỉ cần giữ trong lòng là đủ 🌠",
         "Một điều ước nhỏ, gửi theo ngôi sao này nha 🌌",
         "Nếu chị vừa ước một điều, mong nó tìm được đường đến với chị 💫",
         "Đừng nói ra nhé... cứ để bầu trời giữ bí mật này cho chị 🌙"
-    ],
-
+],
     "lanternMemory": [
         "Chiếc đèn này mang theo một lời chúc thật ấm áp dành cho chị 🏮",
         "Có những điều nhỏ xíu nhưng vẫn đủ làm một đêm dịu lại ✨",
@@ -345,41 +342,45 @@ const GCH_MESSAGES = {
         "Nếu hôm nay mệt rồi, cứ để chiếc đèn này mang bớt mệt mỏi đi nha 🏮",
         "Đêm nay em gửi chị một ánh sáng nhỏ, không cần phải trả lại đâu 💛",
         "Có người đang âm thầm chúc chị ngủ thật ngon 🌌"
-    ],
-
+],
     "aquariusPoems": [
         [
-            "Trời đêm lấp lánh",
-            "Ôm trọn sao sa",
-            "Mệt thì cứ khóc",
-            "Có em ở nhà ✨"
+                "Trời đêm lấp lánh",
+                "Ôm trọn sao sa",
+                "Mệt thì cứ khóc",
+                "Có em ở nhà ✨"
         ],
         [
-            "Đêm nay trăng sáng",
-            "Sao rơi thật xa",
-            "Nếu lòng em mỏi",
-            "Về đây có nhà 🌙"
+                "Nếu em biết là lần cuối",
+                "em sẽ ôm chị thật lâu",
+                "để trút hết bao nhiêu mệt mỏi",
+                "sợ sau này chẳng thể gặp nhau 💬"
         ],
         [
-            "Bầu trời vẫn đó",
-            "Gió vẫn đi qua",
-            "Nếu chị buồn quá",
-            "Có em bên nhà 💛"
+                "Bầu trời vẫn đó",
+                "Gió vẫn đi qua",
+                "Nếu chị buồn quá",
+                "Có em bên nhà 💛"
+        ],
+        [
+                "Trăng nghiêng soi bóng hiên nhà",
+                "Gió đưa lời chúc gửi qua đêm này",
+                "Chị Hân cứ ngủ thật say",
+                "Mai thức dậy nhé, trời đầy nắng hoa 🌙🌸"
         ]
-    ],
-
+],
     "quietNight": [
-        "Đêm nay yên một chút cũng được. 🌙",
-        "Không cần vội đâu chị, cứ nghỉ ngơi một chút nhé.",
-        "Bầu trời vẫn ở đây, chị cứ thở chậm lại nha. 🌌",
-        "Mọi thứ có thể để ngày mai rồi. Đêm nay ngủ ngon nhé.",
-        "Nếu mệt thì mình im lặng một chút cũng được. 💛"
-    ],
-
+        "Đêm nay yên tĩnh một chút cũng được 🌙",
+        "Không cần vội đâu chị, cứ nghỉ ngơi một chút nhé",
+        "Bầu trời vẫn ở đây, chị cứ thở chậm lại nha 🌌",
+        "Mọi thứ có thể để ngày mai rồi. Đêm nay ngủ ngon chị nhé",
+        "Nếu chị mệt thì hãy nhớ em luôn ở đây với chị 💛"
+],
     "nightAtmosphere": [
         "Đêm nay trăng dịu quá... 🌙",
         "Một khoảng trời thật yên dành cho chị. 🌌",
         "Gió đêm đi ngang, mang theo một lời chúc ngủ ngon. 🍃",
         "Bầu trời tối rồi, nhưng vẫn còn rất nhiều ánh sáng nhỏ. ✨"
-    ]
+]
 };
+        
