@@ -3053,34 +3053,50 @@
 
         let autoModeTimer = null;
 
+        /*
+         * URL TEST MODE
+         * ------------------------------------------------------------
+         * Không tạo route/thư mục mới trên GitHub Pages.
+         * Chỉ cần thêm query vào URL:
+         *   ?Chedodem  -> ép ban đêm
+         *   ?Chedongay -> ép ban ngày
+         * Không có query -> chạy theo giờ thực tế như bình thường.
+         *
+         * Dùng URLSearchParams để không ảnh hưởng tới admin.html hay
+         * bất kỳ file/route nào khác trong repository.
+         */
+        function getUrlForcedMode() {
+            const params = new URLSearchParams(window.location.search);
+            let forcedMode = null;
+
+            for (const key of params.keys()) {
+                const normalizedKey = key.trim().toLowerCase();
+                if (normalizedKey === 'chedodem') {
+                    forcedMode = 'evening';
+                    break;
+                }
+                if (normalizedKey === 'chedongay') {
+                    forcedMode = 'morning';
+                    break;
+                }
+            }
+
+            return forcedMode;
+        }
+
         function getModeByLocalClock() {
             const hour = new Date().getHours();
             return (hour >= 6 && hour < 18) ? 'morning' : 'evening';
         }
 
-        /* =========================================================
-           TEST MODE QUA URL
-           /GuichiHan/Chedodem  -> luôn mở CHẾ ĐỘ ĐÊM
-           /GuichiHan/Chedongay -> luôn mở CHẾ ĐỘ NGÀY
-           Không ảnh hưởng logic tự động khi truy cập /GuichiHan/
-           ========================================================= */
-        function getUrlForcedMode() {
-            const path = window.location.pathname
-                .replace(/\/+$/, '')
-                .toLowerCase();
-
-            if (path.endsWith('/chedodem')) return 'evening';
-            if (path.endsWith('/chedongay')) return 'morning';
-            return null;
-        }
-
-        const forcedUrlMode = getUrlForcedMode();
-
         function scheduleAutoDayNight() {
             clearTimeout(autoModeTimer);
 
-            /* Khi đang test bằng URL thì KHÔNG tự đổi mode theo giờ. */
-            if (forcedUrlMode) return;
+            /* Khi URL đang ép mode thì tuyệt đối không tự đổi theo giờ. */
+            if (getUrlForcedMode()) {
+                autoModeTimer = null;
+                return;
+            }
 
             const now = new Date();
             const next = new Date(now);
@@ -3095,14 +3111,27 @@
             }
 
             autoModeTimer = setTimeout(() => {
+                /* Kiểm tra lại URL để tránh đổi mode nếu query được thêm
+                   trong lúc trang đang mở bằng history/navigation. */
+                const forcedMode = getUrlForcedMode();
+                if (forcedMode) {
+                    setMode(forcedMode);
+                    autoModeTimer = null;
+                    return;
+                }
+
                 setMode(getModeByLocalClock());
                 scheduleAutoDayNight();
             }, Math.max(1000, next.getTime() - now.getTime()));
         }
 
-        /* URL test có ưu tiên cao hơn giờ thực tế. */
-        setMode(forcedUrlMode || getModeByLocalClock());
-        scheduleAutoDayNight();
+        /* URL override được áp dụng ngay sau khi toàn bộ hàm setMode đã sẵn sàng. */
+        const forcedModeFromUrl = getUrlForcedMode();
+        setMode(forcedModeFromUrl || getModeByLocalClock());
+
+        if (!forcedModeFromUrl) {
+            scheduleAutoDayNight();
+        }
 
         const introScreen = document.getElementById("intro-screen");
         const startBtn = document.getElementById("start-btn");
