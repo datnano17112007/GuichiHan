@@ -40,10 +40,62 @@ const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY)
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function formatTime(v){return v?new Date(v).toLocaleString('vi-VN'):'';}
-async function loadLocations(){
+async function loadLocations(sessionArg=null, retry=true){
   $('dataStatus').textContent='Đang tải dữ liệu...';
-  const {data,error}=await client.from('locations').select('id,latitude,longitude,accuracy,created_at').order('created_at',{ascending:false});
-  if(error){console.error(error);$('dataStatus').textContent='Không đọc được dữ liệu: '+error.message;$('countText').textContent='Lỗi';return;}
+
+  // Luôn lấy session hiện tại để request đọc dữ liệu có JWT của admin.
+  let session=sessionArg;
+  if(!session){
+    const {data,error}=await client.auth.getSession();
+    if(error||!data.session){
+      $('dataStatus').textContent='Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
+      $('countText').textContent='Chưa đăng nhập';
+      return;
+    }
+    session=data.session;
+  }
+
+  // Gửi JWT trực tiếp trong Authorization header để chắc chắn request
+  // được Supabase xử lý với vai trò authenticated thay vì anon.
+  const url=new URL('/rest/v1/locations',SUPABASE_URL);
+  url.searchParams.set('select','id,latitude,longitude,accuracy,created_at');
+  url.searchParams.set('order','created_at.desc');
+
+  let response;
+  try{
+    response=await fetch(url.toString(),{
+      method:'GET',
+      headers:{
+        apikey:SUPABASE_PUBLISHABLE_KEY,
+        Authorization:'Bearer '+session.access_token,
+        Accept:'application/json'
+      },
+      cache:'no-store'
+    });
+  }catch(err){
+    console.error(err);
+    $('dataStatus').textContent='Không kết nối được Supabase: '+(err?.message||err);
+    $('countText').textContent='Lỗi kết nối';
+    return;
+  }
+
+  // Nếu token hết hạn, làm mới session rồi thử lại một lần.
+  if(response.status===401 && retry){
+    const {data,error}=await client.auth.refreshSession();
+    if(!error && data.session) return loadLocations(data.session,false);
+  }
+
+  let data=null;
+  try{ data=await response.json(); }catch(_){}
+
+  if(!response.ok){
+    const message=data?.message || data?.hint || data?.details || ('HTTP '+response.status);
+    console.error('Supabase REST error:',response.status,data);
+    $('dataStatus').textContent='Không đọc được dữ liệu: '+message;
+    $('countText').textContent='Lỗi';
+    return;
+  }
+
   $('countText').textContent=`${data.length} lượt chia sẻ`;
   $('dataStatus').textContent=data.length?'':'Chưa có vị trí nào được chia sẻ.';
   $('locationsBody').innerHTML=data.map(row=>{
@@ -52,22 +104,71 @@ async function loadLocations(){
     return `<tr><td>${esc(formatTime(row.created_at))}</td><td>${esc(lat.toFixed(6))}</td><td>${esc(lon.toFixed(6))}</td><td>${row.accuracy==null?'—':esc(Math.round(Number(row.accuracy))+' m')}</td><td><a href="${mapUrl}" target="_blank" rel="noopener">Mở bản đồ</a></td></tr>`;
   }).join('');
 }
-async function showSession(){
-  const {data:{session}}=await client.auth.getSession();
+
+function renderSession(session){
   $('loginCard').style.display=session?'none':'block';
   $('adminArea').style.display=session?'block':'none';
-  if(session) await loadLocations();
+  if(!session){
+    $('countText').textContent='Chưa đăng nhập';
+    $('locationsBody').innerHTML='';
+  }
 }
+
+async function init(){
+  const {data,error}=await client.auth.getSession();
+  if(error){
+    console.error(error);
+    renderSession(null);
+    $('loginStatus').textContent='Không kiểm tra được phiên đăng nhập.';
+    return;
+  }
+  const session=data.session;
+  renderSession(session);
+  if(session) await loadLocations(session);
+}
+
 $('loginBtn').addEventListener('click',async()=>{
   $('loginStatus').textContent='Đang đăng nhập...';
-  const {error}=await client.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
-  if(error){$('loginStatus').textContent='Đăng nhập thất bại: '+error.message;return;}
-  $('loginStatus').textContent='';await showSession();
+  const {data,error}=await client.auth.signInWithPassword({
+    email:$('email').value.trim(),
+    password:$('password').value
+  });
+  if(error){
+    $('loginStatus').textContent='Đăng nhập thất bại: '+error.message;
+    return;
+  }
+  $('loginStatus').textContent='';
+  renderSession(data.session);
+  if(data.session) await loadLocations(data.session);
 });
-$('logoutBtn').addEventListener('click',async()=>{await client.auth.signOut();await showSession();});
-$('refreshBtn').addEventListener('click',loadLocations);
-client.auth.onAuthStateChange(()=>showSession());
-showSession();
+
+$('logoutBtn').addEventListener('click',async()=>{
+  $('logoutBtn').disabled=true;
+  const {error}=await client.auth.signOut();
+  $('logoutBtn').disabled=false;
+  if(error) console.error(error);
+  renderSession(null);
+  $('loginStatus').textContent='Đã đăng xuất.';
+});
+
+$('refreshBtn').addEventListener('click',async()=>{
+  $('refreshBtn').disabled=true;
+  try{
+    const {data}=await client.auth.getSession();
+    if(data.session) await loadLocations(data.session);
+    else renderSession(null);
+  }finally{
+    $('refreshBtn').disabled=false;
+  }
+});
+
+// Không gọi getSession lồng bên trong callback auth nữa.
+// Việc đọc locations dùng JWT trực tiếp ở loadLocations().
+client.auth.onAuthStateChange((_event,session)=>{
+  renderSession(session);
+});
+
+init();
 </script>
 </body>
 </html>
