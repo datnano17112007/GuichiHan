@@ -1952,6 +1952,19 @@
             "Chào buổi sáng cô gái tuyệt vời nhất thế giới! 🌍❤️"
         ];
 
+        const locationMessages = [
+            "☁️ Chị Hân ơi, bấm vào đám mây nhỏ và cho phép vị trí, em sẽ xem thời tiết ngay chỗ chị nha 🌤️",
+            "📍 Chị cho em biết vị trí một chút nhé, em có thể báo nhiệt độ hiện tại cho chị 🌡️",
+            "☔ Nếu chị cho phép vị trí, em sẽ xem hôm nay chỗ chị có khả năng mưa không để nhắc chị mang ô nha.",
+            "🌤️ Bấm vào đám mây nhỏ đi chị, em sẽ xem trời hôm nay nắng, mưa hay nhiều mây ở chỗ chị.",
+            "💧 Cho em xin quyền vị trí nhé, em sẽ kiểm tra cả độ ẩm và nhiệt độ cảm nhận ngoài trời cho chị.",
+            "🍃 Chị cho phép vị trí thì em còn xem được gió hôm nay mạnh hay nhẹ nữa đó.",
+            "☀️ Em có thể xem chỉ số UV hôm nay để nhắc chị lúc nào nên che nắng nữa nè.",
+            "🌅 Nếu chị cho phép, em có thể báo cả giờ mặt trời mọc và lặn ở chỗ chị hôm nay.",
+            "🌦️ Chị bấm mây và chọn Cho phép nhé, rồi em gửi chị một bản dự báo thời tiết nhỏ xinh.",
+            "💛 Chị không muốn chia sẻ vị trí cũng không sao nha. Nếu chị đồng ý, em sẽ dùng nó chỉ để xem thời tiết cho chị."
+        ];
+
         let mainContentQueue = [];
         let queueIndex = 0;
         let openedLanternCount = 0;
@@ -2467,32 +2480,22 @@
 
         function rebuildMessageQueue({ resetIndex = false } = {}) {
             const sourceArr = currentModeTime === 'morning' ? morningMessages : eveningMessages;
+            const hasLocation = !!getSavedLocation();
 
-            /*
-             * Mật khẩu là thông điệp HIẾM:
-             * - 3 mảnh vẫn xuất hiện đầy đủ trong mỗi vòng queue.
-             * - Ít nhất 8 thông điệp khác nằm giữa hai mảnh.
-             * - Vị trí được xáo ngẫu nhiên mỗi lần rebuild.
-             */
-            const PASSWORD_MIN_GAP = 8;
-
+            // Tạo một queue mới có xáo trộn để 23+ lần mở không cứ lặp cùng thứ tự.
             const normalItems = sourceArr.map(msg => ({ type: 'text', val: msg }));
 
-            /* Khi chưa có vị trí, rải nhẹ các lời mời dùng tính năng thời tiết
-               vào giữa các thông điệp; khi đã có vị trí thì tự động biến mất. */
-            if (!getSavedLocation()) {
-                LOCATION_PROMPT_MESSAGES.forEach(msg => {
-                    normalItems.push({ type: 'location', val: msg });
-                });
+            // Chưa có vị trí: luôn có nhiều lời mời rõ ràng để chị biết phải bấm đâu.
+            if (!hasLocation) {
+                locationMessages.forEach(msg => normalItems.push({ type: 'location', val: msg }));
             }
 
-            weatherMessages.forEach(msg => {
-                normalItems.push({ type: 'weather', val: msg });
-            });
+            // Đã có vị trí: đưa dữ liệu thời tiết thật vào queue.
+            weatherMessages.forEach(msg => normalItems.push({ type: 'weather', val: msg }));
 
+            // Loại trùng tuyệt đối theo type + nội dung.
             const uniqueNormalItems = [];
             const seen = new Set();
-
             normalItems.forEach(item => {
                 const key = `${item.type}:${item.val}`;
                 if (!seen.has(key)) {
@@ -2501,62 +2504,56 @@
                 }
             });
 
-            const passwordItems = passwordParts.map(val => ({
-                type: 'pass',
-                val
-            }));
+            // Xáo trộn Fisher-Yates.
+            for (let i = uniqueNormalItems.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [uniqueNormalItems[i], uniqueNormalItems[j]] = [uniqueNormalItems[j], uniqueNormalItems[i]];
+            }
 
+            const passwordItems = passwordParts.map(val => ({ type: 'pass', val }));
             const totalLength = uniqueNormalItems.length + passwordItems.length;
+            const PASSWORD_MIN_GAP = 8;
             const positions = [];
-            const maxStart = totalLength - 1;
 
-            for (let attempt = 0; attempt < 500 && positions.length < passwordItems.length; attempt++) {
-                const candidate = Math.floor(Math.random() * (maxStart + 1));
-
+            // Đặt 3 mảnh mật khẩu cách xa nhau.
+            for (let attempt = 0; attempt < 1000 && positions.length < passwordItems.length; attempt++) {
+                const candidate = Math.floor(Math.random() * totalLength);
                 if (positions.every(pos => Math.abs(pos - candidate) > PASSWORD_MIN_GAP)) {
                     positions.push(candidate);
                 }
             }
 
-            /* Fallback an toàn nếu queue quá ngắn để random đủ khoảng cách. */
             if (positions.length < passwordItems.length) {
                 positions.length = 0;
-
-                const span = Math.max(
-                    PASSWORD_MIN_GAP + 1,
-                    Math.floor(totalLength / passwordItems.length)
-                );
-
+                const span = Math.max(PASSWORD_MIN_GAP + 1, Math.floor(totalLength / passwordItems.length));
                 for (let i = 0; i < passwordItems.length; i++) {
-                    positions.push(Math.min(
-                        maxStart,
-                        i * span + Math.floor(span / 2)
-                    ));
+                    positions.push(Math.min(totalLength - 1, i * span + Math.floor(span / 2)));
                 }
             }
-
             positions.sort((a, b) => a - b);
 
             const queue = [];
             let normalIndex = 0;
             let passwordIndex = 0;
-
             for (let i = 0; i < totalLength; i++) {
-                if (passwordIndex < passwordItems.length &&
-                    i === positions[passwordIndex]) {
-                    queue.push(passwordItems[passwordIndex]);
-                    passwordIndex++;
+                if (passwordIndex < passwordItems.length && i === positions[passwordIndex]) {
+                    queue.push(passwordItems[passwordIndex++]);
                 } else if (normalIndex < uniqueNormalItems.length) {
-                    queue.push(uniqueNormalItems[normalIndex]);
-                    normalIndex++;
+                    queue.push(uniqueNormalItems[normalIndex++]);
+                }
+            }
+
+            // Nếu chưa có vị trí, ép ít nhất một lời mời lên đầu queue.
+            if (!hasLocation) {
+                const firstLocation = queue.findIndex(item => item.type === 'location');
+                if (firstLocation > 0) {
+                    const [locationItem] = queue.splice(firstLocation, 1);
+                    queue.unshift(locationItem);
                 }
             }
 
             mainContentQueue = queue;
-
-            if (resetIndex) {
-                queueIndex = 0;
-            }
+            if (resetIndex) queueIndex = 0;
         }
 
         function renderWeather(data) {
