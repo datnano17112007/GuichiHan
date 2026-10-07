@@ -74,6 +74,18 @@ async function loadLocations(){
   }
 
   const activeUser=activeSession.user;
+
+  const {data:debugData,error:debugError}=await client.rpc('debug_admin_context');
+  const dbg=Array.isArray(debugData) ? debugData[0] : null;
+  const debugBlock='\n\nDEBUG RPC: '+(debugError
+    ? ('ERROR: '+debugError.message)
+    : ('OK\nUID in RPC: '+(dbg?.auth_uid ?? 'NULL')+
+       '\nJWT sub: '+(dbg?.jwt_sub ?? 'NULL')+
+       '\nRole in RPC: '+(dbg?.jwt_role ?? 'NULL')+
+       '\nEmail in JWT: '+(dbg?.jwt_email ?? 'NULL')+
+       '\nRows visible in RPC: '+(dbg?.visible_rows ?? 'NULL')+
+       '\nUID matches admin: '+(dbg?.uid_matches_admin ?? 'NULL')));
+
   const {data,error}=await client.rpc('get_admin_locations');
 
   $('debugStatus').textContent=
@@ -85,6 +97,8 @@ async function loadLocations(){
     'RPC data type: '+(Array.isArray(data) ? 'array' : typeof data)+'\n'+
     'RPC rows: '+(Array.isArray(data) ? data.length : 'N/A')+'\n'+
     'RPC error: '+(error ? (error.message || JSON.stringify(error)) : 'NONE');
+
+  $('debugStatus').textContent += debugBlock;
 
   if(error){
     console.error('get_admin_locations error:',error);
