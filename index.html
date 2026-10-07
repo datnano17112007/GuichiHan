@@ -2539,7 +2539,6 @@
             const showers = Number(c.showers || 0);
             const precipitation = Number(c.precipitation || 0);
             const uv = Number(c.uv_index);
-            const isDay = Number(c.is_day) === 1;
             const messages = [];
 
             const todayMax = Number(Array.isArray(d.temperature_2m_max) ? d.temperature_2m_max[0] : NaN);
@@ -2561,135 +2560,144 @@
                 return match ? match[1] : '';
             };
 
-            // 1) Trạng thái bầu trời / mưa / dông hiện tại.
-            if (STORM_CODES.has(code)) {
-                add('Chỗ chị hiện đang có dấu hiệu dông, chị nhớ đi lại cẩn thận và tránh đứng ngoài trời lúc mưa nhé ⛈️');
-            } else if (RAIN_CODES.has(code) || rain > 0.1 || showers > 0.1) {
-                if (code === 65 || code === 82 || rain >= 4 || showers >= 4) {
-                    add('Chỗ chị hiện có mưa khá to, nhớ mang ô và đi chậm một chút nhé ☔');
-                } else {
-                    add('Chỗ chị hiện có mưa, nếu ra ngoài chị nhớ mang theo ô nhé ☔');
-                }
-            } else if (Number.isFinite(temp) && temp >= 33 && Number.isFinite(cloud) && cloud < 60) {
-                add('Chỗ chị hôm nay nắng khá gắt, nhớ uống đủ nước và che nắng nha ☀️🧥');
-            } else if (Number.isFinite(temp) && temp >= 30 && Number.isFinite(cloud) && cloud < 65) {
-                add('Hôm nay chỗ chị có nắng, ra ngoài nhớ mang áo khoác mỏng nhé ☀️');
-            } else if (Number.isFinite(cloud) && cloud >= 75) {
-                add('Hôm nay chỗ chị nhiều mây, bầu trời dịu hơn một chút rồi đó ☁️');
-            } else if (Number.isFinite(cloud) && cloud >= 45) {
-                add('Chỗ chị hôm nay có khá nhiều mây, thời tiết trông dịu nhẹ đó ☁️');
-            } else if (isDay && (code === 0 || code === 1)) {
-                add('Bầu trời chỗ chị hiện khá trong, tranh thủ tận hưởng chút nắng nhé 🌤️');
+            /*
+             * Weather message = THỜI GIAN + THỜI TIẾT.
+             * Có thể test riêng một khung giờ bằng ?gio=21.
+             * ?Chedodem / ?Chedongay vẫn chỉ ép giao diện, nhưng khi test
+             * một mode ở sai thời điểm trong ngày thì dùng mốc đại diện
+             * để lời nhắn vẫn đúng với giao diện đang xem.
+             */
+            const params = new URLSearchParams(window.location.search);
+            const forcedMode = getUrlForcedMode();
+            let messageHour = new Date().getHours();
+            const debugHour = Number(params.get('gio'));
+
+            if (Number.isFinite(debugHour) && debugHour >= 0 && debugHour <= 23) {
+                messageHour = Math.floor(debugHour);
+            } else if (forcedMode === 'evening' && messageHour >= 6 && messageHour < 18) {
+                messageHour = 21;
+            } else if (forcedMode === 'morning' && (messageHour >= 18 || messageHour < 6)) {
+                messageHour = 12;
             }
 
-            // 2) Nhiệt độ thực tế và nhiệt độ cảm nhận.
+            let period;
+            if (messageHour >= 5 && messageHour < 11) period = 'morning';
+            else if (messageHour >= 11 && messageHour < 14) period = 'noon';
+            else if (messageHour >= 14 && messageHour < 18) period = 'afternoon';
+            else if (messageHour >= 18 && messageHour < 21) period = 'evening';
+            else if (messageHour >= 21 && messageHour < 24) period = 'night';
+            else period = 'lateNight';
+
+            const hasStorm = STORM_CODES.has(code);
+            const hasRain = RAIN_CODES.has(code) || rain > 0.1 || showers > 0.1;
+            const heavyRain = code === 65 || code === 82 || rain >= 4 || showers >= 4 || (Number.isFinite(rainChance) && rainChance >= 80);
+            const hot = Number.isFinite(temp) && temp >= 30;
+            const veryHot = Number.isFinite(temp) && temp >= 33;
+            const humid = Number.isFinite(humidity) && humidity >= 85;
+            const dry = Number.isFinite(humidity) && humidity <= 45;
+            const strongWind = Number.isFinite(wind) && wind >= 30;
+            const highUV = Number.isFinite(uvMax) ? uvMax >= 6 : (Number.isFinite(uv) && uv >= 6);
+            const clearSky = Number.isFinite(cloud) && cloud < 35;
+            const cloudy = Number.isFinite(cloud) && cloud >= 65;
+
+            /* 1) Một câu chính theo khung giờ + điều kiện thời tiết. */
+            if (period === 'morning') {
+                if (hasStorm) add('Sáng nay có dấu hiệu dông ⛈️ Chị ra ngoài nhớ cẩn thận và tránh đứng ngoài trời lúc mưa nha.');
+                else if (heavyRain) add('Sáng nay có khả năng mưa khá nhiều 🌧️ Chị nhớ mang áo mưa theo khi ra ngoài nha.');
+                else if (hasRain || (Number.isFinite(rainChance) && rainChance >= 40)) add('Sáng nay có khả năng có mưa 🌦️ Chị ra ngoài nhớ mang theo áo mưa nha.');
+                else if (veryHot) add('Sáng nay trời đã khá nóng rồi ☀️ Chị nhớ uống nước và che nắng khi ra ngoài nha.');
+                else if (hot || highUV) add('Sáng nay có nắng ☀️ Chị nhớ che nắng một chút và bắt đầu ngày mới thật nhẹ nhàng nha.');
+                else add('Sáng nay thời tiết khá dễ chịu 🌤️ Chúc chị có một buổi sáng thật nhẹ nhàng nha.');
+            } else if (period === 'noon') {
+                if (hasStorm) add('Trưa nay có dấu hiệu dông ⛈️ Chị hạn chế ra ngoài lúc này và nhớ cẩn thận nha.');
+                else if (heavyRain) add('Trưa nay có khả năng mưa khá nhiều 🌧️ Chị nhớ mang áo mưa nếu phải ra ngoài nha.');
+                else if (hasRain || (Number.isFinite(rainChance) && rainChance >= 40)) add('Trưa nay có khả năng có mưa 🌦️ Chị nhớ để sẵn áo mưa bên mình nha.');
+                else if (veryHot || highUV) add('Trưa nay khá nóng và nắng gắt ☀️ Chị nhớ uống đủ nước, che nắng và đừng ở ngoài trời lâu nha.');
+                else if (hot) add('Trưa nay trời khá nóng ☀️ Chị nhớ uống nước và che nắng khi ra ngoài nha.');
+                else add('Trưa nay thời tiết khá ổn 🌿 Chị nhớ nghỉ ngơi một chút giữa ngày nha.');
+            } else if (period === 'afternoon') {
+                if (hasStorm) add('Chiều nay có dấu hiệu dông ⛈️ Chị đi đâu nhớ cẩn thận và tránh mưa dông nha.');
+                else if (heavyRain) add('Chiều nay có khả năng mưa khá cao 🌧️ Nếu phải ra ngoài, chị nhớ mang áo mưa nha.');
+                else if (hasRain || (Number.isFinite(rainChance) && rainChance >= 40)) add('Chiều nay có khả năng mưa 🌦️ Chị đi đâu nhớ mang theo áo mưa nha.');
+                else if (veryHot) add('Chiều nay vẫn còn khá nóng ☀️ Chị nhớ uống nước và tránh nắng lâu nha.');
+                else if (hot) add('Chiều nay trời vẫn còn hơi nóng ☀️ Chị nhớ che nắng một chút nha.');
+                else add('Chiều nay trời khá dịu rồi 🍃 Mong chị có một buổi chiều thật dễ chịu nha.');
+            } else if (period === 'evening') {
+                if (hasStorm) add('Tối nay có dấu hiệu dông ⛈️ Chị nhớ ở nơi an toàn và hạn chế ra ngoài lúc mưa nha.');
+                else if (heavyRain) add('Tối nay có khả năng mưa khá nhiều 🌧️ Chị đi đâu nhớ mang áo mưa và về sớm nha.');
+                else if (hasRain || (Number.isFinite(rainChance) && rainChance >= 40)) add('Tối nay có khả năng có mưa 🌦️ Chị nhớ mang theo áo mưa nếu ra ngoài nha.');
+                else if (humid) add('Tối nay không khí hơi oi một chút 💧 Chị giữ phòng thoáng rồi nghỉ ngơi nha.');
+                else if (Number.isFinite(temp) && temp <= 24) add('Tối nay trời khá mát 🌙 Một buổi tối thật thích hợp để chị nghỉ ngơi đó.');
+                else add('Tối nay thời tiết khá ổn 🌙 Chị nghỉ ngơi một chút nha.');
+            } else if (period === 'night') {
+                if (hasStorm) add('Đêm nay có dấu hiệu dông ⛈️ Chị ở trong nhà và đừng ra ngoài muộn nha.');
+                else if (heavyRain) add('Đêm nay có khả năng mưa khá nhiều 🌧️ Chị ở nhà nghỉ ngơi và nhớ đóng cửa cẩn thận nha.');
+                else if (hasRain || (Number.isFinite(rainChance) && rainChance >= 40)) add('Đêm nay có khả năng mưa 🌧️ Nếu chị còn ở ngoài thì nhớ về sớm và mang áo mưa nha.');
+                else if (humid) add('Đêm nay hơi oi một chút 💧 Chị giữ phòng thoáng rồi nghỉ ngơi nha.');
+                else if (Number.isFinite(temp) && temp <= 24) add('Đêm nay trời khá mát 🌙 Chị đắp chăn rồi ngủ ngon nha.');
+                else add('Tối rồi đó chị 🌙 Đừng thức khuya quá nha, nghỉ ngơi một chút đi chị.');
+            } else {
+                if (hasRain || hasStorm) add('Khuya rồi mà ngoài trời vẫn có mưa 🌧️ Chị cứ ở trong nhà và ngủ ngon nha.');
+                else if (humid) add('Khuya rồi mà trời vẫn hơi oi 💧 Chị giữ phòng thoáng rồi nghỉ ngơi nha.');
+                else if (Number.isFinite(temp) && temp <= 24) add('Khuya rồi, trời khá mát 🌙 Chị ngủ ngon nha, đừng thức nữa đó.');
+                else add('Khuya rồi đó chị... 🌙 Đừng thức nữa nha, ngủ một giấc thật ngon đi chị.');
+            }
+
+            /* 2) Một thông tin thời tiết thực tế bổ sung, ưu tiên thứ phù hợp với giờ. */
             if (Number.isFinite(temp)) {
-                add(`Nhiệt độ chỗ chị lúc này khoảng ${Math.round(temp)}°C đó 🌡️`);
+                add(`${period === 'noon' ? 'Nhiệt độ trưa nay' : period === 'afternoon' ? 'Nhiệt độ chiều nay' : period === 'evening' || period === 'night' || period === 'lateNight' ? 'Nhiệt độ tối nay' : 'Nhiệt độ sáng nay'} khoảng ${Math.round(temp)}°C đó 🌡️`);
             }
 
             if (Number.isFinite(feels) && Number.isFinite(temp) && Math.abs(feels - temp) >= 2) {
-                if (feels > temp) {
-                    add(`Cảm giác ngoài trời đang khoảng ${Math.round(feels)}°C, có vẻ oi hơn nhiệt độ thật đó 🥵`);
-                } else {
-                    add(`Nhiệt độ cảm nhận khoảng ${Math.round(feels)}°C, trời có vẻ dễ chịu hơn con số nhiệt độ thật đó 🌿`);
-                }
-            } else if (Number.isFinite(feels)) {
-                add(`Nhiệt độ cảm nhận ở chỗ chị khoảng ${Math.round(feels)}°C nha 🌡️`);
+                if (feels > temp) add(`Cảm giác ngoài trời đang khoảng ${Math.round(feels)}°C, có vẻ oi hơn nhiệt độ thật đó 🥵`);
+                else add(`Nhiệt độ cảm nhận khoảng ${Math.round(feels)}°C, trời có vẻ dễ chịu hơn con số nhiệt độ thật đó 🌿`);
             }
 
-            // 3) Biên độ nhiệt trong ngày.
-            if (Number.isFinite(todayMin) && Number.isFinite(todayMax)) {
-                add(`Hôm nay nhiệt độ dự kiến dao động khoảng ${Math.round(todayMin)}°C – ${Math.round(todayMax)}°C 🌤️`);
+            if (hasRain && Number.isFinite(precipitation) && precipitation > 0) {
+                add(`Lượng mưa ghi nhận gần đây khoảng ${precipitation.toFixed(1)} mm 🌧️`);
             }
 
-            if (Number.isFinite(todayMax) && todayMax >= 34) {
-                add(`Nhiệt độ cao nhất hôm nay có thể lên khoảng ${Math.round(todayMax)}°C, chị nhớ tránh nắng lâu nha ☀️💧`);
-            } else if (Number.isFinite(todayMin) && todayMin <= 21) {
-                add(`Sáng hoặc đêm nay có thể xuống khoảng ${Math.round(todayMin)}°C, chị nhớ giữ ấm nha 🧣`);
-            }
-
-            // 4) Độ ẩm.
-            if (Number.isFinite(humidity)) {
-                if (humidity >= 85) {
-                    add(`Độ ẩm hiện khoảng ${Math.round(humidity)}%, trời dễ oi và bí, chị nhớ uống nước đều nhé 💧`);
-                } else if (humidity <= 45) {
-                    add(`Độ ẩm hiện khoảng ${Math.round(humidity)}%, không khí khá khô đó, chị nhớ uống nước nha 💧`);
-                } else {
-                    add(`Độ ẩm ở chỗ chị hiện khoảng ${Math.round(humidity)}%, khá dễ chịu đó 🌿`);
-                }
-            }
-
-            // 5) Mây.
-            if (Number.isFinite(cloud)) {
-                add(`Mây đang che khoảng ${Math.round(cloud)}% bầu trời chỗ chị ☁️`);
-            }
-
-            // 6) Gió.
-            if (Number.isFinite(wind)) {
-                if (wind >= 30) {
-                    add(`Gió hiện khoảng ${Math.round(wind)} km/h, chị đi đường nhớ cẩn thận và giữ tóc cho đàng hoàng nhé 🍃`);
-                } else if (wind >= 15) {
-                    add(`Gió hiện khoảng ${Math.round(wind)} km/h, ngoài trời chắc đang có chút gió mát đó 🍃`);
-                } else {
-                    add(`Gió hiện khá nhẹ, khoảng ${Math.round(wind)} km/h thôi, trời có vẻ yên ả đó 🌿`);
-                }
-            }
-
-            // 7) Lượng mưa / lượng giáng thủy hiện tại.
-            if (Number.isFinite(precipitation) && precipitation > 0) {
-                add(`Lượng giáng thủy ghi nhận gần đây khoảng ${precipitation.toFixed(1)} mm, chị nhớ để ý trời nhé 🌧️`);
-            }
-
-            // 8) Khả năng mưa trong ngày.
             if (Number.isFinite(rainChance)) {
-                if (rainChance >= 70) {
-                    add(`Khả năng có mưa trong hôm nay khá cao, khoảng ${Math.round(rainChance)}%, chị nhớ để sẵn chiếc ô nha ☔`);
-                } else if (rainChance >= 40) {
-                    add(`Hôm nay vẫn có khả năng mưa khoảng ${Math.round(rainChance)}%, mang theo ô sẽ yên tâm hơn đó 🌦️`);
-                } else if (rainChance > 0) {
-                    add(`Khả năng mưa hôm nay khoảng ${Math.round(rainChance)}%, chưa cao nhưng vẫn nên để ý bầu trời nhé 🌤️`);
+                const timeLabel = period === 'morning' ? 'sáng nay' : period === 'noon' ? 'trưa nay' : period === 'afternoon' ? 'chiều nay' : period === 'evening' ? 'tối nay' : 'đêm nay';
+                if (rainChance >= 70) add(`Khả năng mưa ${timeLabel} khoảng ${Math.round(rainChance)}%, chị nhớ để sẵn áo mưa nha ☔`);
+                else if (rainChance >= 40) add(`${timeLabel.charAt(0).toUpperCase() + timeLabel.slice(1)} vẫn có khả năng mưa khoảng ${Math.round(rainChance)}% 🌦️`);
+            }
+
+            if (Number.isFinite(humidity) && (humid || dry)) {
+                add(`Độ ẩm hiện khoảng ${Math.round(humidity)}%, ${humid ? 'không khí hơi oi đó' : 'không khí khá khô đó'} 💧`);
+            }
+
+            if (strongWind) add(`Gió hiện khoảng ${Math.round(wind)} km/h, chị đi đường nhớ cẩn thận nha 🍃`);
+
+            /* UV chỉ đưa vào ban ngày; ban đêm không nhắc UV nữa. */
+            if (period === 'morning' || period === 'noon' || period === 'afternoon') {
+                const uvValue = Number.isFinite(uvMax) ? uvMax : uv;
+                if (Number.isFinite(uvValue)) {
+                    if (uvValue >= 8) add(`Chỉ số UV hôm nay khá cao, khoảng ${uvValue.toFixed(1)}, chị nhớ che nắng nha 🧴☀️`);
+                    else if (uvValue >= 6) add(`Chỉ số UV hôm nay khoảng ${uvValue.toFixed(1)}, ra ngoài lâu chị nhớ che chắn một chút nhé ☀️`);
                 }
             }
 
-            // 9) UV.
-            const uvValue = Number.isFinite(uvMax) ? uvMax : uv;
-            if (Number.isFinite(uvValue)) {
-                if (uvValue >= 8) {
-                    add(`Chỉ số UV hôm nay có thể khá cao, khoảng ${uvValue.toFixed(1)}, chị nhớ che nắng và bảo vệ da nha 🧴☀️`);
-                } else if (uvValue >= 6) {
-                    add(`Chỉ số UV hôm nay khoảng ${uvValue.toFixed(1)}, ra nắng lâu chị nhớ che chắn một chút nhé ☀️`);
-                } else if (uvValue >= 3) {
-                    add(`Chỉ số UV hôm nay khoảng ${uvValue.toFixed(1)}, nếu ở ngoài trời lâu thì nhớ che nắng nha 🌤️`);
-                }
+            /* Một câu dự báo ngày chỉ giữ lại khi phù hợp, tránh làm loãng thông điệp theo giờ. */
+            if ((period === 'morning' || period === 'noon' || period === 'afternoon') && Number.isFinite(todayMax) && todayMax >= 34) {
+                add(`Nhiệt độ cao nhất hôm nay có thể lên khoảng ${Math.round(todayMax)}°C, chị nhớ tránh nắng lâu nha ☀️💧`);
             }
-
-            // 10) Mặt trời mọc / lặn — lấy trực tiếp từ dữ liệu vị trí.
-            const riseTime = formatTime(sunrise);
-            const setTime = formatTime(sunset);
-            if (riseTime && setTime) {
-                add(`Hôm nay, mặt trời mọc khoảng ${riseTime} và lặn khoảng ${setTime} ở chỗ chị 🌅`);
-            }
-
-            // 11) Dự báo tổng quát cho hôm nay.
-            if (Number.isFinite(todayCode)) {
-                const todayInfo = WMO_WEATHER[todayCode];
-                if (todayInfo && todayInfo.text) {
-                    add(`Dự báo tổng quát hôm nay: ${todayInfo.text} ${todayInfo.icon}`);
-                }
-            }
-
-            if (Number.isFinite(maxWind) && maxWind >= 30) {
-                add(`Gió mạnh nhất hôm nay có thể lên khoảng ${Math.round(maxWind)} km/h, chị đi đường cẩn thận nha 🍃`);
+            if ((period === 'evening' || period === 'night' || period === 'lateNight') && Number.isFinite(todayMin) && todayMin <= 21) {
+                add(`Đêm nay nhiệt độ có thể xuống khoảng ${Math.round(todayMin)}°C, chị nhớ giữ ấm nha 🧣🌙`);
             }
 
             if (!messages.length) {
-                add('Thời tiết chỗ chị hôm nay khá ổn, mong chị có một ngày thật dễ chịu nha 🌿');
+                add(period === 'noon'
+                    ? 'Trưa nay thời tiết khá ổn, chị nhớ nghỉ ngơi một chút nha 🌿'
+                    : period === 'afternoon'
+                        ? 'Chiều nay thời tiết khá dễ chịu, mong chị có một buổi chiều thật nhẹ nhàng 🍃'
+                        : period === 'night' || period === 'lateNight'
+                            ? 'Đêm nay thời tiết khá ổn 🌙 Chị ngủ ngon nha.'
+                            : 'Thời tiết hôm nay khá ổn, mong chị có một ngày thật dễ chịu nha 🌿');
             }
 
-            // Cho phép nhiều mây thông điệp hơn, nhưng vẫn tránh queue quá dài.
-            return messages.slice(0, 12);
+            return messages.slice(0, 8);
         }
-
         function rebuildMessageQueue({ resetIndex = false } = {}) {
             const sourceArr = currentModeTime === 'morning' ? morningMessages : eveningMessages;
             const hasLocation = !!getSavedLocation();
