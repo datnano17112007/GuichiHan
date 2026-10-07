@@ -2190,6 +2190,7 @@
         let birdStartTimeout;
         let sunInteractionInterval;
         let nightLanternInterval;
+        let weatherMessageHourKey = null;
 
         /* =========================================================
            LOCATION + WEATHER ENGINE
@@ -2795,6 +2796,7 @@
             }
 
             weatherData = data;
+            weatherMessageHourKey = new Date().getHours();
             weatherMessages = buildWeatherMessages(data);
             rebuildMessageQueue({ resetIndex: true });
             applyWeatherToSky(data.current);
@@ -3885,6 +3887,21 @@
             const saved = getSavedLocation();
             if (saved) fetchWeatherForLocation(saved);
         }, WEATHER_CACHE_MAX_AGE);
+
+        /*
+         * Đồng bộ lời nhắn thời tiết theo giờ hiện tại.
+         * Tránh trường hợp trang đã mở từ trước nhưng nội dung vẫn giữ
+         * câu "tối nay" sau khi đã sang buổi trưa/chiều.
+         */
+        setInterval(() => {
+            if (!weatherData || !weatherData.current || getUrlForcedMode()) return;
+            const currentHour = new Date().getHours();
+            if (weatherMessageHourKey === currentHour) return;
+
+            weatherMessageHourKey = currentHour;
+            weatherMessages = buildWeatherMessages(weatherData);
+            rebuildMessageQueue({ resetIndex: true });
+        }, 30 * 1000);
 
         function refreshBirdViewportWidth() {
             document.documentElement.style.setProperty(
