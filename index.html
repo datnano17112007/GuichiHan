@@ -1813,7 +1813,7 @@
         <div id="gift-counter">0/50</div>
     </div>
 
-    <button id="location-cloud" type="button" aria-label="Cho phép vị trí để nhận lời nhắn thời tiết" title="Cho phép vị trí để nhận lời nhắn thời tiết">☁️</button>
+    <button id="location-cloud" type="button" aria-label="Bấm để kiểm tra thời tiết" title="Bấm để kiểm tra thời tiết">☁️</button>
 
     <div id="password-modal" class="modal">
         <div class="modal-content">
@@ -2116,8 +2116,8 @@
             locationCloud.classList.toggle('loading', isLoading);
             if (isLoading) {
                 locationCloud.textContent = '⌖';
-                locationCloud.title = 'Đang lấy vị trí và thời tiết…';
-                locationCloud.setAttribute('aria-label', 'Đang lấy vị trí và thời tiết');
+                locationCloud.title = 'Đang kiểm tra thời tiết…';
+                locationCloud.setAttribute('aria-label', 'Đang kiểm tra thời tiết');
             } else {
                 locationCloud.textContent = '☁️';
             }
@@ -2417,9 +2417,9 @@
                     },
                     error => {
                         const message =
-                            error.code === 1 ? 'Em chưa cho phép vị trí.' :
-                            error.code === 2 ? 'Không xác định được vị trí.' :
-                            'Lấy vị trí quá thời gian.';
+                            error.code === 1 ? 'Em chưa cấp quyền vị trí nên chưa thể kiểm tra thời tiết.' :
+                            error.code === 2 ? 'Không xác định được vị trí để kiểm tra thời tiết.' :
+                            'Lấy vị trí quá thời gian, chưa thể kiểm tra thời tiết.';
                         reject(new Error(message));
                     },
                     {
@@ -2444,7 +2444,7 @@
                 weatherData = null;
                 weatherMessages = [];
                 rebuildMessageQueue({ resetIndex: true });
-                syncLocationCloud(true, 'Bấm để cho phép vị trí và nhận lời nhắn thời tiết');
+                syncLocationCloud(true, 'Bấm để kiểm tra thời tiết');
                 if (locationCloud) locationCloud.textContent = '☁️';
             } finally {
                 clearTimeout(weatherRefreshTimer);
@@ -2469,7 +2469,7 @@
         });
 
         /* Chỉ hiện mây nhỏ khi chưa có vị trí đã lưu. */
-        syncLocationCloud(!getSavedLocation(), 'Bấm để cho phép vị trí và nhận lời nhắn thời tiết');
+        syncLocationCloud(!getSavedLocation(), 'Bấm để kiểm tra thời tiết');
         scheduleWeatherRefresh();
 
         const giftIcon = document.getElementById('gift-icon');
