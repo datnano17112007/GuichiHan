@@ -1,13 +1,11 @@
-
-const CACHE = 'gch-admin-pwa-v2';
-const BASE = '/GuichiHan/admin/';
+const CACHE = 'gch-pwa-v2';
+const BASE = '/GuichiHan/';
 
 const APP_SHELL = [
-  `${BASE}`,
   `${BASE}index.html`,
   `${BASE}manifest.webmanifest`,
-  '/GuichiHan/icons/admin-192.png',
-  '/GuichiHan/icons/admin-512.png'
+  `${BASE}icons/icon-192.png`,
+  `${BASE}icons/icon-512.png`
 ];
 
 self.addEventListener('install', event => {
@@ -18,7 +16,7 @@ self.addEventListener('install', event => {
           try {
             await cache.add(url);
           } catch (e) {
-            console.warn('GCH Admin PWA cache:', url, e);
+            console.warn('GCH PWA cache:', url, e);
           }
         }
       })
@@ -45,6 +43,15 @@ self.addEventListener('fetch', event => {
 
   if (url.origin !== self.location.origin) return;
 
+  /*
+   * QUAN TRỌNG:
+   * App chính không được can thiệp vào khu vực Admin.
+   * Admin có Service Worker riêng tại /GuichiHan/admin/
+   */
+  if (url.pathname.startsWith('/GuichiHan/admin/')) {
+    return;
+  }
+
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -52,7 +59,9 @@ self.addEventListener('fetch', event => {
           const copy = response.clone();
 
           caches.open(CACHE)
-            .then(cache => cache.put(`${BASE}index.html`, copy))
+            .then(cache => {
+              cache.put(`${BASE}index.html`, copy);
+            })
             .catch(() => {});
 
           return response;
@@ -70,7 +79,9 @@ self.addEventListener('fetch', event => {
           const copy = response.clone();
 
           caches.open(CACHE)
-            .then(cache => cache.put(event.request, copy))
+            .then(cache => {
+              cache.put(event.request, copy);
+            })
             .catch(() => {});
         }
 
